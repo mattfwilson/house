@@ -18,7 +18,7 @@ Requirements for the core-engine build. Each maps to a roadmap phase.
 - [ ] **PROF-01**: User can create and save two financial profiles (household members) capturing net worth, income, savings rate, existing monthly debts, and current rent
 - [ ] **PROF-02**: User can create multiple named house scenarios under a profile (price, down-payment %, town, loan term, interest rate, HOA, etc.)
 - [ ] **PROF-03**: User can save scenarios and reload them in a later session
-- [ ] **PROF-04**: A saved scenario snapshots every input and assumption so its result regenerates exactly (reproducibility), and replaying a snapshot reproduces the stored result
+- [x] **PROF-04**: A saved scenario snapshots every input and assumption so its result regenerates exactly (reproducibility), and replaying a snapshot reproduces the stored result
 
 ### Affordability (AFF)
 
@@ -100,7 +100,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CORE-02 | Phase 1 | Complete |
 | CORE-03 | Phase 1 | Complete |
 | ASMP-01 | Phase 1 | Complete |
-| PROF-04 | Phase 1 | Pending |
+| PROF-04 | Phase 1 | Complete |
 | TCO-01 | Phase 2 | Pending |
 | TCO-02 | Phase 2 | Pending |
 | TCO-03 | Phase 2 | Pending |

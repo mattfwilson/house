@@ -13,7 +13,7 @@ This build delivers the core decision engine that answers "what does buying this
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundations & Determinism Core** - Monorepo, decimal-precise money, pure-core boundary, assumptions-as-data, reproducibility harness
+- [x] **Phase 1: Foundations & Determinism Core** - Monorepo, decimal-precise money, pure-core boundary, assumptions-as-data, reproducibility harness (completed 2026-06-23)
 - [ ] **Phase 2: TCO Engine** - Amortization, MA mill-rate tax, PMI, insurance, maintenance, HOA, closing costs, rent-vs-buy
 - [ ] **Phase 3: Affordability Engine** - Bank DTI affordability, true affordability, and the gap between them
 - [ ] **Phase 4: FI-Impact Engine & Sensitivity (flagship)** - Opportunity cost, FI-date delta, ranked comparison, oracle reconciliation, anti-funnel, sensitivity bands
@@ -50,7 +50,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-  - [ ] 01-04-PLAN.md — canonicalJson + canary + gated golden-master reproducibility harness + public index (PROF-04)
+  - [x] 01-04-PLAN.md — canonicalJson + canary + gated golden-master reproducibility harness + public index (PROF-04)
 
 ### Phase 2: TCO Engine
 
@@ -145,7 +145,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundations & Determinism Core | 3/4 | In Progress|  |
+| 1. Foundations & Determinism Core | 4/4 | Complete   | 2026-06-23 |
 | 2. TCO Engine | 0/TBD | Not started | - |
 | 3. Affordability Engine | 0/TBD | Not started | - |
 | 4. FI-Impact Engine & Sensitivity | 0/TBD | Not started | - |

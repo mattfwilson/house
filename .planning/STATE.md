@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
+status: verifying
 stopped_at: Completed 01-03-PLAN.md
-last_updated: "2026-06-23T23:26:17.534Z"
+last_updated: "2026-06-23T23:35:22.091Z"
 last_activity: 2026-06-23 -- Completed Plan 01-03 (versioned AssumptionSet + EngineInput, ASMP-01)
 progress:
   total_phases: 7
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
-  completed_plans: 3
-  percent: 75
+  completed_plans: 4
+  percent: 14
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-06-22)
 
 Phase: 01 (foundations-determinism-core) — EXECUTING
 Plan: 4 of 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-06-23 -- Completed Plan 01-03 (versioned AssumptionSet + EngineInput, ASMP-01)
 
 Progress: [███████░░░] 75%
@@ -55,6 +55,7 @@ Progress: [███████░░░] 75%
 | Phase 01 P01 | 20 | 3 tasks | 16 files |
 | Phase 01 P02 | 12 | 2 tasks | 12 files |
 | Phase 01 P03 | 10 | 2 tasks | 11 files |
+| Phase 01 P04 | 4 | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,8 @@ Recent decisions affecting current work:
 - [Phase 01-03]: [Foundation]: AssumptionSet is nested by domain + versioned by integer schemaVersion via a Zod discriminatedUnion; unknown versions rejected at parse (D-04/D-05, ASMP-01)
 - [Phase 01-03]: [Foundation]: Numeric tunables serialize as canonical decimal STRINGS (decStr regex, not z.number()); floats can never re-enter the boundary (D-06)
 - [Phase 01-03]: [Foundation]: EngineInput is the single immutable snapshot unit threading asOf (CalendarDate) + assumptions explicitly, Object.freeze'd, never derived from Date.now (D-11)
+- [Phase ?]: [Phase 01-04]: [Foundation]: Reproducibility loop closed (PROF-04) — runCanary does real (1+r)^30 Dec compounding reading an AssumptionSet slice; canonicalJson serializes Money as decimal strings with sorted keys; golden master deep-equal compared, regenerated ONLY behind UPDATE_GOLDEN=1 (not toMatchSnapshot)
+- [Phase ?]: [Phase 01-04]: [Foundation]: Public @house/core barrel finalized as the stable downstream import boundary; raw Dec/Decimal no longer exported (dollars cross only as the closed Money API)
 
 ### Pending Todos
 
@@ -101,6 +104,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-23T23:26:17.534Z
+Last session: 2026-06-23T23:34:55.442Z
 Stopped at: Completed 01-03-PLAN.md
 Resume file: .planning/phases/01-foundations-determinism-core/01-04-PLAN.md
