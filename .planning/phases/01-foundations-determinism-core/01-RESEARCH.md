@@ -649,14 +649,16 @@ export default mergeConfig(
 
 **Note:** Exact seed assumption *values* (tax rates, DTI %, SWR, etc.) are explicitly Claude's discretion (D-07) and deferred for real values to Phase 2 — only the *shape* is locked. Not logged as assumptions because CONTEXT.md grants discretion.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should Zod be a runtime dependency of the pure core, or quarantined?**
+   - RESOLVED: Zod is allowed as a runtime dependency of `packages/core` and is allowlisted alongside `decimal.js` in the `boundaries/external` deny-by-default config (Plan 01-01, Task 3). Per the recommendation, all Zod usage is confined to the `assumptions/` (`schema.ts`/`assumption-set.ts`) and `serialize/` modules (Plans 01-03 and 01-04) so it remains trivially extractable to a non-core `io` boundary later if dep-graph minimalism is wanted. No further user decision is required for this phase.
    - What we know: CONTEXT.md says "Zod validates the AssumptionSet/snapshot at the serialization boundary only" (discretion item). The boundary config allowlists `decimal.js` + `zod`.
    - What's unclear: whether the team wants `packages/core`'s runtime dep graph to be *strictly* `decimal.js` only, with Zod confined to a non-core `io` boundary module.
    - Recommendation: allow Zod in core (it's pure, framework-free) but keep all Zod usage in `assumptions/schema.ts` + `serialize/` so it's trivially extractable later. Surface to user in planning if dep-graph minimalism matters.
 
 2. **Cross-platform `UPDATE_GOLDEN=1` invocation (Windows/PowerShell).**
+   - RESOLVED: `cross-env` is added as a dev dependency (installed in Plan 01-01, Task 2; confirmed in the Task 1 supply-chain gate) and the root `update-golden` script is `cross-env UPDATE_GOLDEN=1 vitest run packages/core`, making it PowerShell-portable. Plan 01-04 generates and re-verifies the golden fixture through this portable script.
    - What we know: dev shell is PowerShell; the env-var-prefix syntax is POSIX-only.
    - What's unclear: whether to add `cross-env` (one more dev dep) vs. documenting Bash-tool invocation.
    - Recommendation: add `cross-env` for a portable `npm run update-golden`. Trivial, well-known package.
