@@ -1,0 +1,17 @@
+{
+  "name": "@house/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc -b"
+  },
+  "dependencies": {
+    "decimal.js": "^10.6.0",
+    "zod": "^4.4.3"
+  }
+}
