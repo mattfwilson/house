@@ -32,7 +32,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Core functions are deterministic — no `Date.now()`, `Math.random()`, env reads, or module-level mutable defaults; `asOf` and all assumptions are explicit parameters (verified by tests)
   4. An `AssumptionSet` type holds every tunable (tax rates, DTI thresholds, return, inflation, maintenance %, SWR, PMI rules) as versioned, serializable data — nothing is hardcoded
   5. A reproducibility golden test exists: recomputing a frozen snapshot deep-equals the stored result (cent-identical), proving determinism before persistence exists
-**Plans**: TBD
+**Plans**: 4 plans
+  - [ ] 01-01-PLAN.md — Monorepo + core skeleton, ESLint boundary/determinism rules, Vitest projects (CORE-01, CORE-03 lint)
+  - [ ] 01-02-PLAN.md — Frozen Decimal clone, immutable Money, CalendarDate, runtime determinism guard (CORE-02, CORE-03)
+  - [ ] 01-03-PLAN.md — Nested versioned AssumptionSet (Zod) + defaults + migrate + EngineInput (ASMP-01)
+  - [ ] 01-04-PLAN.md — canonicalJson + canary + gated golden-master reproducibility harness + public index (PROF-04)
 
 ### Phase 2: TCO Engine
 **Goal**: Build the shared TCO substrate that Affordability and FI-Impact both consume — full monthly and annualized total cost of ownership for a scenario, computed correctly down to the cent, plus the rent-vs-buy comparison at the household's actual numbers.
@@ -109,7 +113,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundations & Determinism Core | 0/TBD | Not started | - |
+| 1. Foundations & Determinism Core | 0/4 | Not started | - |
 | 2. TCO Engine | 0/TBD | Not started | - |
 | 3. Affordability Engine | 0/TBD | Not started | - |
 | 4. FI-Impact Engine & Sensitivity | 0/TBD | Not started | - |
