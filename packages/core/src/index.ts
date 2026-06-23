@@ -4,3 +4,4 @@
 // build enforcement; Plan 01-02 adds the money/time/determinism primitives.
 export { Money } from './money/money.js';
 export { Dec, type DecimalInstance } from './money/decimal-config.js';
+export { calendarDate, type CalendarDate } from './time/calendar-date.js';

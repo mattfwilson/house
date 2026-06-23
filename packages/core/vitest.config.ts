@@ -10,9 +10,9 @@ export default mergeConfig(
       ...sharedTest,
       name: 'core',
       environment: 'node',
-      // TODO(Plan 01-02): add the runtime determinism guard setup file here:
-      //   setupFiles: ['./src/determinism/guard.setup.ts']
-      // (installs the Date.now/Math.random throw-guard — D-12 runtime half).
+      // Runtime determinism guard (D-12 runtime half): installs the Date.now/Math.random
+      // throw-guard before any core test runs. Complements the build-time ESLint rules.
+      setupFiles: ['./src/determinism/guard.setup.ts'],
     },
   }),
   {},
