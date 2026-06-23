@@ -15,8 +15,8 @@ const input: EngineInput = engineInput({
 });
 
 // (1) asOf is a CalendarDate — a plain string is NOT assignable.
-// @ts-expect-error -- asOf must be a CalendarDate, never a bare string (D-13).
 const _badAsOf: EngineInput = engineInput({
+  // @ts-expect-error -- asOf must be a CalendarDate, never a bare string (D-13).
   asOf: '2026-06-23',
   assumptions: DEFAULT_ASSUMPTIONS,
   scenario: { label: 'canary' },
