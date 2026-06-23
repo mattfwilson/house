@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: Phase 1 context gathered
-last_updated: "2026-06-23T22:45:27.666Z"
-last_activity: 2026-06-22 — Roadmap created, 31/31 v1 requirements mapped
+last_updated: "2026-06-23T23:08:26.308Z"
+last_activity: 2026-06-23 -- Phase 01 execution started
 progress:
   total_phases: 7
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 4
+  completed_plans: 1
   percent: 0
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-22)
 
 **Core value:** Answer "what does buying this house do to our early-retirement timeline?" — and be allowed to conclude "don't buy / rent and invest the difference."
-**Current focus:** Phase 1 — Foundations & Determinism Core
+**Current focus:** Phase 01 — foundations-determinism-core
 
 ## Current Position
 
-Phase: 1 of 7 (Foundations & Determinism Core)
-Plan: 0 of TBD in current phase
+Phase: 01 (foundations-determinism-core) — EXECUTING
+Plan: 2 of 4
 Status: Ready to execute
-Last activity: 2026-06-22 — Roadmap created, 31/31 v1 requirements mapped
+Last activity: 2026-06-23 -- Phase 01 execution started
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -52,6 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: —
 
 *Updated after each plan completion*
+| Phase 01 P01 | 20 | 3 tasks | 16 files |
 
 ## Accumulated Context
 
@@ -65,6 +66,8 @@ Recent decisions affecting current work:
 - [Foundation]: Assumptions are first-class versioned stored data; scenarios snapshot a frozen copy for reproducibility
 - [FI]: Re-implement FI math clean, reconcile against existing retirement model via golden-master oracle test
 - [FI]: Long-horizon SWR default (~3-3.5%), not 4% — configurable assumption
+- [Phase ?]: [Foundation]: CORE-01 enforced by eslint-plugin-boundaries deny-by-default (allow only decimal.js+zod) + no-DOM/no-JSX core tsconfig
+- [Phase ?]: [Foundation]: Negative fixtures (react import + DOM global) committed as durable proof the lint/tsc guards fail the build; boundary.test.ts asserts it portably via execSync
 
 ### Pending Todos
 
@@ -89,6 +92,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-23T12:20:38.427Z
+Last session: 2026-06-23T23:08:18.969Z
 Stopped at: Phase 1 context gathered
 Resume file: .planning/phases/01-foundations-determinism-core/01-CONTEXT.md
