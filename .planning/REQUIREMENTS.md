@@ -96,13 +96,45 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated during roadmap creation) | — | Pending |
+| CORE-01 | Phase 1 | Pending |
+| CORE-02 | Phase 1 | Pending |
+| CORE-03 | Phase 1 | Pending |
+| ASMP-01 | Phase 1 | Pending |
+| PROF-04 | Phase 1 | Pending |
+| TCO-01 | Phase 2 | Pending |
+| TCO-02 | Phase 2 | Pending |
+| TCO-03 | Phase 2 | Pending |
+| TCO-04 | Phase 2 | Pending |
+| TCO-05 | Phase 2 | Pending |
+| TCO-06 | Phase 2 | Pending |
+| TCO-07 | Phase 2 | Pending |
+| AFF-01 | Phase 3 | Pending |
+| AFF-02 | Phase 3 | Pending |
+| AFF-03 | Phase 3 | Pending |
+| FI-01 | Phase 4 | Pending |
+| FI-02 | Phase 4 | Pending |
+| FI-03 | Phase 4 | Pending |
+| FI-04 | Phase 4 | Pending |
+| FI-05 | Phase 4 | Pending |
+| FI-06 | Phase 4 | Pending |
+| ASMP-02 | Phase 4 | Pending |
+| TOWN-01 | Phase 5 | Pending |
+| TOWN-02 | Phase 5 | Pending |
+| TOWN-03 | Phase 5 | Pending |
+| TOWN-04 | Phase 5 | Pending |
+| PROF-01 | Phase 6 | Pending |
+| PROF-02 | Phase 6 | Pending |
+| PROF-03 | Phase 6 | Pending |
+| LIST-01 | Phase 6 | Pending |
+| LIST-02 | Phase 6 | Pending |
 
 **Coverage:**
 - v1 requirements: 31 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 31 ⚠️
+- Mapped to phases: 31 ✓
+- Unmapped: 0
+
+**Note:** Phase 7 (Web Shell) surfaces the engine outputs in a thin Next.js UI; it introduces no new v1 requirement (all 31 are delivered by the calculation core, persistence, and adapter in Phases 1-6).
 
 ---
 *Requirements defined: 2026-06-22*
-*Last updated: 2026-06-22 after initial definition*
+*Last updated: 2026-06-22 after roadmap creation (traceability populated)*
