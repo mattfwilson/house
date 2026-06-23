@@ -10,7 +10,7 @@ Requirements for the core-engine build. Each maps to a roadmap phase.
 ### Calculation Core (CORE)
 
 - [x] **CORE-01**: All financial math lives in a pure, framework-agnostic calculation core with zero React/Next dependencies (enforced by a lint boundary rule)
-- [ ] **CORE-02**: Money arithmetic uses decimal-precise math so no floating-point error accumulates across multi-decade projections
+- [x] **CORE-02**: Money arithmetic uses decimal-precise math so no floating-point error accumulates across multi-decade projections
 - [x] **CORE-03**: The core is fully unit-tested, with deterministic functions (no ambient time/randomness inside the core)
 
 ### Profiles & Scenarios (PROF)
@@ -97,7 +97,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | CORE-01 | Phase 1 | Complete |
-| CORE-02 | Phase 1 | Pending |
+| CORE-02 | Phase 1 | Complete |
 | CORE-03 | Phase 1 | Complete |
 | ASMP-01 | Phase 1 | Pending |
 | PROF-04 | Phase 1 | Pending |
