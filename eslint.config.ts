@@ -6,8 +6,19 @@ import importPlugin from 'eslint-plugin-import';
 
 export default tseslint.config(
   // Don't lint build output, deps, or planning docs.
+  //
+  // _lint-fixtures/** are INTENTIONAL violations (negative test assets). They are
+  // ignored from the everyday repo-wide `eslint .` so the CI lint gate stays green for
+  // real code — but boundary.test.ts lints them directly with `--no-ignore` to prove
+  // the guards still trip. Removing this ignore makes `npm run lint` permanently red.
   {
-    ignores: ['**/dist/**', '**/node_modules/**', '**/coverage/**', '.planning/**'],
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      '**/coverage/**',
+      '.planning/**',
+      'packages/core/src/_lint-fixtures/**',
+    ],
   },
 
   ...tseslint.configs.recommended,
