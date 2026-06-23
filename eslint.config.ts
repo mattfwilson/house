@@ -106,4 +106,21 @@ export default tseslint.config(
       'no-restricted-imports': 'off',
     },
   },
+
+  // ── golden.test.ts: the gated reproducibility harness (PROF-04, T-04-04) ──
+  // This is the ONE file in the package permitted to read an environment variable, and only
+  // `process.env.UPDATE_GOLDEN` — the explicit, reviewable regeneration gate (NOT
+  // toMatchSnapshot, which auto-re-blesses). The core runtime env ban (Plan 01-01, D-12)
+  // is unchanged for production code; this narrowly-scoped, documented exception keeps the
+  // env-read surface auditable to a single file rather than widening it package-wide.
+  // (It overlaps the broad *.test.ts relaxation above, but is stated explicitly so the
+  // sanctioned UPDATE_GOLDEN read has a named, greppable home — defense against silent
+  // scope creep, T-04-04.)
+  {
+    files: ['packages/core/**/golden.test.ts'],
+    rules: {
+      'no-restricted-globals': 'off',
+      'no-restricted-properties': 'off',
+    },
+  },
 );
