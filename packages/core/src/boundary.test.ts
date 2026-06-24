@@ -7,12 +7,13 @@
 import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import { test, expect } from 'vitest';
+import { test, expect, describe } from 'vitest';
 
 const here = dirname(fileURLToPath(import.meta.url));
 // repo root is two levels up from packages/core/src
 const repoRoot = resolve(here, '..', '..', '..');
-const fixture = resolve(here, '_lint-fixtures', 'framework-import.fixture.ts');
+const fixtureDir = resolve(here, '_lint-fixtures');
+const fixture = resolve(fixtureDir, 'framework-import.fixture.ts');
 
 /** Run eslint on a single file; return { code, output }. Never throws. */
 function runEslint(targetFile: string): { code: number; output: string } {
@@ -39,4 +40,46 @@ test('lint REJECTS a framework import in core (CORE-01)', () => {
   // And the failure must be attributable to a boundary/framework guard, not some
   // unrelated lint error.
   expect(output).toMatch(/boundaries\/external|no-restricted-imports|react/i);
+});
+
+// WR-05: the determinism rules (D-12/D-13) are the phase's headline deliverable, so the
+// *absence* of enforcement tests was itself the defect. Each fixture exercises both the
+// direct and the globalThis-qualified evasion form (WR-03); we assert lint trips on each
+// and that the failure is attributable to the intended determinism rule (not noise).
+describe('lint REJECTS each determinism hazard in core (D-12/D-13, WR-05)', () => {
+  const cases: ReadonlyArray<{ name: string; file: string; rule: RegExp }> = [
+    {
+      name: 'Date.now (direct + globalThis-qualified)',
+      file: 'determinism-date-now.fixture.ts',
+      rule: /no-restricted-syntax|Date\.now/i,
+    },
+    {
+      name: 'Math.random (direct + globalThis-qualified)',
+      file: 'determinism-math-random.fixture.ts',
+      rule: /no-restricted-syntax|Math\.random/i,
+    },
+    {
+      name: 'new Date (bare + globalThis.Date)',
+      file: 'determinism-new-date.fixture.ts',
+      rule: /no-restricted-syntax|CalendarDate|D-13/i,
+    },
+    {
+      name: 'performance.now (direct + globalThis-qualified)',
+      file: 'determinism-performance-now.fixture.ts',
+      rule: /no-restricted-syntax|no-restricted-globals|performance/i,
+    },
+    {
+      name: 'crypto.getRandomValues (direct + globalThis-qualified)',
+      file: 'determinism-crypto-random.fixture.ts',
+      rule: /no-restricted-syntax|no-restricted-globals|crypto/i,
+    },
+  ];
+
+  test.each(cases)('rejects $name', ({ file, rule }) => {
+    const { code, output } = runEslint(resolve(fixtureDir, file));
+    // Non-zero exit is the PASS path; a clean exit means the guard regressed.
+    expect(code).not.toBe(0);
+    // The failure must be attributable to the intended determinism rule, not noise.
+    expect(output).toMatch(rule);
+  });
 });

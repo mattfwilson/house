@@ -12,6 +12,11 @@
   "exclude": [
     "dist",
     "src/**/*.test.ts",
-    "src/_lint-fixtures/framework-import.fixture.ts"
+    "src/_lint-fixtures/framework-import.fixture.ts",
+    "src/_lint-fixtures/determinism-date-now.fixture.ts",
+    "src/_lint-fixtures/determinism-math-random.fixture.ts",
+    "src/_lint-fixtures/determinism-new-date.fixture.ts",
+    "src/_lint-fixtures/determinism-performance-now.fixture.ts",
+    "src/_lint-fixtures/determinism-crypto-random.fixture.ts"
   ]
 }
