@@ -7,6 +7,7 @@ prove that the build-time enforcement actually rejects the things Phase 1 forbid
 | File | Violates | Proven by | Expected outcome |
 |------|----------|-----------|------------------|
 | `framework-import.fixture.ts` | CORE-01 — `import 'react'` in core | `boundary.test.ts` (shells out to eslint via `execSync`) | `eslint` exits **non-zero** on this file (`boundaries/external` and/or `no-restricted-imports`). |
+| `external-import.fixture.ts` | CORE-01 — `import 'node:fs'` (arbitrary non-allowlisted external) | `boundary.test.ts` | `eslint` exits **non-zero** (`boundaries/external` deny-by-default). Guards against silent removal of the deprecated `boundaries/external` rule (WR-04). |
 | `dom-global.fixture.ts` | A DOM global (`document`) in the no-DOM core | `tsc -b` | `@ts-expect-error` is **satisfied** only because the no-DOM lib makes `document` an error → `tsc -b` stays **green**. Adding `"dom"` to the lib makes the suppression unused → `tsc` **fails** (TS2578). |
 | `determinism-date-now.fixture.ts` | D-12 — `Date.now()` and `globalThis.Date.now()` | `boundary.test.ts` | `eslint` exits **non-zero** (`no-restricted-syntax`). |
 | `determinism-math-random.fixture.ts` | D-12 — `Math.random()` and `globalThis.Math.random()` | `boundary.test.ts` | `eslint` exits **non-zero** (`no-restricted-syntax`). |

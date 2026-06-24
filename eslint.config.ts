@@ -38,6 +38,17 @@ export default tseslint.config(
       // (A) DENY-BY-DEFAULT external imports — only decimal.js & zod allowed.
       //     Covers static AND dynamic imports. This is the real CORE-01 guard
       //     (import/no-restricted-paths does NOT block npm package names — Pitfall 1).
+      //
+      //     WR-04: `boundaries/external` is deprecated in eslint-plugin-boundaries v6 and
+      //     emits a removal warning. We deliberately KEEP it (the `boundaries/dependencies`
+      //     replacement uses a different selector model whose mistranslation would silently
+      //     WEAKEN deny-by-default — the one thing this guard must never do). To make the
+      //     deprecation safe we (1) PIN the plugin to an exact version (`6.0.2`, not `^`) in
+      //     package.json so a transparent minor/patch bump cannot drop the rule under us, and
+      //     (2) added a negative fixture (`external-import.fixture.ts`, an `import 'node:fs'`)
+      //     asserted by boundary.test.ts — so if the rule is ever removed or disabled, that
+      //     test goes RED and surfaces the un-guarding LOUDLY instead of silently. Revisit the
+      //     `boundaries/dependencies` migration deliberately, with that test as the safety net.
       'boundaries/external': ['error', {
         default: 'disallow',
         rules: [{ from: ['core'], allow: ['decimal.js', 'zod'] }],

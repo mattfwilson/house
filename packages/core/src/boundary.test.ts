@@ -42,6 +42,21 @@ test('lint REJECTS a framework import in core (CORE-01)', () => {
   expect(output).toMatch(/boundaries\/external|no-restricted-imports|react/i);
 });
 
+// WR-04: prove deny-by-default covers ARBITRARY externals, not just framework names. The
+// `boundaries/external` rule is deprecated; this test (plus the exact version pin in
+// package.json) is the safety net — if the rule is ever removed/disabled, an arbitrary
+// disallowed external import stops failing and THIS test goes red, surfacing the silent
+// un-guarding of the core loudly.
+test('lint REJECTS an arbitrary non-allowlisted external import in core (CORE-01, WR-04)', () => {
+  const externalFixture = resolve(fixtureDir, 'external-import.fixture.ts');
+  const { code, output } = runEslint(externalFixture);
+
+  // Non-zero exit is the PASS path; a clean exit means deny-by-default regressed.
+  expect(code).not.toBe(0);
+  // Attributable to the deny-by-default external guard (mentions the module or the rule).
+  expect(output).toMatch(/boundaries\/external|node:fs|no rule allowing/i);
+});
+
 // WR-05: the determinism rules (D-12/D-13) are the phase's headline deliverable, so the
 // *absence* of enforcement tests was itself the defect. Each fixture exercises both the
 // direct and the globalThis-qualified evasion form (WR-03); we assert lint trips on each
