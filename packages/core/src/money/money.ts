@@ -12,8 +12,24 @@
 //   - There is intentionally NO `valueOf`/`toJSON` returning a number — adding one would
 //     re-open the bare-number hole (`money * 1.05` would silently coerce to a float).
 import { Dec, type DecimalInstance } from './decimal-config.js';
+import { CANONICAL_DECIMAL_RE } from '../assumptions/schema.js';
 
 declare const MoneyBrand: unique symbol;
+
+/**
+ * Validate a string at the Money/rate boundary against the SHARED canonical-decimal rule
+ * (the same `CANONICAL_DECIMAL_RE` the serialization boundary uses). Rejects `Infinity`,
+ * `-Infinity`, `NaN`, exponent form (`1e3`), empty/garbage — all of which `new Dec(...)`
+ * would otherwise silently accept and let a non-finite value poison the math + snapshots.
+ * Throws a meaningful error instead of an opaque downstream `RangeError` at `toCents()`.
+ */
+function assertCanonicalDecimal(raw: string, kind: 'Money' | 'rate'): void {
+  if (typeof raw !== 'string' || !CANONICAL_DECIMAL_RE.test(raw)) {
+    throw new Error(
+      `Invalid ${kind} string: ${JSON.stringify(raw)} (expected canonical decimal, e.g. "1234.56")`,
+    );
+  }
+}
 
 export class Money {
   // Nominal brand: makes a plain object non-assignable to Money. `declare` keeps it
@@ -24,6 +40,7 @@ export class Money {
 
   /** Construct from a canonical decimal STRING (never a bare JS number — CORE-02). */
   static of(decimalString: string): Money {
+    assertCanonicalDecimal(decimalString, 'Money');
     return new Money(new Dec(decimalString));
   }
 
@@ -44,6 +61,7 @@ export class Money {
 
   /** Multiply by a DIMENSIONLESS rate string (e.g. '1.05'); full precision retained. */
   mul(rate: string): Money {
+    assertCanonicalDecimal(rate, 'rate');
     return new Money(this.v.times(new Dec(rate)));
   }
 

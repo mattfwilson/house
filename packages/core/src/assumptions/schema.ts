@@ -14,6 +14,16 @@
 import { z } from 'zod';
 
 /**
+ * The single canonical-decimal-string pattern (D-06). One definition of "canonical
+ * decimal string" shared across the codebase: the `decStr` Zod validator at the
+ * serialization boundary AND the `Money` constructor boundary (money.ts) both use this,
+ * so a value cannot be canonical at one door and non-canonical at another.
+ * Optional leading `-`, digits, optional single fractional part. NO exponent form, NO
+ * thousands separators, NO `Infinity`/`NaN`, NO bare JS number.
+ */
+export const CANONICAL_DECIMAL_RE = /^-?\d+(\.\d+)?$/;
+
+/**
  * The decimal-string boundary validator (D-06). A canonical base-10 numeric string:
  * optional leading `-`, digits, optional single fractional part. NO exponent form, NO
  * thousands separators, NO bare JS number. Lifts to `Dec` on use; keeps floats out of
@@ -21,7 +31,7 @@ import { z } from 'zod';
  */
 export const decStr = z
   .string()
-  .regex(/^-?\d+(\.\d+)?$/, 'must be a canonical decimal string (e.g. "0.035")');
+  .regex(CANONICAL_DECIMAL_RE, 'must be a canonical decimal string (e.g. "0.035")');
 
 /** A namespaced group whose every leaf is a decimal string (reused below). */
 const group = <Shape extends z.ZodRawShape>(shape: Shape) => z.object(shape).strict();

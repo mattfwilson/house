@@ -24,6 +24,54 @@ describe('Money construction', () => {
   });
 });
 
+describe('Money.of rejects non-canonical / non-finite input (CR-01, CORE-02)', () => {
+  // decimal.js would otherwise silently accept these — re-opening the float/non-finite hole
+  // the whole API exists to seal. Validation happens at the constructor boundary, the same
+  // canonical rule the serialization boundary (decStr) enforces.
+  test.each([
+    'Infinity',
+    '-Infinity',
+    'NaN',
+    '1e3', // exponent form is rejected everywhere else; reject it here too
+    '1E3',
+    '', // empty
+    ' 1', // leading whitespace
+    '1 ', // trailing whitespace
+    '1,000', // thousands separator
+    '0x10', // hex
+    '--1',
+    '1.', // dangling decimal point
+    '.5', // missing integer part
+    'abc',
+    '+1', // explicit plus sign not canonical
+  ])('Money.of(%j) throws a meaningful invalid-Money error', (bad) => {
+    expect(() => Money.of(bad)).toThrow(/Invalid Money string/);
+  });
+
+  test('the thrown error includes the offending value', () => {
+    expect(() => Money.of('Infinity')).toThrow(/"Infinity"/);
+  });
+
+  test('valid canonical strings still construct', () => {
+    expect(Money.of('1234.56').toDecimalString()).toBe('1234.56');
+    expect(Money.of('-0.001').toDecimalString()).toBe('-0.001');
+    expect(Money.of('0').toDecimalString()).toBe('0');
+  });
+});
+
+describe('Money.mul rejects non-canonical / non-finite rate input (CR-01)', () => {
+  test.each(['Infinity', 'NaN', '1e3', '', 'abc', '1.05x'])(
+    'mul(%j) throws a meaningful invalid-rate error',
+    (bad) => {
+      expect(() => Money.of('100').mul(bad)).toThrow(/Invalid rate string/);
+    },
+  );
+
+  test('valid rate still multiplies', () => {
+    expect(Money.of('100').mul('1.05').toDecimalString()).toBe('105');
+  });
+});
+
 describe('Money arithmetic is immutable and full-precision', () => {
   test('add returns a new Money, leaving operands unchanged', () => {
     const a = Money.of('10.00');
