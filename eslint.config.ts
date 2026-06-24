@@ -60,18 +60,48 @@ export default tseslint.config(
         ],
       }],
 
-      // (D) determinism: forbid Date.now / Math.random / new Date / dynamic import (D-12, D-13).
+      // (D) determinism: forbid Date.now / Math.random / new Date / performance.now /
+      //     crypto.getRandomValues / dynamic import (D-12, D-13).
+      //
+      // Selectors match BOTH the direct form (`Date.now()`) and the globalThis-qualified
+      // member form (`globalThis.Date.now()`, `globalThis.Math.random()`), which previously
+      // slipped past the `callee.object.name` checks (WR-03). `performance` / `crypto` are
+      // matched as the callee object directly (and also via globalThis), and `new Date` is
+      // caught both bare and as `new globalThis.Date()`.
       'no-restricted-syntax': ['error',
         {
-          selector: "CallExpression[callee.object.name='Date'][callee.property.name='now']",
+          // Date.now() and globalThis.Date.now()
+          selector:
+            "CallExpression[callee.property.name='now'][callee.object.object.name='globalThis'][callee.object.property.name='Date']," +
+            "CallExpression[callee.object.name='Date'][callee.property.name='now']",
           message: 'Determinism: thread asOf via EngineInput, no Date.now (D-12).',
         },
         {
-          selector: "CallExpression[callee.object.name='Math'][callee.property.name='random']",
+          // Math.random() and globalThis.Math.random()
+          selector:
+            "CallExpression[callee.property.name='random'][callee.object.object.name='globalThis'][callee.object.property.name='Math']," +
+            "CallExpression[callee.object.name='Math'][callee.property.name='random']",
           message: 'Determinism: core must not use Math.random (D-12).',
         },
         {
-          selector: "NewExpression[callee.name='Date']",
+          // performance.now() and globalThis.performance.now()
+          selector:
+            "CallExpression[callee.property.name='now'][callee.object.name='performance']," +
+            "CallExpression[callee.property.name='now'][callee.object.object.name='globalThis'][callee.object.property.name='performance']",
+          message: 'Determinism: core must not read the high-res clock (performance.now, D-12).',
+        },
+        {
+          // crypto.getRandomValues(...) and globalThis.crypto.getRandomValues(...)
+          selector:
+            "CallExpression[callee.property.name='getRandomValues'][callee.object.name='crypto']," +
+            "CallExpression[callee.property.name='getRandomValues'][callee.object.object.name='globalThis'][callee.object.property.name='crypto']",
+          message: 'Determinism: core must not use crypto entropy (crypto.getRandomValues, D-12).',
+        },
+        {
+          // new Date(...) and new globalThis.Date(...)
+          selector:
+            "NewExpression[callee.name='Date']," +
+            "NewExpression[callee.object.name='globalThis'][callee.property.name='Date']",
           message: 'Core must not touch JS Date — use CalendarDate (D-13).',
         },
         {
@@ -80,9 +110,14 @@ export default tseslint.config(
         },
       ],
 
-      // (E) ban env / global hazards (D-12).
+      // (E) ban env / global hazards (D-12). `process` (env), plus the nondeterminism
+      //     globals `performance` / `crypto` and the `globalThis` escape hatch used to
+      //     re-qualify them past the syntax selectors above (WR-03).
       'no-restricted-globals': ['error',
         { name: 'process', message: 'Core must not read env/process (D-12).' },
+        { name: 'performance', message: 'Core must not read the high-res clock (D-12).' },
+        { name: 'crypto', message: 'Core must not use crypto entropy (D-12).' },
+        { name: 'globalThis', message: 'Core must not reach globals via globalThis (determinism evasion, D-12).' },
       ],
       'no-restricted-properties': ['error',
         { object: 'process', property: 'env', message: 'No env reads in core (D-12).' },

@@ -19,6 +19,14 @@
 // is itself a side effect. It is installed only via the core Vitest setupFile (guard.setup.ts).
 // It is reversible: callers that need the genuine globals back (guard.test.ts) save and
 // restore them around an explicit install.
+//
+// This file is the SANCTIONED, single home for `globalThis` access in core: the guard's
+// entire job is to reach the ambient global hazards and poison them. The repo-wide
+// `no-restricted-globals: globalThis` rule (eslint.config.ts, WR-03) exists to stop OTHER
+// core code from re-qualifying banned globals through `globalThis` as a determinism-evasion
+// path. That rule is disabled HERE — and only here — so the enforcement mechanism itself
+// can do its work, exactly as golden.test.ts is the single sanctioned home for env reads.
+/* eslint-disable no-restricted-globals -- the determinism guard must touch globalThis to install itself (WR-03). */
 export function installDeterminismGuard(): void {
   const ban =
     (name: string) =>
@@ -58,3 +66,4 @@ export function installDeterminismGuard(): void {
     ) as unknown as typeof cryptoObj.getRandomValues;
   }
 }
+/* eslint-enable no-restricted-globals */
