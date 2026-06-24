@@ -52,6 +52,33 @@ describe('canonicalJson sorts object keys recursively (order-independence)', () 
   });
 });
 
+describe('canonicalJson rejects non-finite numbers instead of nulling them (WR-06)', () => {
+  // Plain JSON.stringify coerces NaN/Infinity to null, which would silently bury a corrupt
+  // computation in the golden artifact. The float-free premise requires a loud failure.
+  test.each([NaN, Infinity, -Infinity])('a bare %s throws', (bad) => {
+    expect(() => canonicalJson(bad)).toThrow(/non-finite number/);
+  });
+
+  test('a non-finite number nested in an object throws (not coerced to null)', () => {
+    expect(() => canonicalJson({ total: Number.POSITIVE_INFINITY })).toThrow(
+      /non-finite number/,
+    );
+    expect(() => canonicalJson({ nested: { x: NaN } })).toThrow(/non-finite number/);
+  });
+
+  test('a non-finite number inside an array throws', () => {
+    expect(() => canonicalJson([1, NaN, 3])).toThrow(/non-finite number/);
+  });
+
+  test('finite numbers are still allowed (e.g. schemaVersion, period counts)', () => {
+    expect(canonicalJson({ schemaVersion: 1, periods: 360 })).toBe(
+      '{"periods":360,"schemaVersion":1}',
+    );
+    expect(canonicalJson(0)).toBe('0');
+    expect(canonicalJson(-42.5)).toBe('-42.5');
+  });
+});
+
 describe('canonicalJson is deterministic', () => {
   test('identical inputs produce byte-identical output across repeated calls', () => {
     const value = { total: Money.of('42.42'), label: 'x', nested: { a: 1, b: 2 } };

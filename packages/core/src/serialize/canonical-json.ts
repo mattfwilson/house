@@ -35,7 +35,23 @@ function normalize(value: unknown): unknown {
     return sorted;
   }
 
-  // Primitives (string/number/boolean/null) pass through unchanged.
+  // Numbers: bare JS numbers ARE permitted here, but ONLY finite ones (WR-06).
+  //
+  // Deliberate choice: finite numbers are allowed because the value graph legitimately
+  // contains non-money integers (e.g. `schemaVersion: 1`, period counts). MONEY never
+  // reaches this branch — it is intercepted above and emitted as a decimal string, so
+  // this does NOT re-open the float hole for dollar amounts.
+  //
+  // What is NOT tolerated is a NON-FINITE number (NaN / Infinity / -Infinity). Plain
+  // `JSON.stringify` would silently coerce those to `null`, masking a corrupt computation
+  // inside the golden artifact. The float-free premise requires failing loudly instead.
+  if (typeof value === 'number' && !Number.isFinite(value)) {
+    throw new Error(
+      `canonicalJson: non-finite number ${value} is forbidden (corrupt value — use Money / a finite number).`,
+    );
+  }
+
+  // Primitives (finite number / string / boolean / null / undefined) pass through unchanged.
   return value;
 }
 
