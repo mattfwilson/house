@@ -88,4 +88,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-22 after initialization*
+*Last updated: 2026-06-24 — Phase 1 (Foundations & Determinism Core) complete: pure framework-agnostic calc core, decimal-precise `Money`, runtime+lint determinism guards, versioned assumptions-as-data, and a golden-master reproducibility harness. No engine result computes yet by design — everything downstream imports these primitives. User-facing Active requirements remain unvalidated until an engine produces results.*
