@@ -66,4 +66,17 @@ describe('parseAssumptionSet / serializeAssumptionSet (boundary helpers)', () =>
     // The SWR rate is present as a quoted string, not a bare number.
     expect(json).toContain(`"rate":"${DEFAULT_ASSUMPTIONS.swr.rate}"`);
   });
+
+  test('serialization is truly canonical: insertion order does not change the bytes (WR-01)', () => {
+    // Build a semantically-identical set whose top-level keys are in a DIFFERENT insertion
+    // order (as a spread/merge would produce). Raw JSON.stringify would emit different bytes;
+    // the canonical serializer sorts keys recursively, so the output must be byte-identical.
+    const reordered = Object.fromEntries(
+      Object.keys(DEFAULT_ASSUMPTIONS)
+        .reverse()
+        .map((k) => [k, (DEFAULT_ASSUMPTIONS as Record<string, unknown>)[k]]),
+    ) as typeof DEFAULT_ASSUMPTIONS;
+
+    expect(serializeAssumptionSet(reordered)).toBe(serializeAssumptionSet(DEFAULT_ASSUMPTIONS));
+  });
 });
