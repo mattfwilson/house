@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 2 context gathered
-last_updated: "2026-06-25T14:32:00.000Z"
-last_activity: 2026-06-25 -- Completed 02-01 (Wave-1 TCO foundation)
+stopped_at: Completed 02-02 (Wave-2 amortization + PMI)
+last_updated: "2026-06-25T10:40:00.000Z"
+last_activity: 2026-06-25 -- Completed 02-02 (amortization + PMI correctness cores)
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 9
-  completed_plans: 5
-  percent: 56
+  completed_plans: 6
+  percent: 67
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-06-22)
 ## Current Position
 
 Phase: 02 (tco-engine) — EXECUTING
-Plan: 2 of 5
-Status: Executing Phase 02 (Wave 1 complete)
-Last activity: 2026-06-25 -- Completed 02-01 (Wave-1 TCO foundation)
+Plan: 3 of 5
+Status: Executing Phase 02 (Wave 2 in progress — 02-02 complete)
+Last activity: 2026-06-25 -- Completed 02-02 (amortization + PMI correctness cores)
 
-Progress: [██████░░░░] 56%
+Progress: [███████░░░] 67%
 
 ## Performance Metrics
 
@@ -57,6 +57,7 @@ Progress: [██████░░░░] 56%
 | Phase 01 P03 | 10 | 2 tasks | 11 files |
 | Phase 01 P04 | 4 | 2 tasks | 9 files |
 | Phase 02 P01 | 12 | 3 tasks | 13 files |
+| Phase 02 P02 | 10 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -86,6 +87,9 @@ Recent decisions affecting current work:
 - [Phase 02-01]: [TCO]: ScenarioInputs widened to the full house contract (price, downPaymentPct, annualRate, termMonths, holdingYears, town, insuranceAnnual, hoaMonthly, monthlyRent + optional overrides); dollars/rates as canonical decimal strings; Phase 2 is fixed-rate only (D-16)
 - [Phase 02-01]: [TCO]: Seeded 24-town FY-stamped greater-Boston mill-rate table (residential rate stored as published, $/$1,000, A3) behind a .strict() Zod row schema; resolveMillRate returns the snapshot-capturable {rate, fy} pair and throws on unknown towns; full-MA + other scoring metrics deferred to Phase 5 (D-09)
 - [Phase 02-01]: [TCO]: V2 default tunables seeded as [ASSUMED] conservative values (appreciation 0.0075, sellCost 0.065, rentGrowth 0, closing 0.025, assessmentRatio 1.0) pending user confirmation
+- [Phase 02-02]: [TCO]: Amortization uses a RECONCILED final payment (final principal IS the remaining balance) so finalBalance === $0.00 exactly and principal-sum === loan exactly (Pitfall 2); monthlyRate = nominal-annual/12 kept FULL Dec precision (never rounded), each period's split rounded to cents HALF_EVEN at the Money boundary
+- [Phase 02-02]: [TCO]: PMI applies iff origination LTV (loan/originalValue) STRICTLY > 0.80 — exactly 20% down does NOT trigger PMI; drop-off measured against CONSTANT original value + scheduled balance, 78% auto / 80% requested toggle (no appreciated-value input by design, Pitfall 3); oracle: $360k/6.375%/360 → premium $225.00, drop-off auto-78 month 108 vs requested-80 month 94
+- [Phase 02-02]: [TCO]: tco/ barrel exports deferred to Plan 04 (alongside computeTco) per plan artifacts note
 
 ### Pending Todos
 
@@ -110,6 +114,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-25T14:32:00.000Z
-Stopped at: Completed 02-01-PLAN.md (Wave 1)
-Resume file: .planning/phases/02-tco-engine/02-02-PLAN.md
+Last session: 2026-06-25T10:40:00.000Z
+Stopped at: Completed 02-02-PLAN.md (Wave 2 — amortization + PMI)
+Resume file: .planning/phases/02-tco-engine/02-03-PLAN.md

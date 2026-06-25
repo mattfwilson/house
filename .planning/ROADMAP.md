@@ -73,7 +73,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 2** *(blocked on Wave 1)*
 
-  - [ ] 02-02-PLAN.md — Fixed-rate amortization (exact $0 payoff, principal-sum, oracle) + PMI 78/80 original-value toggle (TCO-01, TCO-04)
+  - [x] 02-02-PLAN.md — Fixed-rate amortization (exact $0 payoff, principal-sum, oracle) + PMI 78/80 original-value toggle (TCO-01, TCO-04)
   - [ ] 02-03-PLAN.md — Property tax (assessed × mill rate, appreciating, Prop 2½ flag) + carrying costs + closing costs (TCO-02, TCO-03, TCO-05)
 
 **Wave 3** *(blocked on Wave 2)*
@@ -164,7 +164,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundations & Determinism Core | 4/4 | Complete    | 2026-06-24 |
-| 2. TCO Engine | 1/5 | In progress | - |
+| 2. TCO Engine | 2/5 | In progress | - |
 | 3. Affordability Engine | 0/TBD | Not started | - |
 | 4. FI-Impact Engine & Sensitivity | 0/TBD | Not started | - |
 | 5. Town Scoring & Heatmap | 0/TBD | Not started | - |
