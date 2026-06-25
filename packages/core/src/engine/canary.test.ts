@@ -11,11 +11,27 @@ import { DEFAULT_ASSUMPTIONS } from '../assumptions/defaults.js';
 import { calendarDate } from '../time/calendar-date.js';
 import { Money } from '../money/money.js';
 
+// A well-formed scenario (engineInput now validates the scenario at the boundary, 02-07).
+// runCanary reads only the returns.realAnnual assumption slice — the scenario values are
+// inert here — but the scenario must be a valid ScenarioInputs to cross the boundary.
+const CANARY_SCENARIO = {
+  label: 'canary',
+  price: '450000',
+  downPaymentPct: '0.20',
+  annualRate: '0.065',
+  termMonths: 360,
+  holdingYears: 10,
+  town: 'Newton',
+  insuranceAnnual: '2000',
+  hoaMonthly: '0',
+  monthlyRent: '2800',
+} as const;
+
 const fixedInput = () =>
   engineInput({
     asOf: calendarDate('2026-01-01'),
     assumptions: DEFAULT_ASSUMPTIONS,
-    scenario: { label: 'canary' },
+    scenario: CANARY_SCENARIO,
   });
 
 describe('runCanary is deterministic', () => {
@@ -65,7 +81,7 @@ describe('runCanary does real multi-period compounding rounded at the boundary',
       engineInput({
         asOf: calendarDate('2026-01-01'),
         assumptions: { ...DEFAULT_ASSUMPTIONS, returns: { realAnnual: '0.10' } },
-        scenario: { label: 'canary' },
+        scenario: CANARY_SCENARIO,
       }),
     );
     expect(altered.final.toDecimalString()).not.toBe(base.final.toDecimalString());

@@ -26,7 +26,12 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { describe, test, expect } from 'vitest';
-import { engineInput, type EngineInput, type ScenarioInputs } from './engine/engine-input.js';
+import {
+  engineInput,
+  parseScenarioInputs,
+  type EngineInput,
+  type ScenarioInputs,
+} from './engine/engine-input.js';
 import { runCanary, type CanaryResult } from './engine/canary.js';
 import { computeTco } from './tco/tco.js';
 import { rentVsBuy } from './tco/rent-vs-buy.js';
@@ -149,8 +154,12 @@ describe('snapshot round-trip is lossless (D-08 data reproducibility)', () => {
 /**
  * Serialize an EngineInput to canonical JSON (the snapshot a persistence layer would store),
  * then rebuild it THROUGH the boundary validators — never trusting raw JSON. The assumptions go
- * back through `parseAssumptionSet` (Zod) and `asOf` through `calendarDate`; the scenario is the
- * full widened shape.
+ * back through `parseAssumptionSet` (Zod) and `asOf` through `calendarDate`; the scenario goes
+ * back through `parseScenarioInputs` (Zod) — the same boundary the snapshot loader uses (CR-03),
+ * NOT a bare `as ScenarioInputs` cast. Because `engineInput()` also parses internally (02-07),
+ * the round-trip is double-validated by design (the loader-facing `parseScenarioInputs` is the
+ * documented entry point). Parsing a valid scenario is identity on the values, so the
+ * recomputed result is cent-identical.
  */
 function roundTrip(original: EngineInput): EngineInput {
   const snapshot = JSON.parse(
@@ -159,11 +168,11 @@ function roundTrip(original: EngineInput): EngineInput {
       assumptions: original.assumptions,
       scenario: original.scenario,
     }),
-  ) as { asOf: string; assumptions: unknown; scenario: ScenarioInputs };
+  ) as { asOf: string; assumptions: unknown; scenario: unknown };
 
   return engineInput({
     asOf: calendarDate(snapshot.asOf),
     assumptions: parseAssumptionSet(snapshot.assumptions) as CurrentAssumptionSet,
-    scenario: snapshot.scenario,
+    scenario: parseScenarioInputs(snapshot.scenario),
   });
 }

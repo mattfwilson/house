@@ -31,6 +31,8 @@ export { migrate } from './assumptions/migrate.js';
 // The immutable snapshot/input unit (D-11) threading asOf + assumptions explicitly.
 export {
   engineInput,
+  ScenarioInputsSchema,
+  parseScenarioInputs,
   type EngineInput,
   type ScenarioInputs,
 } from './engine/engine-input.js';
