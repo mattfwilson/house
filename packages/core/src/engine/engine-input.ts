@@ -10,8 +10,10 @@
 //     nothing hardcoded (ASMP-01).
 //   - The whole object is `readonly` at the type level and `Object.freeze`d at runtime, so
 //     a scenario cannot be mutated mid-computation.
+import { z } from 'zod';
 import type { CalendarDate } from '../time/calendar-date.js';
 import type { CurrentAssumptionSet } from '../assumptions/assumption-set.js';
+import { decStr } from '../assumptions/schema.js';
 
 /**
  * The per-scenario house inputs the TCO engine reads. Every field is `readonly` (a scenario
@@ -51,6 +53,58 @@ export interface ScenarioInputs {
 }
 
 /**
+ * ScenarioInputsSchema — the Zod 4 runtime mirror of the `ScenarioInputs` interface and the
+ * SCENARIO half of the snapshot trust boundary (CR-03 / T-07-*). The assumptions half is
+ * `AssumptionSetSchema`; together they are the single point where a persisted-or-forged
+ * snapshot JSON becomes a trusted in-memory `EngineInput`. Three properties are enforced HERE,
+ * not by convention (mirroring `assumptions/schema.ts`):
+ *   - T-07-01: every dollar/rate field is a canonical decimal STRING (`decStr`, the SAME
+ *     validator `Money.of` and the AssumptionSet boundary use) — a JS float, thousands
+ *     separator, or exponent form can never enter the calc (D-06).
+ *   - T-07-02: `downPaymentPct` is constrained to the half-open interval [0,1) so a forged
+ *     value can never produce a negative loan in `computeTco` (loan = price * (1 - pct), D-14).
+ *     The canonical-string contract is already enforced by `decStr`; the `.refine` here is a
+ *     pure BOUNDARY guard (range check on the already-canonical value), not money math, so a
+ *     plain `Number(s)` comparison is acceptable.
+ *   - T-07-03: `.strict()` rejects unknown keys, so a forged snapshot can't smuggle extra
+ *     fields past the boundary (mirrors `AssumptionsV2.strict()`).
+ * `termMonths` / `holdingYears` are positive integers (they are counts, not money).
+ */
+export const ScenarioInputsSchema = z
+  .object({
+    label: z.string().min(1),
+    price: decStr,
+    downPaymentPct: decStr.refine(
+      (s) => {
+        const n = Number(s);
+        return n >= 0 && n < 1;
+      },
+      { message: 'downPaymentPct must be in [0,1)' },
+    ),
+    annualRate: decStr,
+    termMonths: z.number().int().positive(),
+    holdingYears: z.number().int().positive(),
+    town: z.string().min(1),
+    insuranceAnnual: decStr,
+    hoaMonthly: decStr,
+    monthlyRent: decStr,
+    closingCostsOverride: decStr.optional(),
+    otherOneTimeCosts: decStr.optional(),
+  })
+  .strict();
+
+/**
+ * Validate untrusted data into a trusted `ScenarioInputs`. Throws (with a Zod error) on any
+ * forged/corrupt scenario — a negative or zero count, a `downPaymentPct` outside [0,1), a
+ * non-canonical decimal string, an unknown extra key, or a missing required field. The
+ * snapshot loader and `engineInput()` MUST go through this; never spread raw JSON into the
+ * calc (mirrors `parseAssumptionSet`, T-07-01..03).
+ */
+export function parseScenarioInputs(input: unknown): ScenarioInputs {
+  return ScenarioInputsSchema.parse(input) as ScenarioInputs;
+}
+
+/**
  * The immutable snapshot unit: `asOf` + `assumptions` + scenario inputs, all readonly.
  * This is what a top-level engine function receives AND what a snapshot serializes.
  */
@@ -73,6 +127,8 @@ export function engineInput(parts: {
   return Object.freeze({
     asOf: parts.asOf,
     assumptions: parts.assumptions,
-    scenario: Object.freeze({ ...parts.scenario }),
+    // Validate the scenario at assembly — a forged snapshot is rejected here, not silently
+    // computed (CR-03). `assumptions` is already parsed at its own boundary (parseAssumptionSet).
+    scenario: Object.freeze(parseScenarioInputs(parts.scenario)),
   });
 }
