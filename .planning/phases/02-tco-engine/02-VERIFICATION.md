@@ -1,7 +1,8 @@
 ---
 phase: 02-tco-engine
 verified: 2026-06-25T20:00:00Z
-status: human_needed
+status: passed
+human_items_approved: 2026-06-26
 score: 5/5 roadmap success criteria verified
 overrides_applied: 0
 re_verification:
@@ -37,8 +38,8 @@ human_verification:
 # Phase 2: TCO Engine Verification Report (Re-verification)
 
 **Phase Goal:** Build the shared TCO substrate that Affordability and FI-Impact both consume — full monthly and annualized total cost of ownership for a scenario, computed correctly down to the cent, plus the rent-vs-buy comparison at the household's actual numbers.
-**Verified:** 2026-06-25T20:00:00Z
-**Status:** human_needed
+**Verified:** 2026-06-25T20:00:00Z (human items approved 2026-06-26)
+**Status:** passed — all 5 success criteria verified in code; 3 human-plausibility items approved by user 2026-06-26 (see 02-HUMAN-UAT.md). The pmiApplies ambiguity was fixed via quick task 260625-k0h.
 **Re-verification:** Yes — after gap closure (plans 02-06 and 02-07)
 
 ## Re-Verification Summary
