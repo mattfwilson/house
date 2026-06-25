@@ -45,8 +45,12 @@ import { Money } from '../money/money.js';
 import type { EngineInput } from '../engine/engine-input.js';
 import { computeTco } from './tco.js';
 import { amortizationSchedule } from './amortization.js';
-import { homeValueAt } from './carrying-costs.js';
+import { maintenanceAnnual, homeValueAt } from './carrying-costs.js';
+import { annualPropertyTax, assessedValueAt } from './property-tax.js';
 import { closingCosts, otherOneTimeCosts } from './closing-costs.js';
+
+/** The exact 1/12 rate string (full Dec precision) used to derive a monthly = annual / 12. */
+const ONE_TWELFTH = new Dec(1).div(12).toFixed();
 
 /** The closed rent-vs-buy result: ending net worth per path + the crossover + the verdict. */
 export interface RentVsBuyResult {
@@ -79,6 +83,56 @@ export function toReal(nominal: string, inflation: string): InstanceType<typeof 
  */
 function monthlyGrowthFactor(annualReal: string): InstanceType<typeof Dec> {
   return new Dec(1).plus(new Dec(annualReal)).pow(new Dec(1).div(12));
+}
+
+/**
+ * The BUY path's recurring monthly outflow for a given 1-based hold `month` (WR-02 + WR-03).
+ *
+ * Unlike the year-0 `computeTco` snapshot, this is a TIME-VARYING outflow:
+ *   - P+I, insurance, HOA are FLAT (their real semantics — D-15): taken from the year-0 TCO
+ *     line monthlies (the closing line is excluded — closing is the t=0 lump, D-11).
+ *   - PROPERTY TAX + MAINTENANCE GROW with appreciation (WR-03): recomputed for the month's hold
+ *     year on the appreciating assessed/home value (`assessedValueAt` / `homeValueAt`), using the
+ *     SAME captured mill rate (`tco.resolvedMillRate`) as the TCO breakdown so the rates agree.
+ *   - PMI is charged ONLY while `month <= pmiDropOffMonth` (WR-02): the FULL monthly premium each
+ *     month up to and including drop-off, $0.00 after (a time-limited cost, not a flat lifetime
+ *     charge). When no PMI applies (`pmiDropOffMonth` null) it is $0.00 throughout.
+ *
+ * All growth/division in `Dec`; the result crosses into `Money` once via `.toFixed()`. Exported
+ * for the rent-vs-buy loop and its locking tests (an internal-but-testable helper, like `toReal`).
+ */
+export function buyMonthlyOutflowAt(input: EngineInput, month: number): Money {
+  const { scenario, assumptions } = input;
+  const { price, downPaymentPct } = scenario;
+  const assessmentRatio = assumptions.tax.assessmentRatio;
+  const appreciationRealAnnual = assumptions.appreciation.realAnnual;
+  const maintenancePctOfValue = assumptions.maintenance.annualPctOfValue;
+  const pmiAnnualRateOfLoan = assumptions.pmi.annualRateOfLoan;
+
+  const tco = computeTco(input);
+
+  // FLAT components (real semantics): P+I + insurance + HOA, all monthly.
+  const flatMonthly = tco.principalAndInterest.monthly
+    .add(tco.insurance.monthly)
+    .add(tco.hoa.monthly);
+
+  // GROWING components (WR-03): property tax + maintenance recomputed for THIS month's hold year
+  // (0-based: months 1-12 are year 0). Uses the captured mill rate so the rate matches the TCO.
+  const holdYear = Math.floor((month - 1) / 12);
+  const assessedValue = assessedValueAt(price, assessmentRatio, appreciationRealAnnual, holdYear);
+  const propertyTaxMonthly = annualPropertyTax(assessedValue, tco.resolvedMillRate).mul(ONE_TWELFTH);
+  const homeValue = homeValueAt(price, appreciationRealAnnual, holdYear);
+  const maintenanceMonthly = maintenanceAnnual(homeValue, maintenancePctOfValue).mul(ONE_TWELFTH);
+
+  // MONTH-GATED PMI (WR-02): the full monthly premium only while month <= drop-off, else $0.00.
+  let pmiMonthly = Money.zero();
+  if (tco.pmiDropOffMonth !== null && month <= tco.pmiDropOffMonth) {
+    const loan = new Dec(price).times(new Dec(1).minus(new Dec(downPaymentPct))).toFixed();
+    const monthlyPmiRate = new Dec(pmiAnnualRateOfLoan).div(12).toFixed();
+    pmiMonthly = Money.of(loan).mul(monthlyPmiRate);
+  }
+
+  return flatMonthly.add(propertyTaxMonthly).add(maintenanceMonthly).add(pmiMonthly);
 }
 
 /**
@@ -116,10 +170,10 @@ export function rentVsBuy(input: EngineInput): RentVsBuyResult {
       ? downPayment.add(closingLump).add(otherOneTimeCosts(otherOneTimeCostsInput))
       : downPayment.add(closingLump);
 
-  // --- The recurring BUY monthly outflow = TCO total MINUS the amortized-closing line ---
-  // (closing is the t=0 lump, not a monthly cost — D-11). PITI + tax + ins + maint + HOA + PMI.
-  const tco = computeTco(input);
-  const buyMonthlyOutflow = tco.total.monthly.sub(tco.amortizedClosing.monthly);
+  // --- The recurring BUY monthly outflow is TIME-VARYING (WR-02 + WR-03): P+I/ins/HOA flat,
+  // property-tax + maintenance GROW with appreciation, and PMI is charged only through its
+  // drop-off month. It excludes the amortized-closing line (closing is the t=0 lump, D-11).
+  // Computed per month via `buyMonthlyOutflowAt` (NOT held flat at the year-0 TCO total). ---
 
   // --- Amortization schedule: remaining loan balance per month (forced-savings principal). ---
   const loan = new Dec(price).times(new Dec(1).minus(new Dec(downPaymentPct))).toFixed();
@@ -149,7 +203,8 @@ export function rentVsBuy(input: EngineInput): RentVsBuyResult {
 
   for (let month = 1; month <= totalMonths; month++) {
     // Symmetric invest-the-difference: the cheaper path invests |buy - rent| into ITS portfolio.
-    const buyOut = new Dec(buyMonthlyOutflow.toDecimalString());
+    // The BUY outflow is recomputed PER MONTH (grows with appreciation; PMI gated at drop-off).
+    const buyOut = new Dec(buyMonthlyOutflowAt(input, month).toDecimalString());
     const rentOut = currentRent;
     const diff = buyOut.minus(rentOut).abs();
     if (rentOut.lessThan(buyOut)) {

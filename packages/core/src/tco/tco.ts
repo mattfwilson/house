@@ -21,6 +21,17 @@
 //      single-year breakdown. So `propertyTax` here is the year-0 bill and `maintenance` the
 //      year-0 figure; downstream multi-year math reads the per-year schedules directly.
 //
+//   3. PMI ANNUALIZATION — DROP-OFF-AWARE (WR-02). PMI is a TIME-LIMITED cost: it stops once the
+//      scheduled balance reaches the basis threshold (`pmiDropOffMonth`). Annualizing it as a
+//      flat `monthlyPremium × 12` overstates the lifetime PMI cost whenever drop-off falls inside
+//      the hold (biasing the rent-vs-buy verdict toward "rent"). So the `pmi` line is the HOLD
+//      AVERAGE: total PMI actually paid over the hold = `monthlyPremium × min(dropOffMonth,
+//      totalMonths)`, divided by `holdingYears` (and /12 for the monthly). The raw drop-off month
+//      is also surfaced as `pmiDropOffMonth` so the rent-vs-buy model can charge PMI month by
+//      month (it is null when no PMI applies). NOTE: for an amortizing loan the balance cannot
+//      fall 2+ LTV points inside the first 12 months, so drop-off never lands in year 0 — the
+//      year-0 PMI charge is always the full 12 months; the hold AVERAGE is what differs from flat.
+//
 // Dec/Money discipline (the canary.ts precedent, D-03 / CORE-02): the loan = price × (1 −
 // downPaymentPct) derivation and the 1/12 monthly division happen in the frozen `Dec` clone;
 // dollars cross into `Money` only via the closed `Money` API. `Dec`/`Decimal` are NOT exported
@@ -59,6 +70,12 @@ export interface TcoBreakdown {
   readonly pmi: TcoLine;
   readonly amortizedClosing: TcoLine;
   readonly total: TcoLine;
+  /**
+   * The 1-based scheduled month PMI drops off (balance reaches the basis threshold), or null
+   * when no PMI applies. Surfaced so the rent-vs-buy model can charge PMI ONLY while
+   * `month <= pmiDropOffMonth` (WR-02) rather than re-deriving it.
+   */
+  readonly pmiDropOffMonth: number | null;
   /** The resolved residential mill rate (per $1,000, as published) captured for replay. */
   readonly resolvedMillRate: string;
   /** The fiscal year the captured mill rate was published for (snapshot self-containment). */
@@ -157,7 +174,19 @@ export function computeTco(input: EngineInput): TcoBreakdown {
     annualRateOfLoan: pmiAnnualRateOfLoan,
     basis: 'auto-78',
   });
-  const pmi = lineFromAnnual(pmiResult.monthlyPremium.mul('12'));
+  // WR-02 drop-off-aware annualization: PMI is charged for only the months up to drop-off (or
+  // the whole hold if drop-off is later / never). The annualized figure is the HOLD AVERAGE —
+  // total PMI paid over the hold / holdingYears — so it does NOT overstate a time-limited cost.
+  const totalMonthsHeld = holdingYears * 12;
+  const pmiChargedMonths = pmiResult.applies
+    ? Math.min(pmiResult.dropOffMonth ?? totalMonthsHeld, totalMonthsHeld)
+    : 0;
+  // annualized PMI = monthlyPremium × pmiChargedMonths / holdingYears (the per-year average over
+  // the hold); the /holdingYears is done in Dec via Money.mul by the (chargedMonths/holdingYears)
+  // rate so the ×12 → ÷12 round trip in lineFromAnnual reproduces the monthly average exactly.
+  const pmiAnnualizedRate =
+    holdingYears > 0 ? new Dec(pmiChargedMonths).div(holdingYears).toFixed() : '0';
+  const pmi = lineFromAnnual(pmiResult.monthlyPremium.mul(pmiAnnualizedRate));
 
   // --- Amortized closing: (closing costs + other one-time costs) spread over the hold. ---
   const closingLump = closingCosts(price, closingRateOfPrice, closingCostsOverride);
@@ -190,6 +219,7 @@ export function computeTco(input: EngineInput): TcoBreakdown {
     pmi,
     amortizedClosing,
     total,
+    pmiDropOffMonth: pmiResult.applies ? pmiResult.dropOffMonth : null,
     resolvedMillRate: resolved.residentialMillRate,
     millRateFy: resolved.fy,
     propTwoAndHalfFlag: PROP_2_5_FLAG,
