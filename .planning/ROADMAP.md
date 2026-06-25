@@ -65,7 +65,25 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. The full TCO breakdown (P+I, tax, insurance, maintenance reserve, HOA, PMI, amortized closing costs) is presented both monthly and annualized
   5. Rent-vs-buy is computed at the household's real numbers, investing the down payment and monthly difference symmetrically and treating principal as forced savings (no opportunity-cost asymmetry)
 
-**Plans**: TBD
+**Plans**: 5 plans
+
+**Wave 1**
+
+  - [ ] 02-01-PLAN.md — AssumptionsV2 (+ v1ToV2 migrate), widened ScenarioInputs, seeded FY-stamped greater-Boston mill-rate table + resolver (TCO-02 data)
+
+**Wave 2** *(blocked on Wave 1)*
+
+  - [ ] 02-02-PLAN.md — Fixed-rate amortization (exact $0 payoff, principal-sum, oracle) + PMI 78/80 original-value toggle (TCO-01, TCO-04)
+  - [ ] 02-03-PLAN.md — Property tax (assessed × mill rate, appreciating, Prop 2½ flag) + carrying costs + closing costs (TCO-02, TCO-03, TCO-05)
+
+**Wave 3** *(blocked on Wave 2)*
+
+  - [ ] 02-04-PLAN.md — computeTco monthly+annualized breakdown + no-bare-number type-test + public barrel (TCO-01..06)
+
+**Wave 4** *(blocked on Wave 3)*
+
+  - [ ] 02-05-PLAN.md — Two-portfolio rent-vs-buy (symmetric, Fisher real, sell haircut, crossover, anti-funnel) + TCO golden fixture (TCO-07)
+
 
 ### Phase 3: Affordability Engine
 
@@ -146,7 +164,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundations & Determinism Core | 4/4 | Complete    | 2026-06-24 |
-| 2. TCO Engine | 0/TBD | Not started | - |
+| 2. TCO Engine | 0/5 | Planned     | - |
 | 3. Affordability Engine | 0/TBD | Not started | - |
 | 4. FI-Impact Engine & Sensitivity | 0/TBD | Not started | - |
 | 5. Town Scoring & Heatmap | 0/TBD | Not started | - |
