@@ -82,7 +82,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 4** *(blocked on Wave 3)*
 
-  - [ ] 02-05-PLAN.md — Two-portfolio rent-vs-buy (symmetric, Fisher real, sell haircut, crossover, anti-funnel) + TCO golden fixture (TCO-07)
+  - [x] 02-05-PLAN.md — Two-portfolio rent-vs-buy (symmetric, Fisher real, sell haircut, crossover, anti-funnel) + TCO golden fixture (TCO-07)
 
 ### Phase 3: Affordability Engine
 

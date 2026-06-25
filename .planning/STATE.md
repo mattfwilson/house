@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-03-PLAN.md (Wave 2 — property tax, carrying costs, closing costs)
-last_updated: "2026-06-25T15:00:12.438Z"
-last_activity: 2026-06-25 -- Completed 02-03 (property tax, carrying costs, closing costs)
+stopped_at: Completed 02-05-PLAN.md (Wave 4 — two-portfolio rent-vs-buy + TCO golden fixture); Phase 2 plans all complete
+last_updated: "2026-06-25T16:00:00.000Z"
+last_activity: 2026-06-25 -- Completed 02-05 (rent-vs-buy two-portfolio engine + TCO golden, TCO-07)
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 9
-  completed_plans: 8
-  percent: 14
+  completed_plans: 9
+  percent: 21
 ---
 
 # Project State
@@ -25,18 +25,18 @@ See: .planning/PROJECT.md (updated 2026-06-22)
 
 ## Current Position
 
-Phase: 02 (tco-engine) — EXECUTING
-Plan: 5 of 5
-Status: Ready to execute
-Last activity: 2026-06-25 -- Completed 02-03 (property tax, carrying costs, closing costs)
+Phase: 02 (tco-engine) — EXECUTING (all plans complete; ready for phase verification/transition)
+Plan: 5 of 5 — COMPLETE
+Status: Phase 2 plans all complete
+Last activity: 2026-06-25 -- Completed 02-05 (rent-vs-buy two-portfolio engine + TCO golden, TCO-07)
 
-Progress: [████████░░] 78%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 4
+- Total plans completed: 9
 - Average duration: —
 - Total execution time: —
 
@@ -60,6 +60,7 @@ Progress: [████████░░] 78%
 | Phase 02 P02 | 10 | 2 tasks | 4 files |
 | Phase 02 P03 | 4 | 3 tasks | 6 files |
 | Phase 02-tco-engine P04 | 7min | 2 tasks | 4 files |
+| Phase 02-tco-engine P05 | 14min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -96,6 +97,11 @@ Recent decisions affecting current work:
 - [Phase 02-03]: [TCO]: Single appreciation idiom — homeValueAt is a thin re-use of property-tax's assessedValueAt with ratio "1.0"; carrying-costs imports it (no duplicated (1+r)^year power). Maintenance tracks appreciating value; insurance + HOA flat in today's dollars (D-15)
 - [Phase 02-03]: [TCO]: Closing = price × rateOfPrice OR dollar override (override wins, D-12); amortizeOverHold divides the lump in Dec into { annual, monthly } for display only — t=0-lump semantics for the Plan-05 net-worth model documented, not amortized (D-13)
 - [Phase ?]: computeTco annualized-is-source-of-truth: monthly = annualized/12, each line cents-pinned so total = exact sum of per-line cents; breakdown is the year-0 snapshot
+- [Phase 02-05]: [TCO]: rentVsBuy is a SYMMETRIC two-portfolio net-worth model — buy monthly outflow = computeTco total.monthly MINUS amortizedClosing (closing is t=0 lump, D-11); renter seeds its portfolio with DP+closing+other one-time at t=0; the cheaper path each month invests |diff| into ITS OWN portfolio (Pitfall 6); both compound monthly at (1+returns.realAnnual)^(1/12)
+- [Phase 02-05]: [TCO]: BUY equity = appreciated home value (separate appreciation.realAnnual, NOT the portfolio return — D-04) minus amortization remaining balance (principal = forced savings), liquidated with the explicit sellCostPct haircut (D-05) at horizon; crossoverYear = first year buy ending NW >= rent NW (null is a legitimate anti-funnel outcome)
+- [Phase 02-05]: [TCO]: all-real convention locked (D-02) — returns/appreciation/rent real rates consumed DIRECTLY (no double-Fisher); toReal=(1+n)/(1+i)-1 exposed for a future nominal knob only; inflation never enters the compounding (tested inflation-invariant)
+- [Phase 02-05]: [TCO]: reproducibility loop closed for the FULL TCO result — committed tco-golden-snapshot.json deep-equals canonicalJson({tco, rentVsBuy}); gated UPDATE_GOLDEN-only regeneration, never toMatchSnapshot; canary golden-snapshot.json is byte-identical (canary reads only returns.realAnnual, unaffected by the widened scenario — the widened reconciliation lands in fixedInput())
+- [Phase 02-05]: [TCO]: ANTI-FUNNEL PROVEN — realistic Newton $850k/7%/7yr/$3,200-rent set yields RENT wins ($563,158 vs $257,910); the golden fixture itself (Newton $450k) is also rent-wins. The "rent and invest the difference" verdict is reachable (PROJECT.md core value)
 
 ### Pending Todos
 
@@ -120,6 +126,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-25T14:59:57.902Z
-Stopped at: Completed 02-03-PLAN.md (Wave 2 — property tax, carrying costs, closing costs)
-Resume file: .planning/phases/02-tco-engine/02-04-PLAN.md
+Last session: 2026-06-25T16:00:00.000Z
+Stopped at: Completed 02-05-PLAN.md (Wave 4 — two-portfolio rent-vs-buy + TCO golden); Phase 2 all plans complete
+Resume file: None (Phase 2 ready for verification/transition)
