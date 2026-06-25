@@ -19,7 +19,7 @@ describe('engineInput factory — the immutable snapshot unit (D-11)', () => {
   test('assembles an object with asOf + assumptions + scenario', () => {
     const input = engineInput(baseParts());
     expect(input.asOf).toBe('2026-06-23');
-    expect(input.assumptions.schemaVersion).toBe(1);
+    expect(input.assumptions.schemaVersion).toBe(2);
     expect(input.scenario.label).toBe('canary');
   });
 

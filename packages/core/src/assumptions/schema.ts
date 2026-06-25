@@ -77,16 +77,88 @@ export const AssumptionsV1 = z
   .strict();
 
 /**
- * AssumptionSetSchema — the versioned discriminated union (D-05). Adding V2 later is a
- * one-line append: `z.discriminatedUnion('schemaVersion', [AssumptionsV1, AssumptionsV2])`.
+ * AssumptionsV2 — schemaVersion 2. KEEPS every V1 slice and adds the TCO-engine tunables
+ * (D-04/D-05/D-06). Built by copying the V1 shape, bumping the discriminant literal, and
+ * appending new `group({...})` slices — every leaf a `decStr` (never `z.number()`, T-03-02).
+ * The new slices feed the Phase-2 TCO calc modules:
+ *   - `appreciation.realAnnual` (D-04): expected REAL annual home-value appreciation.
+ *   - `transaction.sellCostPct` (D-05): sale-side cost haircut applied at the holding horizon.
+ *   - `rent.realGrowthAnnual` (D-06): real annual rent growth for the rent-vs-buy path.
+ *   - `closing.rateOfPrice` (D-12): default one-time closing cost as a fraction of price.
+ *   - `tax.assessmentRatio` (D-07, RESEARCH Open Question 3): assessed value ÷ market value,
+ *     added under the existing `tax` group so the property-tax module reads one slice.
  */
-export const AssumptionSetSchema = z.discriminatedUnion('schemaVersion', [AssumptionsV1]);
+export const AssumptionsV2 = z
+  .object({
+    schemaVersion: z.literal(2),
+    // V1 `tax` group PLUS the new `assessmentRatio` (D-07) — assessed/market value ratio.
+    tax: group({
+      effectiveIncomeRate: decStr, // blended marginal-ish income tax rate
+      propertyRateAnnual: decStr, // placeholder statewide property tax rate (of value)
+      assessmentRatio: decStr, // assessed value ÷ market value (e.g. "1.0")
+    }),
+    // Debt-to-income qualification ratios (front-end housing, back-end total debt).
+    dti: group({
+      frontEnd: decStr,
+      backEnd: decStr,
+    }),
+    // Expected REAL (inflation-adjusted) investment return for the opportunity-cost engine.
+    returns: group({
+      realAnnual: decStr,
+    }),
+    inflation: group({
+      annual: decStr,
+    }),
+    maintenance: group({
+      annualPctOfValue: decStr,
+    }),
+    // Safe withdrawal rate — long-horizon default (~0.033), NOT the 4% rule (locked decision).
+    swr: group({
+      rate: decStr,
+    }),
+    // PMI: charged while LTV exceeds `dropOffLtv`, at `annualRateOfLoan` of the loan balance.
+    pmi: group({
+      annualRateOfLoan: decStr,
+      dropOffLtv: decStr, // e.g. "0.8" — PMI removable at/under 80% LTV
+    }),
+    // Expected REAL annual home-value appreciation (D-04).
+    appreciation: group({
+      realAnnual: decStr,
+    }),
+    // Sale-side transaction cost as a fraction of sale price, applied at horizon end (D-05).
+    transaction: group({
+      sellCostPct: decStr,
+    }),
+    // Real annual rent growth for the rent-vs-buy path (D-06).
+    rent: group({
+      realGrowthAnnual: decStr,
+    }),
+    // Default one-time closing cost as a fraction of purchase price (D-12).
+    closing: group({
+      rateOfPrice: decStr,
+    }),
+  })
+  .strict();
+
+/**
+ * AssumptionSetSchema — the versioned discriminated union (D-05). Adding a version is a
+ * one-line append: another object schema in the `z.discriminatedUnion` list.
+ */
+export const AssumptionSetSchema = z.discriminatedUnion('schemaVersion', [AssumptionsV1, AssumptionsV2]);
 
 /** The current schema version (integer, monotonic). */
-export const CURRENT_VERSION = 1 as const;
+export const CURRENT_VERSION = 2 as const;
 
-/** Any accepted (parseable) AssumptionSet — the union across all known versions. */
-export type AnyAssumptionSet = z.infer<typeof AssumptionSetSchema>;
+/**
+ * Any accepted (parseable) AssumptionSet — the union across all known versions.
+ *
+ * Built as an explicit union of the per-version inferred types rather than
+ * `z.infer<typeof AssumptionSetSchema>`: Zod 4's `discriminatedUnion` inference over two
+ * large `.strict()` objects degrades to `any`, which would erase the discriminant narrowing
+ * the `migrate` switch depends on. The members are the SAME schemas the union is built from,
+ * so this stays a single source of truth (a member shape change still flows through).
+ */
+export type AnyAssumptionSet = z.infer<typeof AssumptionsV1> | z.infer<typeof AssumptionsV2>;
 
 /** The current-version AssumptionSet (what calc code consumes). */
-export type CurrentAssumptionSet = z.infer<typeof AssumptionsV1>;
+export type CurrentAssumptionSet = z.infer<typeof AssumptionsV2>;

@@ -30,13 +30,33 @@ describe('decStr — the decimal-string validator (D-06, T-03-02)', () => {
 });
 
 describe('AssumptionSetSchema — discriminated union on schemaVersion (D-05)', () => {
-  test('CURRENT_VERSION is the integer 1', () => {
-    expect(CURRENT_VERSION).toBe(1);
+  test('CURRENT_VERSION is the integer 2', () => {
+    expect(CURRENT_VERSION).toBe(2);
   });
 
   test('DEFAULT_ASSUMPTIONS parses cleanly against the current schema', () => {
     const r = AssumptionSetSchema.safeParse(DEFAULT_ASSUMPTIONS);
     expect(r.success).toBe(true);
+  });
+
+  test('a V2 object (new slices present) parses against the union', () => {
+    // DEFAULT_ASSUMPTIONS is V2-shaped; assert the new TCO slices are present and accepted.
+    const r = AssumptionSetSchema.safeParse(DEFAULT_ASSUMPTIONS);
+    expect(r.success).toBe(true);
+    expect(DEFAULT_ASSUMPTIONS.schemaVersion).toBe(2);
+    expect(DEFAULT_ASSUMPTIONS.appreciation.realAnnual).toBe('0.0075');
+    expect(DEFAULT_ASSUMPTIONS.transaction.sellCostPct).toBe('0.065');
+    expect(DEFAULT_ASSUMPTIONS.rent.realGrowthAnnual).toBe('0');
+    expect(DEFAULT_ASSUMPTIONS.closing.rateOfPrice).toBe('0.025');
+    expect(DEFAULT_ASSUMPTIONS.tax.assessmentRatio).toBe('1.0');
+  });
+
+  test('rejects a float on a new V2 tunable (appreciation.realAnnual as a number) — T-02-01', () => {
+    const bad = {
+      ...DEFAULT_ASSUMPTIONS,
+      appreciation: { realAnnual: 0.0075 }, // a NUMBER, not a decimal string
+    };
+    expect(AssumptionSetSchema.safeParse(bad).success).toBe(false);
   });
 
   test('rejects an unknown schemaVersion (e.g. 99) — T-03-01', () => {
