@@ -19,7 +19,7 @@
 //     returns.realAnnual is consumed directly (not double-converted).
 //   - SELL HAIRCUT (D-05): sellCostPct of 0 yields a higher buy ending net worth than 0.065.
 import { describe, test, expect } from 'vitest';
-import { rentVsBuy, toReal, buyMonthlyOutflowAt } from './rent-vs-buy.js';
+import { rentVsBuy, toReal, buyMonthlyOutflowAt, shouldChargePmi } from './rent-vs-buy.js';
 import { computeTco } from './tco.js';
 import { amortizationSchedule } from './amortization.js';
 import { computePmi } from './pmi.js';
@@ -374,6 +374,45 @@ describe('WR-03: the buy monthly outflow grows with appreciation (tax + maintena
     const year15 = buyMonthlyOutflowAt(input, 15 * 12);
     expect(year10.toCents()).toBe(year0.toCents());
     expect(year15.toCents()).toBe(year0.toCents());
+  });
+});
+
+// CR-01 (02-REVIEW-gap-closure.md): the PMI charge predicate must distinguish the TWO states a
+// null pmiDropOffMonth conflated — "PMI does not apply" vs "PMI applies but the schedule never
+// reaches the drop-off LTV within the term". The OLD inline guard (`pmiDropOffMonth !== null &&
+// month <= pmiDropOffMonth`) silently charged $0 PMI for the entire hold in the second state,
+// biasing the rent-vs-buy verdict toward BUY, while `tco.pmi.annualized` (via `?? totalMonths`)
+// correctly charged it — the two surfaces disagreed.
+//
+// FINDING (planner, empirical sweep): through the standard `computeTco` path, the
+// `applies === true && dropOffMonth === null` state is UNREACHABLE (the amortization schedule
+// always reconciles to a $0.00 final balance, so `computePmi` always finds a finite drop-off,
+// worst case = termMonths). So the honest, reachable reproduction of CR-01 is at the SEAM — the
+// pure `shouldChargePmi` predicate — NOT a fabricated `rentVsBuy` scenario that never drops off
+// (there is none). The `shouldChargePmi(true, null, ...)` cases below are the RED ones.
+describe('PMI charge gating distinguishes the two null states (CR-01)', () => {
+  test('no PMI applies -> never charge (even with a null drop-off)', () => {
+    expect(shouldChargePmi(false, null, 1)).toBe(false);
+  });
+
+  test('PMI applies and NEVER drops off -> charge (the CR-01 bug: full-hold charge)', () => {
+    expect(shouldChargePmi(true, null, 1)).toBe(true);
+  });
+
+  test('PMI applies, no drop-off -> still charge late months', () => {
+    expect(shouldChargePmi(true, null, 999)).toBe(true);
+  });
+
+  test('PMI applies, before the drop-off month -> charge', () => {
+    expect(shouldChargePmi(true, 108, 50)).toBe(true);
+  });
+
+  test('PMI applies, ON the drop-off month -> charge (inclusive)', () => {
+    expect(shouldChargePmi(true, 108, 108)).toBe(true);
+  });
+
+  test('PMI applies, AFTER the drop-off month -> stop charging', () => {
+    expect(shouldChargePmi(true, 108, 109)).toBe(false);
   });
 });
 
