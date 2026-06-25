@@ -33,7 +33,7 @@ Requirements for the core-engine build. Each maps to a roadmap phase.
 - [x] **TCO-03**: Tool includes homeowners insurance, a configurable maintenance reserve (~1–2%/yr of home value), and HOA/condo fees where relevant
 - [x] **TCO-04**: Tool computes PMI when down payment < 20% and drops it at the correct LTV (78% of original value automatic, 80% borrower-requested)
 - [x] **TCO-05**: Tool includes closing costs as a one-time figure, amortizable for cross-scenario comparison
-- [ ] **TCO-06**: Tool presents the full TCO breakdown both monthly and annualized
+- [x] **TCO-06**: Tool presents the full TCO breakdown both monthly and annualized
 - [ ] **TCO-07**: Tool computes rent-vs-buy at the household's actual numbers — investing the down payment and monthly difference, treating principal as forced savings (no opportunity-cost asymmetry)
 
 ### FI-Impact Engine (FI) — flagship
@@ -106,7 +106,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TCO-03 | Phase 2 | Complete (02-03) |
 | TCO-04 | Phase 2 | Complete (02-02) |
 | TCO-05 | Phase 2 | Complete (02-03) |
-| TCO-06 | Phase 2 | Pending |
+| TCO-06 | Phase 2 | Complete |
 | TCO-07 | Phase 2 | Pending |
 | AFF-01 | Phase 3 | Pending |
 | AFF-02 | Phase 3 | Pending |

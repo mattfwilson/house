@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-03 (Wave-2 per-line TCO cost calculators)
-last_updated: "2026-06-25T14:47:37.000Z"
+stopped_at: Completed 02-03-PLAN.md (Wave 2 — property tax, carrying costs, closing costs)
+last_updated: "2026-06-25T15:00:12.438Z"
 last_activity: 2026-06-25 -- Completed 02-03 (property tax, carrying costs, closing costs)
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 9
-  completed_plans: 7
-  percent: 78
+  completed_plans: 8
+  percent: 14
 ---
 
 # Project State
@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-06-22)
 ## Current Position
 
 Phase: 02 (tco-engine) — EXECUTING
-Plan: 4 of 5
-Status: Executing Phase 02 (Wave 2 complete — 02-03 done; Wave 3 next)
+Plan: 5 of 5
+Status: Ready to execute
 Last activity: 2026-06-25 -- Completed 02-03 (property tax, carrying costs, closing costs)
 
 Progress: [████████░░] 78%
@@ -59,6 +59,7 @@ Progress: [████████░░] 78%
 | Phase 02 P01 | 12 | 3 tasks | 13 files |
 | Phase 02 P02 | 10 | 2 tasks | 4 files |
 | Phase 02 P03 | 4 | 3 tasks | 6 files |
+| Phase 02-tco-engine P04 | 7min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,7 @@ Recent decisions affecting current work:
 - [Phase 02-03]: [TCO]: Property tax = assessed × mill-rate/$1,000 (div(1000) INSIDE the function — rate stored as published, A3); assessed = price × assessmentRatio grown at appreciation under a HELD-CONSTANT mill rate (D-10); NO flat-% path and NO 2.5% bill clamp (Pitfall 9); PROP_2_5_FLAG = "Prop 2½ caps the town levy, not your individual bill"
 - [Phase 02-03]: [TCO]: Single appreciation idiom — homeValueAt is a thin re-use of property-tax's assessedValueAt with ratio "1.0"; carrying-costs imports it (no duplicated (1+r)^year power). Maintenance tracks appreciating value; insurance + HOA flat in today's dollars (D-15)
 - [Phase 02-03]: [TCO]: Closing = price × rateOfPrice OR dollar override (override wins, D-12); amortizeOverHold divides the lump in Dec into { annual, monthly } for display only — t=0-lump semantics for the Plan-05 net-worth model documented, not amortized (D-13)
+- [Phase ?]: computeTco annualized-is-source-of-truth: monthly = annualized/12, each line cents-pinned so total = exact sum of per-line cents; breakdown is the year-0 snapshot
 
 ### Pending Todos
 
@@ -118,6 +120,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-25T14:47:37.000Z
+Last session: 2026-06-25T14:59:57.902Z
 Stopped at: Completed 02-03-PLAN.md (Wave 2 — property tax, carrying costs, closing costs)
 Resume file: .planning/phases/02-tco-engine/02-04-PLAN.md
