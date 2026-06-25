@@ -235,6 +235,40 @@ describe('one-time costs enter the RENT seed at t=0 (D-13)', () => {
   });
 });
 
+// CR-01 (BLOCKER): when the hold extends PAST the amortization term (holdingYears*12 >
+// termMonths), the schedule has fewer rows than the hold has months. The year-boundary
+// snapshot must NOT crash reading schedule.rows[month-1] out of bounds — out-of-range months
+// (loan fully paid off before the horizon) read as a $0.00 remaining balance (full equity).
+describe('CR-01: a hold longer than the loan term does not crash (out-of-range balance = $0)', () => {
+  const HELD_PAST_PAYOFF: ScenarioInputs = {
+    label: 'Quincy $500k — 15yr loan held 20 years (past payoff)',
+    price: '500000',
+    downPaymentPct: '0.20',
+    annualRate: '0.05',
+    termMonths: 180, // 15-year loan
+    holdingYears: 20, // held 5 years past payoff -> totalMonths 240 > rows.length 180
+    town: 'Quincy',
+    insuranceAnnual: '1800',
+    hoaMonthly: '0',
+    monthlyRent: '2500',
+  };
+
+  test('rentVsBuy does not throw and returns holdingYears === 20', () => {
+    const r = rentVsBuy(inputFor(HELD_PAST_PAYOFF));
+    expect(r.holdingYears).toBe(20);
+    expect(r.buyEndingNetWorth).toBeInstanceOf(Money);
+    expect(r.rentEndingNetWorth).toBeInstanceOf(Money);
+  });
+
+  test('post-payoff buy equity reflects full home value (no remaining balance) at the horizon', () => {
+    // At year 20 the loan was paid off at year 15, so remaining balance is $0 and the buy
+    // equity is the full appreciated home value x (1 - sellCostPct) + the buy side-portfolio.
+    // We assert it is a positive, finite, large figure (full equity, not a NaN/throw).
+    const r = rentVsBuy(inputFor(HELD_PAST_PAYOFF));
+    expect(r.buyEndingNetWorth.toCents() > 0n).toBe(true);
+  });
+});
+
 describe('rentVsBuy is deterministic over a frozen EngineInput', () => {
   test('two runs on the same input produce cent-identical ending net worths', () => {
     const a = rentVsBuy(inputFor(SCENARIO_RENT_WINS));

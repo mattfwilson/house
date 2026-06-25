@@ -79,3 +79,32 @@ describe('amortizationSchedule produces a full, exactly-reconciled schedule', ()
     expect(sumInterest).toBe(sumPayment - Money.of(LOAN).toCents());
   });
 });
+
+// CR-02 (BLOCKER): a zero nominal rate must amortize STRAIGHT-LINE, never divide by zero
+// (the closed-form M = P·r·(1+r)^n / ((1+r)^n − 1) is 0/0 at r=0). The level payment degrades
+// to loan/termMonths, each period's interest is $0.00, and the schedule still reconciles to a
+// final balance of EXACTLY $0.00 with the principal sum EXACTLY the original loan.
+describe('CR-02: zero-rate loans amortize straight-line (no divide-by-zero)', () => {
+  test('scheduledPayment($400,000 / 0% / 360mo) === loan/termMonths straight-line $1,111.11', () => {
+    const m = scheduledPayment('400000', '0', 360);
+    expect(m).toBeInstanceOf(Money);
+    // 400000 / 360 = 1111.1111... -> HALF_EVEN at the cent boundary = $1,111.11 = 111111 cents.
+    expect(m.toCents()).toBe(111111n);
+  });
+
+  test('amortizationSchedule($360,000 / 0% / 360mo): $0.00 final balance, exact loan sum, $0 interest', () => {
+    const schedule = amortizationSchedule('360000', '0', 360);
+    expect(schedule.rows.length).toBe(360);
+    // Final balance is EXACTLY $0.00 (reconciled).
+    expect(schedule.rows[359]!.balance.toCents()).toBe(0n);
+    // Principal split sums to the original loan EXACTLY.
+    const sumCents = schedule.rows.reduce((acc, r) => acc + r.principal.toCents(), 0n);
+    expect(sumCents).toBe(Money.of('360000').toCents());
+    // Every period's interest is $0.00 (zero rate) — checked on the first and a mid period.
+    expect(schedule.rows[0]!.interest.toCents()).toBe(0n);
+    expect(schedule.rows[180]!.interest.toCents()).toBe(0n);
+    // Straight-line principal: 360000/360 = $1,000.00 per period (non-final periods).
+    expect(schedule.rows[0]!.principal.toCents()).toBe(100000n);
+    expect(schedule.rows[180]!.principal.toCents()).toBe(100000n);
+  });
+});
