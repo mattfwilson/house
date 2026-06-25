@@ -22,14 +22,14 @@ result: [pending]
 
 ### 3. Assess pmiDropOffMonth=null ambiguity acceptability
 expected: For the primary use case (Boston conforming mortgages: 15yr or 30yr term, 10–20% down), the scheduled amortization always reaches the 78% LTV threshold within the term, so pmiDropOffMonth is always a concrete month number and the ambiguity does not manifest. Decide whether to add a `pmiApplies` boolean to `TcoBreakdown` to disambiguate before Phase 4 layers the FI-impact engine on top of `buyMonthlyOutflowAt`.
-result: [pending]
+result: resolved — user chose to fix. Quick task 260625-k0h added `pmiApplies: boolean` to TcoBreakdown and re-gated buy PMI via the exported `shouldChargePmi(pmiApplies, pmiDropOffMonth, month)` predicate so the buy-outflow and tco.pmi.annualized surfaces agree. Confirmed `applies=true/dropOff=null` is currently unreachable via computeTco (amortization always terminates at $0 → finite drop-off), so this was a latent/defensive fix. 227 tests pass, tsc clean, golden diff additive only. Commits d4d0ac2 / 670c74a / 836775e.
 
 ## Summary
 
 total: 3
-passed: 0
+passed: 1
 issues: 0
-pending: 3
+pending: 2
 skipped: 0
 blocked: 0
 
