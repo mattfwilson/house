@@ -50,6 +50,7 @@ export { type TownRateRow } from './towns/town-table.schema.js';
 // rent-vs-buy model reuse. Raw `Dec`/`Decimal` remain UNEXPORTED — dollars cross this
 // boundary only as `Money`, so no downstream code can re-open the bare-float hole.
 export { computeTco, type TcoBreakdown, type TcoLine } from './tco/tco.js';
+export { rentVsBuy, type RentVsBuyResult } from './tco/rent-vs-buy.js';
 export {
   scheduledPayment,
   amortizationSchedule,

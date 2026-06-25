@@ -211,6 +211,30 @@ describe('the explicit sell haircut reduces buy ending net worth (D-05)', () => 
   });
 });
 
+describe('one-time costs enter the RENT seed at t=0 (D-13)', () => {
+  test('adding otherOneTimeCosts raises the rent ending net worth (the renter invests that cash too)', () => {
+    // The BUY path commits closing + otherOneTimeCosts up front; the RENT path invests exactly
+    // that cash as its t=0 seed. So a larger one-time cost grows the RENT portfolio (the renter
+    // keeps and compounds the money the buyer sank). closingCostsOverride is also exercised here.
+    const withoutOther: ScenarioInputs = {
+      ...SCENARIO_RENT_WINS,
+      closingCostsOverride: '12000',
+    };
+    const withOther: ScenarioInputs = {
+      ...SCENARIO_RENT_WINS,
+      closingCostsOverride: '12000',
+      otherOneTimeCosts: '20000',
+    };
+    const base = rentVsBuy(inputFor(withoutOther));
+    const more = rentVsBuy(inputFor(withOther));
+    // The extra $20k one-time cost is invested by the renter at t=0 and compounds, so the rent
+    // ending net worth is strictly higher; the buy ending net worth is unchanged (the buyer's
+    // one-time cash leaves their net worth entirely — it is not equity).
+    expect(more.rentEndingNetWorth.toCents() > base.rentEndingNetWorth.toCents()).toBe(true);
+    expect(more.buyEndingNetWorth.toCents()).toBe(base.buyEndingNetWorth.toCents());
+  });
+});
+
 describe('rentVsBuy is deterministic over a frozen EngineInput', () => {
   test('two runs on the same input produce cent-identical ending net worths', () => {
     const a = rentVsBuy(inputFor(SCENARIO_RENT_WINS));
