@@ -102,7 +102,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ASMP-01 | Phase 1 | Complete |
 | PROF-04 | Phase 1 | Complete |
 | TCO-01 | Phase 2 | Pending |
-| TCO-02 | Phase 2 | Pending |
+| TCO-02 | Phase 2 | In progress (data half: seeded mill-rate table + resolver — 02-01; computation in 02-03) |
 | TCO-03 | Phase 2 | Pending |
 | TCO-04 | Phase 2 | Pending |
 | TCO-05 | Phase 2 | Pending |

@@ -69,7 +69,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 1**
 
-  - [ ] 02-01-PLAN.md — AssumptionsV2 (+ v1ToV2 migrate), widened ScenarioInputs, seeded FY-stamped greater-Boston mill-rate table + resolver (TCO-02 data)
+  - [x] 02-01-PLAN.md — AssumptionsV2 (+ v1ToV2 migrate), widened ScenarioInputs, seeded FY-stamped greater-Boston mill-rate table + resolver (TCO-02 data)
 
 **Wave 2** *(blocked on Wave 1)*
 
@@ -164,7 +164,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundations & Determinism Core | 4/4 | Complete    | 2026-06-24 |
-| 2. TCO Engine | 0/5 | Planned     | - |
+| 2. TCO Engine | 1/5 | In progress | - |
 | 3. Affordability Engine | 0/TBD | Not started | - |
 | 4. FI-Impact Engine & Sensitivity | 0/TBD | Not started | - |
 | 5. Town Scoring & Heatmap | 0/TBD | Not started | - |
