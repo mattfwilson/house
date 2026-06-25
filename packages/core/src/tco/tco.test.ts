@@ -147,11 +147,22 @@ describe('PMI gating by down payment', () => {
     expect(tco.pmi.annualized.toCents()).toBe(0n);
   });
 
-  test('down payment < 20% (LTV 90%) -> PMI is charged', () => {
+  test('down payment < 20% (LTV 90%) -> PMI is charged, drop-off-aware (WR-02)', () => {
     const tco = computeTco(inputFor(SCENARIO_10PCT));
-    // (loan $360,000 x 0.0075) / 12 = $225.00/mo; annualized = $2,700.00.
-    expect(tco.pmi.monthly.toCents()).toBe(22500n);
-    expect(tco.pmi.annualized.toCents()).toBe(270000n);
+    // WR-02: PMI is NOT charged flat for the whole hold. Loan $360,000 / 6.375% / 360mo drops
+    // off (auto-78) at month 108; the 10-year hold (120 months) charges PMI for only 108 of
+    // them. The annualized PMI is the HOLD AVERAGE = ($225.00 x 108) / 10yr = $2,430.00/yr,
+    // NOT the old flat $225.00 x 12 = $2,700.00. monthly = annualized / 12 = $202.50.
+    expect(tco.pmi.annualized.toCents()).toBe(243000n); // $2,430.00, NOT $2,700.00
+    expect(tco.pmi.annualized.toCents()).not.toBe(270000n); // proves it differs from premium x 12
+    expect(tco.pmi.monthly.toCents()).toBe(20250n); // $202.50
+    // The breakdown exposes the drop-off month so rentVsBuy can charge PMI month-by-month.
+    expect(tco.pmiDropOffMonth).toBe(108);
+  });
+
+  test('20% down (no PMI) -> pmiDropOffMonth is null', () => {
+    const tco = computeTco(inputFor(SCENARIO_20PCT));
+    expect(tco.pmiDropOffMonth).toBeNull();
   });
 });
 

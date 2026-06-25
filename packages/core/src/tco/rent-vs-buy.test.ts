@@ -19,7 +19,10 @@
 //     returns.realAnnual is consumed directly (not double-converted).
 //   - SELL HAIRCUT (D-05): sellCostPct of 0 yields a higher buy ending net worth than 0.065.
 import { describe, test, expect } from 'vitest';
-import { rentVsBuy, toReal } from './rent-vs-buy.js';
+import { rentVsBuy, toReal, buyMonthlyOutflowAt } from './rent-vs-buy.js';
+import { computeTco } from './tco.js';
+import { amortizationSchedule } from './amortization.js';
+import { computePmi } from './pmi.js';
 import { Money } from '../money/money.js';
 import { Dec } from '../money/decimal-config.js';
 import { engineInput, type ScenarioInputs } from '../engine/engine-input.js';
@@ -266,6 +269,111 @@ describe('CR-01: a hold longer than the loan term does not crash (out-of-range b
     // We assert it is a positive, finite, large figure (full equity, not a NaN/throw).
     const r = rentVsBuy(inputFor(HELD_PAST_PAYOFF));
     expect(r.buyEndingNetWorth.toCents() > 0n).toBe(true);
+  });
+});
+
+// WR-02 (correctness bias): PMI must be charged in the BUY monthly outflow ONLY while
+// month <= dropOffMonth. The OLD code held tco.total.monthly (which bakes in PMI x 12 flat)
+// for the WHOLE hold, overstating ownership cost past drop-off and biasing the verdict to rent.
+describe('WR-02: PMI stops at its drop-off month in the buy monthly outflow', () => {
+  // A 90%-LTV (10% down) Quincy scenario at ZERO appreciation so the ONLY thing that changes
+  // across the hold is PMI dropping off — isolating the PMI delta from the WR-03 growth.
+  const PMI_SCENARIO: ScenarioInputs = {
+    label: 'Quincy $500k — 10% down (PMI), zero appreciation',
+    price: '500000',
+    downPaymentPct: '0.10',
+    annualRate: '0.06',
+    termMonths: 360,
+    holdingYears: 20,
+    town: 'Quincy',
+    insuranceAnnual: '1800',
+    hoaMonthly: '0',
+    monthlyRent: '2500',
+  };
+  const NO_APPRECIATION: CurrentAssumptionSet = {
+    ...DEFAULT_ASSUMPTIONS,
+    appreciation: { realAnnual: '0' },
+  };
+
+  test('buy outflow AFTER drop-off is lower than BEFORE, by exactly the PMI premium', () => {
+    const input = inputFor(PMI_SCENARIO, NO_APPRECIATION);
+    const loan = '450000'; // 500000 x (1 - 0.10)
+    const schedule = amortizationSchedule(loan, '0.06', 360);
+    const pmi = computePmi({
+      originalValue: '500000',
+      loan,
+      schedule,
+      annualRateOfLoan: DEFAULT_ASSUMPTIONS.pmi.annualRateOfLoan,
+      basis: 'auto-78',
+    });
+    expect(pmi.dropOffMonth).not.toBeNull();
+    const dropOff = pmi.dropOffMonth!;
+    expect(dropOff).toBeLessThan(PMI_SCENARIO.holdingYears * 12);
+
+    const before = buyMonthlyOutflowAt(input, dropOff); // PMI still charged at the drop-off month
+    const after = buyMonthlyOutflowAt(input, dropOff + 1); // PMI gone the month after
+    expect(after.toCents() < before.toCents()).toBe(true);
+    // The difference is EXACTLY the PMI premium (zero appreciation -> nothing else moves).
+    expect(before.toCents() - after.toCents()).toBe(pmi.monthlyPremium.toCents());
+  });
+
+  test('a PMI borrower is NOT charged PMI in year 20 (well past drop-off)', () => {
+    const input = inputFor(PMI_SCENARIO, NO_APPRECIATION);
+    const loan = '450000';
+    const schedule = amortizationSchedule(loan, '0.06', 360);
+    const pmi = computePmi({
+      originalValue: '500000',
+      loan,
+      schedule,
+      annualRateOfLoan: DEFAULT_ASSUMPTIONS.pmi.annualRateOfLoan,
+      basis: 'auto-78',
+    });
+    const month240 = buyMonthlyOutflowAt(input, 240); // year 20
+    const month1 = buyMonthlyOutflowAt(input, 1); // PMI charged
+    // At zero appreciation, the only delta between month 1 and month 240 is the dropped PMI.
+    expect(month1.toCents() - month240.toCents()).toBe(pmi.monthlyPremium.toCents());
+  });
+});
+
+// WR-03 (correctness bias): the BUY monthly outflow must GROW over the hold as the appreciating
+// property-tax + maintenance components rise. The OLD code held it flat while rent compounded,
+// biasing the verdict to buy. P+I / insurance / HOA stay flat (their real semantics).
+describe('WR-03: the buy monthly outflow grows with appreciation (tax + maintenance)', () => {
+  const GROW_SCENARIO: ScenarioInputs = {
+    label: 'Newton $700k — 20% down, growing carry',
+    price: '700000',
+    downPaymentPct: '0.20',
+    annualRate: '0.06',
+    termMonths: 360,
+    holdingYears: 15,
+    town: 'Newton',
+    insuranceAnnual: '2400',
+    hoaMonthly: '0',
+    monthlyRent: '3500',
+  };
+  const APPRECIATING: CurrentAssumptionSet = {
+    ...DEFAULT_ASSUMPTIONS,
+    appreciation: { realAnnual: '0.03' },
+  };
+  const FLAT: CurrentAssumptionSet = {
+    ...DEFAULT_ASSUMPTIONS,
+    appreciation: { realAnnual: '0' },
+  };
+
+  test('a later-year buy outflow exceeds the year-0 buy outflow when appreciation > 0', () => {
+    const input = inputFor(GROW_SCENARIO, APPRECIATING);
+    const year0 = buyMonthlyOutflowAt(input, 1); // first month (year 0)
+    const year15 = buyMonthlyOutflowAt(input, 15 * 12); // final month (year 14 of the hold)
+    expect(year15.toCents() > year0.toCents()).toBe(true);
+  });
+
+  test('with appreciation = 0 the buy outflow is FLAT year-over-year (no spurious growth)', () => {
+    const input = inputFor(GROW_SCENARIO, FLAT);
+    const year0 = buyMonthlyOutflowAt(input, 1);
+    const year10 = buyMonthlyOutflowAt(input, 10 * 12);
+    const year15 = buyMonthlyOutflowAt(input, 15 * 12);
+    expect(year10.toCents()).toBe(year0.toCents());
+    expect(year15.toCents()).toBe(year0.toCents());
   });
 });
 
