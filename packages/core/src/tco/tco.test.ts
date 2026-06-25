@@ -135,7 +135,8 @@ describe('computeTco returns a closed monthly + annualized breakdown', () => {
       tco.pmi.monthly.toCents() +
       tco.amortizedClosing.monthly.toCents();
     expect(tco.total.monthly.toCents()).toBe(sum);
-    expect(tco.total.monthly.toCents()).toBe(289172n);
+    // Sum of the per-line cents: 199638 + 32867 + 15000 + 33333 + 0 + 0 + 8333 = 289171.
+    expect(tco.total.monthly.toCents()).toBe(289171n);
   });
 });
 
