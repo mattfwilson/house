@@ -14,6 +14,7 @@ export { calendarDate, type CalendarDate } from './time/calendar-date.js';
 export {
   AssumptionSetSchema,
   AssumptionsV1,
+  AssumptionsV2,
   decStr,
   CURRENT_VERSION,
   type AnyAssumptionSet,
@@ -38,3 +39,8 @@ export {
 // golden master is compared against.
 export { runCanary, type CanaryResult } from './engine/canary.js';
 export { canonicalJson } from './serialize/canonical-json.js';
+
+// Town mill-rate table (TCO-02 data half): the resolver + its row/result types. The raw
+// data array stays internal; downstream code resolves by town name through this boundary.
+export { resolveMillRate, type ResolvedMillRate } from './towns/town-table.js';
+export { type TownRateRow } from './towns/town-table.schema.js';

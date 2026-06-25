@@ -6,12 +6,27 @@
 // UNUSED and `tsc -b` FAILS (TS2578). Mirrors money.type-test.ts / calendar-date.type-test.ts.
 import { calendarDate } from '../time/calendar-date.js';
 import { DEFAULT_ASSUMPTIONS } from '../assumptions/defaults.js';
-import { engineInput, type EngineInput } from './engine-input.js';
+import { engineInput, type EngineInput, type ScenarioInputs } from './engine-input.js';
+
+// A full, valid house scenario (the widened ScenarioInputs contract). Dollars/rates are
+// canonical decimal strings; only the counts are bare numbers.
+const SCENARIO: ScenarioInputs = {
+  label: 'canary',
+  price: '750000',
+  downPaymentPct: '0.2',
+  annualRate: '0.06375',
+  termMonths: 360,
+  holdingYears: 10,
+  town: 'Cambridge',
+  insuranceAnnual: '1800',
+  hoaMonthly: '0',
+  monthlyRent: '3200',
+};
 
 const input: EngineInput = engineInput({
   asOf: calendarDate('2026-06-23'),
   assumptions: DEFAULT_ASSUMPTIONS,
-  scenario: { label: 'canary' },
+  scenario: SCENARIO,
 });
 
 // (1) asOf is a CalendarDate — a plain string is NOT assignable.
@@ -19,7 +34,7 @@ const _badAsOf: EngineInput = engineInput({
   // @ts-expect-error -- asOf must be a CalendarDate, never a bare string (D-13).
   asOf: '2026-06-23',
   assumptions: DEFAULT_ASSUMPTIONS,
-  scenario: { label: 'canary' },
+  scenario: SCENARIO,
 });
 void _badAsOf;
 
