@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-05-PLAN.md (Wave 4 — two-portfolio rent-vs-buy + TCO golden fixture); Phase 2 plans all complete
-last_updated: "2026-06-25T16:00:00.000Z"
-last_activity: 2026-06-25 -- Completed 02-05 (rent-vs-buy two-portfolio engine + TCO golden, TCO-07)
+stopped_at: Completed 02-05-PLAN.md (Wave 4 — two-portfolio rent-vs-buy + TCO golden); Phase 2 all plans complete
+last_updated: "2026-06-25T17:17:44.325Z"
+last_activity: 2026-06-25 -- Phase 02 execution started
 progress:
   total_phases: 7
   completed_phases: 1
-  total_plans: 9
-  completed_plans: 9
-  percent: 21
+  total_plans: 11
+  completed_plans: 10
+  percent: 14
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-06-22)
 
 ## Current Position
 
-Phase: 02 (tco-engine) — EXECUTING (all plans complete; ready for phase verification/transition)
-Plan: 5 of 5 — COMPLETE
-Status: Phase 2 plans all complete
-Last activity: 2026-06-25 -- Completed 02-05 (rent-vs-buy two-portfolio engine + TCO golden, TCO-07)
+Phase: 02 (tco-engine) — EXECUTING
+Plan: 2 of 7
+Status: Ready to execute
+Last activity: 2026-06-25 -- Phase 02 execution started
 
 Progress: [██████████] 100%
 
@@ -61,6 +61,7 @@ Progress: [██████████] 100%
 | Phase 02 P03 | 4 | 3 tasks | 6 files |
 | Phase 02-tco-engine P04 | 7min | 2 tasks | 4 files |
 | Phase 02-tco-engine P05 | 14min | 2 tasks | 5 files |
+| Phase 02-tco-engine P06 | 8 | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -102,6 +103,9 @@ Recent decisions affecting current work:
 - [Phase 02-05]: [TCO]: all-real convention locked (D-02) — returns/appreciation/rent real rates consumed DIRECTLY (no double-Fisher); toReal=(1+n)/(1+i)-1 exposed for a future nominal knob only; inflation never enters the compounding (tested inflation-invariant)
 - [Phase 02-05]: [TCO]: reproducibility loop closed for the FULL TCO result — committed tco-golden-snapshot.json deep-equals canonicalJson({tco, rentVsBuy}); gated UPDATE_GOLDEN-only regeneration, never toMatchSnapshot; canary golden-snapshot.json is byte-identical (canary reads only returns.realAnnual, unaffected by the widened scenario — the widened reconciliation lands in fixedInput())
 - [Phase 02-05]: [TCO]: ANTI-FUNNEL PROVEN — realistic Newton $850k/7%/7yr/$3,200-rent set yields RENT wins ($563,158 vs $257,910); the golden fixture itself (Newton $450k) is also rent-wins. The "rent and invest the difference" verdict is reachable (PROJECT.md core value)
+- [Phase ?]: [Phase 02-06]: [TCO]: amortization + rentVsBuy are crash-proof — r.isZero() straight-line guard (zero-rate) and a clamped schedule index (hold past payoff = $0.00 balance = full equity)
+- [Phase ?]: [Phase 02-06]: [TCO]: PMI is drop-off-aware everywhere — computeTco annualizes the hold average (premium x chargedMonths / holdingYears) + exposes pmiDropOffMonth; rentVsBuy charges PMI only while month <= dropOffMonth
+- [Phase ?]: [Phase 02-06]: [TCO]: the rentVsBuy buy outflow is time-varying — property-tax + maintenance grow per hold year on the appreciating value (P+I/ins/HOA flat); golden fixture regenerated cent-identically, RENT still wins
 
 ### Pending Todos
 
@@ -126,6 +130,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-25T16:00:00.000Z
+Last session: 2026-06-25T17:16:47.718Z
 Stopped at: Completed 02-05-PLAN.md (Wave 4 — two-portfolio rent-vs-buy + TCO golden); Phase 2 all plans complete
 Resume file: None (Phase 2 ready for verification/transition)
