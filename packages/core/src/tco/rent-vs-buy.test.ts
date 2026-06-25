@@ -135,11 +135,11 @@ describe('symmetry: the cheaper path invests the difference into ITS OWN portfol
 
 describe('separate appreciation: equity does NOT grow at returns.realAnnual (Pitfall 6 / D-04)', () => {
   test('raising returns.realAnnual alone leaves the buy EQUITY component unchanged', () => {
-    // A scenario where buying is the cheaper path so the buy side-portfolio is ZERO (rent is
-    // more expensive, so the BUY path never invests a difference). Then buyEndingNetWorth is
-    // PURE liquidated equity — independent of returns.realAnnual.
+    // A scenario where RENTING is the cheaper path so the BUY side-portfolio is ZERO (the buy
+    // path never invests a difference — only the renter does). Then buyEndingNetWorth is PURE
+    // liquidated equity — independent of returns.realAnnual (it grows only at appreciation).
     const equityOnly: ScenarioInputs = {
-      label: 'equity-only (buy cheaper, no buy side-portfolio)',
+      label: 'equity-only (rent cheaper, no buy side-portfolio)',
       price: '500000',
       downPaymentPct: '0.20',
       annualRate: '0.05',
@@ -148,7 +148,7 @@ describe('separate appreciation: equity does NOT grow at returns.realAnnual (Pit
       town: 'Quincy',
       insuranceAnnual: '1800',
       hoaMonthly: '0',
-      monthlyRent: '9000', // buy is far cheaper -> the BUY side-portfolio stays empty
+      monthlyRent: '1000', // rent is far cheaper -> the BUY side-portfolio stays empty
     };
     const lowReturn: CurrentAssumptionSet = {
       ...DEFAULT_ASSUMPTIONS,
