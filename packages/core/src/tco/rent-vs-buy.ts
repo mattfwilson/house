@@ -86,6 +86,27 @@ function monthlyGrowthFactor(annualReal: string): InstanceType<typeof Dec> {
 }
 
 /**
+ * The PMI charge decision for a given 1-based hold `month` (CR-01 — 02-REVIEW-gap-closure.md).
+ *
+ * PMI is charged iff it applies AND we are at/before its scheduled drop-off — where a `null`
+ * drop-off means "PMI applies but the schedule never reaches the drop-off LTV within the term",
+ * so it is charged for the ENTIRE hold. This matches `tco.pmi.annualized`'s `?? totalMonths`
+ * semantics: the two PMI surfaces now AGREE that PMI which never terminates is charged the whole
+ * hold. The fix is to read `tco.pmiApplies` (the explicit applies flag) rather than overloading a
+ * null `pmiDropOffMonth` to mean "no PMI" — the OLD inline guard returned false for a null
+ * drop-off, silently zeroing a real PMI cost and biasing the rent-vs-buy verdict toward BUY.
+ *
+ * Pure + exported for the rent-vs-buy loop and its locking tests.
+ */
+export function shouldChargePmi(
+  pmiApplies: boolean,
+  pmiDropOffMonth: number | null,
+  month: number,
+): boolean {
+  return pmiApplies && (pmiDropOffMonth === null || month <= pmiDropOffMonth);
+}
+
+/**
  * The BUY path's recurring monthly outflow for a given 1-based hold `month` (WR-02 + WR-03).
  *
  * Unlike the year-0 `computeTco` snapshot, this is a TIME-VARYING outflow:
@@ -94,9 +115,11 @@ function monthlyGrowthFactor(annualReal: string): InstanceType<typeof Dec> {
  *   - PROPERTY TAX + MAINTENANCE GROW with appreciation (WR-03): recomputed for the month's hold
  *     year on the appreciating assessed/home value (`assessedValueAt` / `homeValueAt`), using the
  *     SAME captured mill rate (`tco.resolvedMillRate`) as the TCO breakdown so the rates agree.
- *   - PMI is charged ONLY while `month <= pmiDropOffMonth` (WR-02): the FULL monthly premium each
- *     month up to and including drop-off, $0.00 after (a time-limited cost, not a flat lifetime
- *     charge). When no PMI applies (`pmiDropOffMonth` null) it is $0.00 throughout.
+ *   - PMI is charged via `shouldChargePmi(tco.pmiApplies, tco.pmiDropOffMonth, month)` (WR-02 +
+ *     CR-01): the FULL monthly premium each month while PMI applies AND (no scheduled drop-off OR
+ *     `month <= pmiDropOffMonth`), $0.00 after drop-off. A null drop-off now means "PMI applies
+ *     but never terminates within the term" -> charged the whole hold (matching the annualized
+ *     surface); "$0.00 throughout" is the case where PMI does NOT apply (`pmiApplies` false).
  *
  * All growth/division in `Dec`; the result crosses into `Money` once via `.toFixed()`. Exported
  * for the rent-vs-buy loop and its locking tests (an internal-but-testable helper, like `toReal`).
@@ -124,9 +147,10 @@ export function buyMonthlyOutflowAt(input: EngineInput, month: number): Money {
   const homeValue = homeValueAt(price, appreciationRealAnnual, holdYear);
   const maintenanceMonthly = maintenanceAnnual(homeValue, maintenancePctOfValue).mul(ONE_TWELFTH);
 
-  // MONTH-GATED PMI (WR-02): the full monthly premium only while month <= drop-off, else $0.00.
+  // MONTH-GATED PMI (WR-02 + CR-01): the full monthly premium while shouldChargePmi is true
+  // (applies AND at/before drop-off, drop-off-null = whole hold), else $0.00.
   let pmiMonthly = Money.zero();
-  if (tco.pmiDropOffMonth !== null && month <= tco.pmiDropOffMonth) {
+  if (shouldChargePmi(tco.pmiApplies, tco.pmiDropOffMonth, month)) {
     const loan = new Dec(price).times(new Dec(1).minus(new Dec(downPaymentPct))).toFixed();
     const monthlyPmiRate = new Dec(pmiAnnualRateOfLoan).div(12).toFixed();
     pmiMonthly = Money.of(loan).mul(monthlyPmiRate);

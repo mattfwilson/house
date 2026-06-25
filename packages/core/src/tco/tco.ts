@@ -71,6 +71,14 @@ export interface TcoBreakdown {
   readonly amortizedClosing: TcoLine;
   readonly total: TcoLine;
   /**
+   * True exactly when PMI applies — origination LTV > 80% / down payment < 20% — independent of
+   * whether drop-off occurs within the term. Pairs with the nullable `pmiDropOffMonth` so callers
+   * can distinguish "no PMI" (applies false) from "PMI that never terminates within the term"
+   * (applies true, drop-off null). The rent-vs-buy model gates the per-month PMI charge on this
+   * (CR-01): a null drop-off no longer silently means "$0 PMI", which biased the verdict to BUY.
+   */
+  readonly pmiApplies: boolean;
+  /**
    * The 1-based scheduled month PMI drops off (balance reaches the basis threshold), or null
    * when no PMI applies. Surfaced so the rent-vs-buy model can charge PMI ONLY while
    * `month <= pmiDropOffMonth` (WR-02) rather than re-deriving it.
@@ -219,6 +227,7 @@ export function computeTco(input: EngineInput): TcoBreakdown {
     pmi,
     amortizedClosing,
     total,
+    pmiApplies: pmiResult.applies,
     pmiDropOffMonth: pmiResult.applies ? pmiResult.dropOffMonth : null,
     resolvedMillRate: resolved.residentialMillRate,
     millRateFy: resolved.fy,
