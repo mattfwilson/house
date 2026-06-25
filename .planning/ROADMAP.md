@@ -74,7 +74,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Wave 2** *(blocked on Wave 1)*
 
   - [x] 02-02-PLAN.md — Fixed-rate amortization (exact $0 payoff, principal-sum, oracle) + PMI 78/80 original-value toggle (TCO-01, TCO-04)
-  - [ ] 02-03-PLAN.md — Property tax (assessed × mill rate, appreciating, Prop 2½ flag) + carrying costs + closing costs (TCO-02, TCO-03, TCO-05)
+  - [x] 02-03-PLAN.md — Property tax (assessed × mill rate, appreciating, Prop 2½ flag) + carrying costs + closing costs (TCO-02, TCO-03, TCO-05)
 
 **Wave 3** *(blocked on Wave 2)*
 

@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-02 (Wave-2 amortization + PMI)
-last_updated: "2026-06-25T10:40:00.000Z"
-last_activity: 2026-06-25 -- Completed 02-02 (amortization + PMI correctness cores)
+stopped_at: Completed 02-03 (Wave-2 per-line TCO cost calculators)
+last_updated: "2026-06-25T14:47:37.000Z"
+last_activity: 2026-06-25 -- Completed 02-03 (property tax, carrying costs, closing costs)
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 9
-  completed_plans: 6
-  percent: 67
+  completed_plans: 7
+  percent: 78
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-06-22)
 ## Current Position
 
 Phase: 02 (tco-engine) — EXECUTING
-Plan: 3 of 5
-Status: Executing Phase 02 (Wave 2 in progress — 02-02 complete)
-Last activity: 2026-06-25 -- Completed 02-02 (amortization + PMI correctness cores)
+Plan: 4 of 5
+Status: Executing Phase 02 (Wave 2 complete — 02-03 done; Wave 3 next)
+Last activity: 2026-06-25 -- Completed 02-03 (property tax, carrying costs, closing costs)
 
-Progress: [███████░░░] 67%
+Progress: [████████░░] 78%
 
 ## Performance Metrics
 
@@ -58,6 +58,7 @@ Progress: [███████░░░] 67%
 | Phase 01 P04 | 4 | 2 tasks | 9 files |
 | Phase 02 P01 | 12 | 3 tasks | 13 files |
 | Phase 02 P02 | 10 | 2 tasks | 4 files |
+| Phase 02 P03 | 4 | 3 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,9 @@ Recent decisions affecting current work:
 - [Phase 02-02]: [TCO]: Amortization uses a RECONCILED final payment (final principal IS the remaining balance) so finalBalance === $0.00 exactly and principal-sum === loan exactly (Pitfall 2); monthlyRate = nominal-annual/12 kept FULL Dec precision (never rounded), each period's split rounded to cents HALF_EVEN at the Money boundary
 - [Phase 02-02]: [TCO]: PMI applies iff origination LTV (loan/originalValue) STRICTLY > 0.80 — exactly 20% down does NOT trigger PMI; drop-off measured against CONSTANT original value + scheduled balance, 78% auto / 80% requested toggle (no appreciated-value input by design, Pitfall 3); oracle: $360k/6.375%/360 → premium $225.00, drop-off auto-78 month 108 vs requested-80 month 94
 - [Phase 02-02]: [TCO]: tco/ barrel exports deferred to Plan 04 (alongside computeTco) per plan artifacts note
+- [Phase 02-03]: [TCO]: Property tax = assessed × mill-rate/$1,000 (div(1000) INSIDE the function — rate stored as published, A3); assessed = price × assessmentRatio grown at appreciation under a HELD-CONSTANT mill rate (D-10); NO flat-% path and NO 2.5% bill clamp (Pitfall 9); PROP_2_5_FLAG = "Prop 2½ caps the town levy, not your individual bill"
+- [Phase 02-03]: [TCO]: Single appreciation idiom — homeValueAt is a thin re-use of property-tax's assessedValueAt with ratio "1.0"; carrying-costs imports it (no duplicated (1+r)^year power). Maintenance tracks appreciating value; insurance + HOA flat in today's dollars (D-15)
+- [Phase 02-03]: [TCO]: Closing = price × rateOfPrice OR dollar override (override wins, D-12); amortizeOverHold divides the lump in Dec into { annual, monthly } for display only — t=0-lump semantics for the Plan-05 net-worth model documented, not amortized (D-13)
 
 ### Pending Todos
 
@@ -114,6 +118,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-25T10:40:00.000Z
-Stopped at: Completed 02-02-PLAN.md (Wave 2 — amortization + PMI)
-Resume file: .planning/phases/02-tco-engine/02-03-PLAN.md
+Last session: 2026-06-25T14:47:37.000Z
+Stopped at: Completed 02-03-PLAN.md (Wave 2 — property tax, carrying costs, closing costs)
+Resume file: .planning/phases/02-tco-engine/02-04-PLAN.md

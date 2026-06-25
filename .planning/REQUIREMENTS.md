@@ -29,10 +29,10 @@ Requirements for the core-engine build. Each maps to a roadmap phase.
 ### Total Cost of Ownership (TCO)
 
 - [x] **TCO-01**: Tool computes monthly principal + interest via amortization from rate, term, and loan amount
-- [ ] **TCO-02**: Tool computes property tax from MA town-level mill rates (seeded static table), not a flat percentage
-- [ ] **TCO-03**: Tool includes homeowners insurance, a configurable maintenance reserve (~1–2%/yr of home value), and HOA/condo fees where relevant
+- [x] **TCO-02**: Tool computes property tax from MA town-level mill rates (seeded static table), not a flat percentage
+- [x] **TCO-03**: Tool includes homeowners insurance, a configurable maintenance reserve (~1–2%/yr of home value), and HOA/condo fees where relevant
 - [x] **TCO-04**: Tool computes PMI when down payment < 20% and drops it at the correct LTV (78% of original value automatic, 80% borrower-requested)
-- [ ] **TCO-05**: Tool includes closing costs as a one-time figure, amortizable for cross-scenario comparison
+- [x] **TCO-05**: Tool includes closing costs as a one-time figure, amortizable for cross-scenario comparison
 - [ ] **TCO-06**: Tool presents the full TCO breakdown both monthly and annualized
 - [ ] **TCO-07**: Tool computes rent-vs-buy at the household's actual numbers — investing the down payment and monthly difference, treating principal as forced savings (no opportunity-cost asymmetry)
 
@@ -102,10 +102,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ASMP-01 | Phase 1 | Complete |
 | PROF-04 | Phase 1 | Complete |
 | TCO-01 | Phase 2 | Complete (02-02) |
-| TCO-02 | Phase 2 | In progress (data half: seeded mill-rate table + resolver — 02-01; computation in 02-03) |
-| TCO-03 | Phase 2 | Pending |
+| TCO-02 | Phase 2 | Complete (data: seeded mill-rate table + resolver — 02-01; computation: assessed × mill rate, no flat %, Prop 2½ flag — 02-03) |
+| TCO-03 | Phase 2 | Complete (02-03) |
 | TCO-04 | Phase 2 | Complete (02-02) |
-| TCO-05 | Phase 2 | Pending |
+| TCO-05 | Phase 2 | Complete (02-03) |
 | TCO-06 | Phase 2 | Pending |
 | TCO-07 | Phase 2 | Pending |
 | AFF-01 | Phase 3 | Pending |
