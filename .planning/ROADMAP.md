@@ -84,6 +84,11 @@ Decimal phases appear between their surrounding integers in numeric order.
 
   - [x] 02-05-PLAN.md — Two-portfolio rent-vs-buy (symmetric, Fisher real, sell haircut, crossover, anti-funnel) + TCO golden fixture (TCO-07)
 
+**Wave 5** *(gap-closure — VERIFICATION.md remediation)*
+
+  - [x] 02-06-PLAN.md — TCO correctness gap-closure (zero-rate guard, PMI drop-off-aware, time-varying rentVsBuy outflow) (TCO-01..07)
+  - [x] 02-07-PLAN.md — ScenarioInputs trust-boundary validation (ScenarioInputsSchema Zod .strict(), parseScenarioInputs, round-trip-through-parse) — closes CR-03 (TCO-01, TCO-07)
+
 ### Phase 3: Affordability Engine
 
 **Goal**: Answer "can the bank?" versus "what does our retirement allow?" — compute bank affordability from configurable DTI ratios and true affordability from the savings-rate/FI-threshold constraint, and surface the gap between them as a first-class output.
@@ -163,7 +168,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundations & Determinism Core | 4/4 | Complete    | 2026-06-24 |
-| 2. TCO Engine | 6/7 | In Progress|  |
+| 2. TCO Engine | 7/7 | Complete | 2026-06-25 |
 | 3. Affordability Engine | 0/TBD | Not started | - |
 | 4. FI-Impact Engine & Sensitivity | 0/TBD | Not started | - |
 | 5. Town Scoring & Heatmap | 0/TBD | Not started | - |

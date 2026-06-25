@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-05-PLAN.md (Wave 4 — two-portfolio rent-vs-buy + TCO golden); Phase 2 all plans complete
-last_updated: "2026-06-25T17:17:44.325Z"
-last_activity: 2026-06-25 -- Phase 02 execution started
+stopped_at: Completed 02-07-PLAN.md (gap-closure — ScenarioInputs trust-boundary validation, CR-03 closed); Phase 2 all 7 plans complete
+last_updated: "2026-06-25T17:23:42.000Z"
+last_activity: 2026-06-25 -- Completed 02-07 (CR-03 ScenarioInputs Zod boundary)
 progress:
   total_phases: 7
   completed_phases: 1
-  total_plans: 11
-  completed_plans: 10
+  total_plans: 13
+  completed_plans: 13
   percent: 14
 ---
 
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-06-22)
 ## Current Position
 
 Phase: 02 (tco-engine) — EXECUTING
-Plan: 2 of 7
-Status: Ready to execute
-Last activity: 2026-06-25 -- Phase 02 execution started
+Plan: 7 of 7 (complete)
+Status: Phase 2 complete — ready for verification/transition
+Last activity: 2026-06-25 -- Completed 02-07 (CR-03 ScenarioInputs Zod boundary)
 
 Progress: [██████████] 100%
 
@@ -62,6 +62,7 @@ Progress: [██████████] 100%
 | Phase 02-tco-engine P04 | 7min | 2 tasks | 4 files |
 | Phase 02-tco-engine P05 | 14min | 2 tasks | 5 files |
 | Phase 02-tco-engine P06 | 8 | 3 tasks | 7 files |
+| Phase 02-tco-engine P07 | 3min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -106,6 +107,7 @@ Recent decisions affecting current work:
 - [Phase ?]: [Phase 02-06]: [TCO]: amortization + rentVsBuy are crash-proof — r.isZero() straight-line guard (zero-rate) and a clamped schedule index (hold past payoff = $0.00 balance = full equity)
 - [Phase ?]: [Phase 02-06]: [TCO]: PMI is drop-off-aware everywhere — computeTco annualizes the hold average (premium x chargedMonths / holdingYears) + exposes pmiDropOffMonth; rentVsBuy charges PMI only while month <= dropOffMonth
 - [Phase ?]: [Phase 02-06]: [TCO]: the rentVsBuy buy outflow is time-varying — property-tax + maintenance grow per hold year on the appreciating value (P+I/ins/HOA flat); golden fixture regenerated cent-identically, RENT still wins
+- [Phase 02-07]: [TCO]: ScenarioInputs is validated at the snapshot trust boundary by ScenarioInputsSchema (Zod .strict(), decStr leaves, positive-int counts, downPaymentPct in [0,1)), mirroring AssumptionSetSchema — CR-03 closed; parseScenarioInputs is the loader helper, engineInput() parses through it, and the golden round-trip rebuilds through a real parse (not a bare cast). downPaymentPct's [0,1) range is a decStr.refine boundary guard (Number(s), not money math)
 
 ### Pending Todos
 
@@ -130,6 +132,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-25T17:16:47.718Z
-Stopped at: Completed 02-05-PLAN.md (Wave 4 — two-portfolio rent-vs-buy + TCO golden); Phase 2 all plans complete
+Last session: 2026-06-25T17:23:42.000Z
+Stopped at: Completed 02-07-PLAN.md (gap-closure — ScenarioInputs trust-boundary validation, CR-03 closed); Phase 2 all 7 plans complete
 Resume file: None (Phase 2 ready for verification/transition)
