@@ -44,3 +44,18 @@ export { canonicalJson } from './serialize/canonical-json.js';
 // data array stays internal; downstream code resolves by town name through this boundary.
 export { resolveMillRate, type ResolvedMillRate } from './towns/town-table.js';
 export { type TownRateRow } from './towns/town-table.schema.js';
+
+// TCO engine (Phase 2): the top-level aggregator + the closed result types, plus the
+// building-block calculators/types Phase 3 (Affordability: PITI+HOA+PMI for DTI) and the
+// rent-vs-buy model reuse. Raw `Dec`/`Decimal` remain UNEXPORTED — dollars cross this
+// boundary only as `Money`, so no downstream code can re-open the bare-float hole.
+export { computeTco, type TcoBreakdown, type TcoLine } from './tco/tco.js';
+export {
+  scheduledPayment,
+  amortizationSchedule,
+  type AmortizationSchedule,
+  type AmortizationRow,
+} from './tco/amortization.js';
+export { computePmi, type PmiResult } from './tco/pmi.js';
+export { annualPropertyTax } from './tco/property-tax.js';
+export { closingCosts } from './tco/closing-costs.js';
