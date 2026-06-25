@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-22)
 Phase: 02 (tco-engine) — EXECUTING
 Plan: 7 of 7 (complete)
 Status: Phase 2 complete — ready for verification/transition
-Last activity: 2026-06-25 -- Completed 02-07 (CR-03 ScenarioInputs Zod boundary)
+Last activity: 2026-06-25 -- Completed quick task 260625-k0h (pmiApplies flag — CR-01 from gap-closure review)
 
 Progress: [██████████] 100%
 
@@ -121,6 +121,12 @@ None yet.
 
 - Critical correctness pitfalls (float money, amortization final-balance, PMI 78/80 basis, DTI definitions, real-vs-nominal FI, opportunity-cost symmetry, SWR horizon) are existential — fence each into its mapped phase with gating verification (see research/PITFALLS.md).
 - Anti-funnel guarantee: a realistic input set must reach a "rent and invest" verdict (acceptance check in Phase 4).
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260625-k0h | Fix pmiDropOffMonth=null ambiguity — add pmiApplies flag to TcoBreakdown, re-gate buy PMI | 2026-06-25 | 836775e | [260625-k0h-fix-pmi-applies-flag](./quick/260625-k0h-fix-pmi-applies-flag/) |
 
 ## Deferred Items
 
