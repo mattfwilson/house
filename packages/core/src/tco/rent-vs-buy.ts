@@ -172,7 +172,11 @@ export function rentVsBuy(input: EngineInput): RentVsBuyResult {
       const year = month / 12;
       // BUY equity at year-end = home value (appreciated) - remaining loan balance, liquidated.
       const homeValue = new Dec(homeValueAt(price, appreciationRealAnnual, year).toDecimalString());
-      const remainingBalance = new Dec(schedule.rows[month - 1]!.balance.toDecimalString());
+      // CR-01: clamp the schedule index. When the hold runs PAST the amortization term
+      // (totalMonths > schedule.rows.length), out-of-range months mean the loan is fully paid
+      // off — the remaining balance is $0.00 (full equity), never an out-of-bounds read.
+      const row = month - 1 < schedule.rows.length ? schedule.rows[month - 1]! : undefined;
+      const remainingBalance = row ? new Dec(row.balance.toDecimalString()) : new Dec(0);
       const equity = homeValue.minus(remainingBalance);
       const liquidatedEquity = equity.times(sellRetain);
       buyEndingByYear.push(liquidatedEquity.plus(buyPortfolio));

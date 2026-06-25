@@ -56,6 +56,11 @@ function toCentsDec(d: InstanceType<typeof Dec>): InstanceType<typeof Dec> {
  */
 export function scheduledPayment(loan: string, annualRate: string, termMonths: number): Money {
   const r = monthlyRate(annualRate);
+  // CR-02: zero-rate guard. The closed form is 0/0 when r=0 (P·0·1 / (1−1)); a zero-interest
+  // loan simply repays the principal in equal straight-line installments: loan/termMonths.
+  if (r.isZero()) {
+    return Money.of(new Dec(loan).div(termMonths).toFixed());
+  }
   const pow = new Dec(1).plus(r).pow(termMonths);
   const m = new Dec(loan).times(r).times(pow).div(pow.minus(1));
   return Money.of(m.toFixed());
@@ -78,13 +83,18 @@ export function amortizationSchedule(
 ): AmortizationSchedule {
   const r = monthlyRate(annualRate);
   // Pin the level payment to cents once, so the per-period split uses the same cents the
-  // borrower actually pays (and the reconciled tail is the only deviation).
-  const paymentDec = toCentsDec(
-    new Dec(loan)
-      .times(r)
-      .times(new Dec(1).plus(r).pow(termMonths))
-      .div(new Dec(1).plus(r).pow(termMonths).minus(1)),
-  );
+  // borrower actually pays (and the reconciled tail is the only deviation). CR-02: at r=0 the
+  // closed form is 0/0; a zero-interest loan's level payment is the straight-line loan/termMonths.
+  // The per-period loop below then yields interest = balance·0 = $0.00 and principal = the
+  // straight-line split, with the SAME reconciled final period forcing the balance to $0.00.
+  const paymentDec = r.isZero()
+    ? toCentsDec(new Dec(loan).div(termMonths))
+    : toCentsDec(
+        new Dec(loan)
+          .times(r)
+          .times(new Dec(1).plus(r).pow(termMonths))
+          .div(new Dec(1).plus(r).pow(termMonths).minus(1)),
+      );
   const payment = Money.of(paymentDec.toFixed());
 
   const rows: AmortizationRow[] = [];
