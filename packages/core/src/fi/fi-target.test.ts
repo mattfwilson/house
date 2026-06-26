@@ -157,6 +157,37 @@ describe('fiTargets — the SWR knob is live (so the tornado can sweep it, D-13)
   });
 });
 
+describe('fiTargets — divideBySwr defense-in-depth guard (CR-01, GAP 2)', () => {
+  // A forged input that BYPASSES the Zod boundary (e.g. a non-positive swr.rate slipped past
+  // parse) must throw a CLEAR error naming swr.rate — NOT Money.of("Infinity") (zero) and NOT a
+  // silent NEGATIVE FI target read as "reached at month 0" (negative). We forge the rate directly
+  // onto a built input to reach the function in depth.
+  const forgeSwr = (rate: string): EngineInput => {
+    const base = inputFor(HOUSEHOLD);
+    return {
+      ...base,
+      assumptions: { ...base.assumptions, swr: { ...base.assumptions.swr, rate } },
+    } as EngineInput;
+  };
+
+  test('a zero swr.rate reaching the divide throws a clear error (not Money.of("Infinity"))', () => {
+    const input = forgeSwr('0');
+    expect(() => fiTargets(input, computeTco(inputFor(HOUSEHOLD)))).toThrow(/swr\.rate/);
+  });
+
+  test('a negative swr.rate reaching the divide throws a clear error (not a negative target)', () => {
+    const input = forgeSwr('-0.01');
+    expect(() => fiTargets(input, computeTco(inputFor(HOUSEHOLD)))).toThrow(/swr\.rate/);
+  });
+
+  test('a normal positive swr.rate still divides correctly (guard does not perturb the happy path)', () => {
+    const input = inputFor(HOUSEHOLD);
+    const targets = fiTargets(input, computeTco(input));
+    expect(targets.renterTarget.toCents()).toBeGreaterThan(0n);
+    expect(targets.ownerTarget.toCents()).toBeGreaterThan(0n);
+  });
+});
+
 describe('fiTargets — requires household (the FI number lives on household.targetAnnualRetirementSpend)', () => {
   test('throws a clear error when household is absent', () => {
     const input = inputFor(undefined);

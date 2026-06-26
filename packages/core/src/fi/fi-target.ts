@@ -65,8 +65,18 @@ function ownerHousingAt(input: EngineInput, tco: TcoBreakdown, fiYear: number): 
 
 /** Divide a `Money` numerator by the swr RATE string in `Dec`, crossing back to `Money` once. */
 function divideBySwr(numerator: Money, swrRate: string): Money {
+  // CR-01 defense in depth: a non-positive swr.rate must NOT reach the divide. The Zod boundary
+  // refine rejects it at parse, but a forged input bypassing the boundary would otherwise yield
+  // Money.of('Infinity') (zero → decimal.js Infinity) or a negative FI target read as "reached at
+  // month 0" (negative). Convert that remaining edge into an HONEST thrown error.
+  const r = new Dec(swrRate);
+  if (r.lessThanOrEqualTo(0)) {
+    throw new Error(
+      `fiTargets: swr.rate must be > 0 (got ${swrRate}); the FI number is annualNeed / swr.rate`,
+    );
+  }
   // Division lives in Dec (Money has no `div`); the result re-enters as Money via `.toFixed()`.
-  const d = new Dec(numerator.toDecimalString()).div(new Dec(swrRate));
+  const d = new Dec(numerator.toDecimalString()).div(r);
   return Money.of(d.toFixed());
 }
 

@@ -195,6 +195,35 @@ describe('tornado — ranking + serialization (D-14 / L3)', () => {
   });
 });
 
+describe('tornado — swr low-band clamp guards against a non-positive swept rate (CR-01 / GAP 2)', () => {
+  test('a swr.rate at/below swrBand still yields a well-formed swr row (no throw escaping tornado)', () => {
+    // swr.rate 0.004 with swrBand 0.005 → the NAIVE absolute low sweep would be 0.004 − 0.005 =
+    // −0.001 (non-positive), which the now-stricter boundary refine would REJECT, throwing out of
+    // tornado. The clamp floors the low endpoint to a small positive rate so the row stays valid.
+    const edge = engineInput({
+      asOf: ASOF,
+      assumptions: {
+        ...DEFAULT_ASSUMPTIONS,
+        projection: { maxHorizonYears: '40' },
+        swr: { rate: '0.004' },
+        sensitivity: { ...DEFAULT_ASSUMPTIONS.sensitivity, swrBand: '0.005' },
+      },
+      scenario: SCENARIO,
+      household: HOUSEHOLD,
+    });
+    // No throw escapes tornado.
+    const result = tornado(edge);
+    const swrRow = result.rows.find((r) => r.driver === 'swr')!;
+    // The row is well-formed: low/base/high are valid FiOutcomes with a finite swing.
+    expect(swrRow.low.kind).toMatch(/^(reached|unreached)$/);
+    expect(swrRow.base.kind).toMatch(/^(reached|unreached)$/);
+    expect(swrRow.high.kind).toMatch(/^(reached|unreached)$/);
+    expect(Number.isFinite(swrRow.swingMonths)).toBe(true);
+    // The serialized result still has no Infinity.
+    expect(canonicalJson(result)).not.toContain('Infinity');
+  });
+});
+
 describe('tornado — unreached endpoints contribute a finite max-magnitude swing (L3)', () => {
   test('a strained scenario where a perturbed endpoint is unreached still yields a finite swing', () => {
     // A strained household: a pricey house, thin savings — perturbing a driver adversely can push the

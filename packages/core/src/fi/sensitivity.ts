@@ -107,6 +107,25 @@ function relative(rate: string, band: string, dir: Direction): string {
 }
 
 /**
+ * CR-01 floor (GAP 2): the smallest positive swr.rate the swr low-band sweep is allowed to reach.
+ * A band that meets/exceeds the SWR is degenerate input — `absolute(rate, band, '-')` would be
+ * `<= 0`, which the now-stricter boundary refine REJECTS (throwing out of `tornado`). Flooring the
+ * swept value to this tiny positive rate keeps the perturbed input valid so the tornado returns a
+ * well-formed row instead of crashing. A canonical decimal string (never a bare number).
+ */
+const SWR_FLOOR = '0.0001';
+
+/**
+ * Perturb a rate ABSOLUTELY but CLAMP it to a small positive floor (CR-01). Used only by the swr
+ * driver's low sweep, where a `rate − band <= 0` would be rejected at the boundary. Returns the
+ * larger of the perturbed rate and `SWR_FLOOR`, as a canonical decimal string.
+ */
+function absoluteClampedPositive(rate: string, band: string, dir: Direction): string {
+  const perturbed = new Dec(absolute(rate, band, dir));
+  return perturbed.lessThanOrEqualTo(0) ? SWR_FLOOR : perturbed.toFixed();
+}
+
+/**
  * The driver → perturbation table (D-12 / L6). Five absolute, ONE relative (tax). Each `apply` moves
  * exactly one rate; no per-driver projection math — the projection is the SAME `fiImpact` re-run.
  */
@@ -158,9 +177,14 @@ const DRIVER_SPECS: Record<TornadoDriver, DriverSpec> = {
   swr: {
     band: 'swrBand',
     relative: false,
+    // CR-01: the low sweep (`-`) is clamped to a positive floor so a band >= swr.rate cannot drive
+    // the rate to <= 0 (which the boundary refine would reject, crashing the tornado). The high
+    // sweep (`+`) is always positive, so it stays a plain absolute perturbation.
     apply: (a, band, dir) => ({
       ...a,
-      swr: { rate: absolute(a.swr.rate, band, dir) },
+      swr: {
+        rate: dir === '-' ? absoluteClampedPositive(a.swr.rate, band, dir) : absolute(a.swr.rate, band, dir),
+      },
     }),
   },
 };

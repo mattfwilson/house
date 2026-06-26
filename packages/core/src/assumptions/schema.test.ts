@@ -121,6 +121,32 @@ describe('AssumptionSetSchema — discriminated union on schemaVersion (D-05)', 
     expect(r.success).toBe(false);
   });
 
+  test('rejects a zero swr.rate at the boundary (CR-01 — the FI number is spend / swr.rate)', () => {
+    const r = AssumptionSetSchema.safeParse({
+      ...DEFAULT_ASSUMPTIONS,
+      swr: { rate: '0' },
+    });
+    expect(r.success).toBe(false);
+    if (!r.success) {
+      expect(JSON.stringify(r.error.issues)).toMatch(/swr\.rate/);
+    }
+  });
+
+  test('rejects a negative swr.rate at the boundary (CR-01 — no negative FI target)', () => {
+    const r = AssumptionSetSchema.safeParse({
+      ...DEFAULT_ASSUMPTIONS,
+      swr: { rate: '-0.001' },
+    });
+    expect(r.success).toBe(false);
+  });
+
+  test('accepts a positive swr.rate (default 0.033 and a tiny positive both parse)', () => {
+    expect(AssumptionSetSchema.safeParse(DEFAULT_ASSUMPTIONS).success).toBe(true);
+    expect(
+      AssumptionSetSchema.safeParse({ ...DEFAULT_ASSUMPTIONS, swr: { rate: '0.0001' } }).success,
+    ).toBe(true);
+  });
+
   test('a canonical-decimal-string value round-trips without becoming a binary float', () => {
     const parsed = AssumptionSetSchema.parse(DEFAULT_ASSUMPTIONS);
     const json = JSON.stringify(parsed);

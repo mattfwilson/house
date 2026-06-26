@@ -182,7 +182,14 @@ export const AssumptionsV3 = z
       annualPctOfValue: decStr,
     }),
     swr: group({
-      rate: decStr,
+      // CR-01: the FI number is annualNeed / swr.rate, so a zero rate crashes via Money.of('Infinity')
+      // and a negative rate yields a negative FI target read as "reached at month 0". A positivity
+      // refine (mirroring the targetSavingsRate/downPaymentPct Number-comparison precedent) rejects
+      // both at the boundary. Tightens validation only — no serialized value changes (defaults stay
+      // positive), so the goldens remain byte-identical.
+      rate: decStr.refine((s) => Number(s) > 0, {
+        message: 'swr.rate must be > 0 (the FI number is spend / swr.rate)',
+      }),
     }),
     pmi: group({
       annualRateOfLoan: decStr,
