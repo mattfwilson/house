@@ -47,18 +47,18 @@ function oracleFiMonths(seed: string, contribution: string, target: string, real
     return Math.ceil(Number(T.minus(S).div(C).toFixed()));
   }
 
-  if (C.lessThanOrEqualTo(0)) {
-    // With r > 0 a non-positive contribution still grows the seed; reachable only if the seed
-    // alone can ever reach T. With S < T (guarded above) and C <= 0 (no additions), and growth
-    // applied to a possibly-shrinking base, treat as unreachable for the FI-date purpose.
-    return Infinity;
-  }
-
+  // General closed form (handles C <= 0 too): NW_n = S*f^n + C*f*(f^n - 1)/(f - 1) >= T
+  //   => f^n >= (T*(f-1) + C*f) / (S*(f-1) + C*f) = A / B.
+  // If A/B <= 0 the inequality can never be satisfied (the contribution overwhelms growth and NW
+  // diverges away from T) -> unreachable. Otherwise n = ceil(ln(A/B)/ln(f)). When that n is
+  // non-positive the target is met immediately (already guarded by S >= T above).
   const fm1 = f.minus(1);
   const A = T.times(fm1).plus(C.times(f));
   const B = S.times(fm1).plus(C.times(f));
-  if (A.dividedBy(B).lessThanOrEqualTo(0)) return Infinity;
-  const n = A.dividedBy(B).ln().dividedBy(f.ln());
+  const ratio = A.dividedBy(B);
+  if (ratio.lessThanOrEqualTo(0)) return Infinity;
+  const n = ratio.ln().dividedBy(f.ln());
+  if (n.lessThanOrEqualTo(0)) return Infinity; // NW already diverging below T with negative C
   return Math.ceil(Number(n.toFixed()));
 }
 
@@ -150,10 +150,13 @@ describe('oracle — high-inflation edge MUST route through Fisher (D-11 / L2)',
   });
 });
 
-describe('oracle — unreachable agreement (C <= 0 => oracle Infinity, engine unreached)', () => {
-  test('non-positive contribution: oracle returns Infinity, engine returns kind: "unreached"', () => {
+describe('oracle — unreachable agreement (premium swallows savings => oracle Infinity, engine unreached)', () => {
+  test('negative contribution (premium > savings): oracle Infinity, engine kind: "unreached"', () => {
+    // The ownership premium drives the monthly contribution NEGATIVE: NW is eroded faster than it
+    // compounds, so it diverges AWAY from the target — the honest "FI not reached" / don't-buy case
+    // (FI-06). Both the oracle (A/B <= 0 => Infinity) and the engine (cap => unreached) must agree.
     const seed = '10000';
-    const contribution = '0'; // premium swallows all savings
+    const contribution = '-1000'; // each month withdraws more than growth adds
     const target = '500000';
     const realAnnual = '0.05';
 
@@ -168,7 +171,11 @@ describe('oracle — unreachable agreement (C <= 0 => oracle Infinity, engine un
       maxHorizonMonths: 60 * 12,
     });
     expect(outcome.kind).toBe('unreached');
-    // Both agree on unreachability: oracle === Infinity, engine === a discriminated 'unreached'.
+    if (outcome.kind === 'unreached') {
+      expect(outcome.cappedAtMonth).toBe(60 * 12);
+    }
+    // Both agree on unreachability: oracle === Infinity, engine (same cap) === a discriminated
+    // 'unreached', surfaced here as Infinity by the engineFiMonths adapter.
     expect(engineFiMonths(seed, contribution, target, realAnnual)).toBe(Infinity);
   });
 });
