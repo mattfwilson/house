@@ -112,11 +112,49 @@ function grownRentAt(
 }
 
 /**
+ * The buy path's liquidated home equity at a 1-based hold `month` (A5): `(homeValueAt − schedule
+ * balance) × (1 − sellCostPct)`. This is the MONTHLY analogue of rentVsBuy's year-boundary equity
+ * snapshot (rent-vs-buy.ts:242-253), RECONCILED to share its valuation basis — NOT a blind copy
+ * (WR-01 / IN-04):
+ *
+ *   - HOME-VALUE YEAR (the bit that was silently diverging): `Math.max(0, Math.floor(month / 12))`.
+ *     At every year boundary this EQUALS rentVsBuy's `month / 12` — month 12 → year 1, month 24 →
+ *     year 2 — so the two instruments value the same hold-month-12 home at the SAME appreciated year
+ *     (the old `floor((month-1)/12)` valued month 12 at year 0, one year of appreciation too few).
+ *     Between boundaries the FI path values monthly at the just-passed year (months 1-11 → year 0).
+ *     The `Math.max(0, …)` clamp pins month 0 → year 0 (never a NEGATIVE year — closes IN-02, since
+ *     projection.ts:85 seeds the month-0 check with `equityFor(0)`).
+ *   - SCHEDULE-BALANCE INDEX: `month - 1` with the same out-of-range clamp as rentVsBuy
+ *     (rent-vs-buy.ts:249) — a hold past the amortization term means the loan is paid off, balance
+ *     $0.00. This index ALREADY agreed between the two instruments and is unchanged.
+ *
+ * Exported (module-level, pure — `Dec` in/out) so the convention is unit-pinned in the test suite
+ * (T-04-G4: a future blind "reconcile" of the two equity conventions fails CI).
+ */
+export function buyEquityAt(opts: {
+  price: string;
+  appreciationRealAnnual: string;
+  schedule: ReturnType<typeof amortizationSchedule>;
+  sellRetain: InstanceType<typeof Dec>;
+  month: number;
+}): InstanceType<typeof Dec> {
+  const { price, appreciationRealAnnual, schedule, sellRetain, month } = opts;
+  // Reconciled home-value year: agrees with rentVsBuy's `month/12` at every boundary; never < 0.
+  const year = Math.max(0, Math.floor(month / 12));
+  const homeValue = new Dec(homeValueAt(price, appreciationRealAnnual, year).toDecimalString());
+  // Schedule-balance index `month - 1`, clamped: a hold past payoff means $0.00 balance (full equity).
+  const row = month - 1 >= 0 && month - 1 < schedule.rows.length ? schedule.rows[month - 1]! : undefined;
+  const remainingBalance = row ? new Dec(row.balance.toDecimalString()) : new Dec(0);
+  return homeValue.minus(remainingBalance).times(sellRetain);
+}
+
+/**
  * Build the BUY path (D-04): seed = investable NW − (DP + closing); monthly contribution =
  * `monthlySavings − ownership premium`, premium = `buyMonthlyOutflowAt(month) − grown rent`
  * (reusing `buyMonthlyOutflowAt` — NEVER re-summing P+I/tax/ins/maint/PMI); NW = liquid + liquidated
- * home equity (A5, via `equityFor` reusing `homeValueAt` + the amortization schedule + index-clamp,
- * verbatim from rent-vs-buy.ts 246-253). Projected against the OWNER target.
+ * home equity (A5, via `buyEquityAt` — the monthly analogue of rentVsBuy's year-boundary equity
+ * snapshot, RECONCILED to share its valuation basis, NOT copied verbatim). Projected against the
+ * OWNER target.
  */
 function buyPath(
   input: EngineInput,
@@ -148,15 +186,12 @@ function buyPath(
     return monthlySavings.minus(premium);
   };
 
-  // A5: liquidated home equity = (homeValueAt − schedule balance) × (1 − sellCostPct), with the
-  // schedule index-clamp for holds past the amortization term (rent-vs-buy.ts 246-253 verbatim).
-  const equityFor = (month: number): InstanceType<typeof Dec> => {
-    const year = Math.floor((month - 1) / 12);
-    const homeValue = new Dec(homeValueAt(price, appreciationRealAnnual, year).toDecimalString());
-    const row = month - 1 < schedule.rows.length ? schedule.rows[month - 1]! : undefined;
-    const remainingBalance = row ? new Dec(row.balance.toDecimalString()) : new Dec(0);
-    return homeValue.minus(remainingBalance).times(sellRetain);
-  };
+  // A5: liquidated home equity per month, via the reconciled `buyEquityAt` (home-value year agrees
+  // with rentVsBuy at boundaries; schedule-balance index `month - 1` shared; month 0 clamped to
+  // year 0 — see `buyEquityAt`). This is NOT a verbatim copy of rent-vs-buy.ts — it is the monthly
+  // analogue that genuinely AGREES with the year-boundary snapshot (WR-01 / IN-02 / IN-04).
+  const equityFor = (month: number): InstanceType<typeof Dec> =>
+    buyEquityAt({ price, appreciationRealAnnual, schedule, sellRetain, month });
 
   return {
     seedDollars: seed.toDecimalString(),
