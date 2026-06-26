@@ -132,7 +132,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. A realistic input set produces a "rent and invest the difference / don't buy" verdict, present as a first-class comparison row (anti-funnel acceptance check)
   5. Sensitivity analysis ships in this phase: a one-way/tornado view shows FI-date swing across return, inflation, maintenance %, tax, and SWR, with the top drivers labeled (no headline number without a range)
 
-**Plans**: 4 plans
+**Plans**: 4 plans + 2 gap-closure plans (04-05, 04-06)
 
 **Wave 1**
 
@@ -149,6 +149,11 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Wave 4** *(blocked on Wave 3)*
 
   - [x] 04-04-PLAN.md — Six-driver tornado (ranked FI-date swing, top drivers flagged) + no-bare-number type-test + FI golden master + round-trip (ASMP-02, FI-05)
+
+**Gap Closure** *(post-verification; gaps_found 4/5 + code review 1 Critical + 4 Warnings)*
+
+  - [ ] 04-05-PLAN.md — Tornado tax driver bites (overridable mill rate, perturbed relatively, GAP 1/SC5/ASMP-02) + swr.rate zero/negative guard at boundary, in divideBySwr, and tornado swr-low clamp (GAP 2/CR-01) (ASMP-02, FI-05)
+  - [ ] 04-06-PLAN.md — Reconcile equityFor year index with rentVsBuy + correct false "verbatim" comments + month-12 equity-year pin (GAP 3/WR-01; closes IN-02) (FI-05)
 
 ### Phase 5: Town Scoring & Heatmap
 
