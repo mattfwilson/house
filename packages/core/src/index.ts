@@ -28,13 +28,19 @@ export {
 export { DEFAULT_ASSUMPTIONS } from './assumptions/defaults.js';
 export { migrate } from './assumptions/migrate.js';
 
-// The immutable snapshot/input unit (D-11) threading asOf + assumptions explicitly.
+// The immutable snapshot/input unit (D-11) threading asOf + assumptions explicitly, plus the
+// household (profile) trust boundary (D-09): the person-vs-house side of an affordability solve.
+// `Household` crosses only through `parseHousehold` (mirroring `ScenarioInputs`); raw JSON never
+// enters the calc.
 export {
   engineInput,
   ScenarioInputsSchema,
   parseScenarioInputs,
+  HouseholdSchema,
+  parseHousehold,
   type EngineInput,
   type ScenarioInputs,
+  type Household,
 } from './engine/engine-input.js';
 
 // Reproducibility loop (PROF-04): the deterministic canary + the canonical serializer the
@@ -62,3 +68,36 @@ export {
 export { computePmi, type PmiResult } from './tco/pmi.js';
 export { annualPropertyTax } from './tco/property-tax.js';
 export { closingCosts } from './tco/closing-costs.js';
+
+// Affordability engine (Phase 3): the four entry points — the BANK ceiling (AFF-01), the TRUE
+// ceiling (AFF-02), the GAP composer (AFF-03), and the per-scenario evaluate REPORT (D-06) — plus
+// their closed result types, the directional verdict enum, the binding-constraint enums, and the
+// two shared D-14 numerator derivations (`lenderDtiCarryingCost` / `cashSavingsDrain`). Raw
+// `Dec`/`Decimal` remain UNEXPORTED — every dollar crosses as `Money`.
+export {
+  bankAffordability,
+  type BankAffordabilityResult,
+  type BindingRatio,
+} from './affordability/bank-affordability.js';
+export {
+  trueAffordability,
+  cashSavingsDrain,
+  type TrueAffordabilityResult,
+  type BindingConstraint,
+} from './affordability/true-affordability.js';
+export {
+  affordabilityGap,
+  ALIGNED_TOLERANCE_CENTS,
+  type AffordabilityGapResult,
+  type AffordabilityVerdict,
+} from './affordability/gap.js';
+export {
+  evaluateScenario,
+  type EvaluateScenarioResult,
+} from './affordability/evaluate-scenario.js';
+// `lenderDtiCarryingCost` returns a `Money` (the D-14 lender numerator) — safe to expose. The
+// `frontEndRatio`/`backEndRatio` derivations return the internal `Dec` (DecimalInstance) and are
+// deliberately NOT re-exported here: exposing them would leak the raw decimal.js type across the
+// boundary that exists precisely to keep `Dec` internal (the L6-9 omission). The ratios reach
+// downstream code as decimal STRINGS through `evaluateScenario`'s result instead.
+export { lenderDtiCarryingCost } from './affordability/dti.js';

@@ -29,12 +29,15 @@ import { describe, test, expect } from 'vitest';
 import {
   engineInput,
   parseScenarioInputs,
+  parseHousehold,
   type EngineInput,
   type ScenarioInputs,
+  type Household,
 } from './engine/engine-input.js';
 import { runCanary, type CanaryResult } from './engine/canary.js';
 import { computeTco } from './tco/tco.js';
 import { rentVsBuy } from './tco/rent-vs-buy.js';
+import { affordabilityGap } from './affordability/gap.js';
 import { canonicalJson } from './serialize/canonical-json.js';
 import { DEFAULT_ASSUMPTIONS } from './assumptions/defaults.js';
 import { parseAssumptionSet } from './assumptions/assumption-set.js';
@@ -44,6 +47,7 @@ import type { CurrentAssumptionSet } from './assumptions/schema.js';
 const here = dirname(fileURLToPath(import.meta.url));
 const GOLDEN_PATH = resolve(here, '__fixtures__', 'golden-snapshot.json');
 const TCO_GOLDEN_PATH = resolve(here, '__fixtures__', 'tco-golden-snapshot.json');
+const AFFORDABILITY_GOLDEN_PATH = resolve(here, '__fixtures__', 'affordability-golden-snapshot.json');
 
 /**
  * THE fixed, deterministic house scenario the golden masters are computed from: a $450k Newton
@@ -65,14 +69,34 @@ const FIXED_SCENARIO: ScenarioInputs = {
 };
 
 /**
+ * THE fixed, deterministic household the affordability golden is computed from: a $200k-gross
+ * household, $90k down, modest existing debt, a 20%-of-gross savings target, a roomy reserve, and
+ * a $48k/yr current-savings baseline (D-17). Pairs with FIXED_SCENARIO so `affordabilityGap`
+ * resolves deterministically. The TCO/canary goldens IGNORE this block (they never read household),
+ * so adding it leaves `tco-golden-snapshot.json` byte-identical.
+ */
+const FIXED_HOUSEHOLD: Household = {
+  grossAnnualIncome: '200000',
+  existingMonthlyDebt: '400',
+  targetSavingsRate: '0.20',
+  availableNetWorth: '600000',
+  currentRent: '2800',
+  downPaymentCash: '90000',
+  reserve: '30000',
+  currentAnnualSavings: '48000',
+};
+
+/**
  * THE frozen input the golden masters are computed from. Fixed `asOf` (never a clock) +
- * DEFAULT_ASSUMPTIONS + the full widened FIXED_SCENARIO. Identical on every run.
+ * DEFAULT_ASSUMPTIONS + the full widened FIXED_SCENARIO + the FIXED_HOUSEHOLD. Identical on every
+ * run. The TCO + canary goldens ignore `household`; the affordability golden consumes it.
  */
 function fixedInput(): EngineInput {
   return engineInput({
     asOf: calendarDate('2026-01-01'),
     assumptions: DEFAULT_ASSUMPTIONS,
     scenario: FIXED_SCENARIO,
+    household: FIXED_HOUSEHOLD,
   });
 }
 
@@ -97,6 +121,16 @@ function canonicalTcoResult(input: EngineInput): string {
   const tco = computeTco(input);
   const rvb = rentVsBuy(input);
   return canonicalJson({ tco, rentVsBuy: rvb });
+}
+
+/**
+ * Canonical-JSON form of the AFFORDABILITY gap result (AFF-03): the composed bank + true ceilings,
+ * the signed gap, both binding fields, and the directional verdict. `canonicalJson` emits each
+ * `Money` as a decimal string (float-free) with sorted keys, so equal results are byte-identical.
+ * The verdict + binding enums are plain strings and serialize verbatim. Requires `input.household`.
+ */
+function canonicalAffordabilityResult(input: EngineInput): string {
+  return canonicalJson(affordabilityGap(input));
 }
 
 describe('golden master: the canary recomputes cent-identically (PROF-04)', () => {
@@ -131,6 +165,22 @@ describe('golden master: the full TCO + rent-vs-buy result recomputes cent-ident
   });
 });
 
+describe('golden master: the affordability GAP result recomputes cent-identically (Plan 03-04)', () => {
+  test('produced canonical gap result deep-equals the committed affordability-golden fixture', () => {
+    const produced = canonicalAffordabilityResult(fixedInput());
+
+    // Gated regeneration ONLY (reviewable git diff). NEVER toMatchSnapshot (T-03-07).
+    if (process.env.UPDATE_GOLDEN === '1') {
+      mkdirSync(dirname(AFFORDABILITY_GOLDEN_PATH), { recursive: true });
+      writeFileSync(AFFORDABILITY_GOLDEN_PATH, produced + '\n', 'utf8');
+      return;
+    }
+
+    const golden = readFileSync(AFFORDABILITY_GOLDEN_PATH, 'utf8').trim();
+    expect(produced).toBe(golden);
+  });
+});
+
 describe('snapshot round-trip is lossless (D-08 data reproducibility)', () => {
   test('serialize -> deserialize -> recompute yields the identical canonical canary result', () => {
     const original = fixedInput();
@@ -147,6 +197,18 @@ describe('snapshot round-trip is lossless (D-08 data reproducibility)', () => {
 
     const rebuilt = roundTrip(original);
     const second = canonicalTcoResult(rebuilt);
+    expect(second).toBe(first);
+  });
+
+  test('serialize -> deserialize -> recompute yields the identical canonical AFFORDABILITY result (Pitfall 5: household carried)', () => {
+    const original = fixedInput();
+    const first = canonicalAffordabilityResult(original);
+
+    // The round-trip serializes + re-parses `household` through `parseHousehold` — so a non-canonical
+    // number cannot silently re-enter the affordability math (T-03-08). The recompute must match.
+    const rebuilt = roundTrip(original);
+    expect(rebuilt.household).toBeDefined();
+    const second = canonicalAffordabilityResult(rebuilt);
     expect(second).toBe(first);
   });
 });
@@ -167,12 +229,21 @@ function roundTrip(original: EngineInput): EngineInput {
       asOf: original.asOf,
       assumptions: original.assumptions,
       scenario: original.scenario,
+      // Carry `household` through the snapshot when present (Pitfall 5 / T-03-08). It is serialized
+      // here and re-parsed through `parseHousehold` below, so a non-canonical number cannot
+      // silently re-enter the affordability math. Omitted entirely when absent (exactOptionalPropertyTypes).
+      ...(original.household ? { household: original.household } : {}),
     }),
-  ) as { asOf: string; assumptions: unknown; scenario: unknown };
+  ) as { asOf: string; assumptions: unknown; scenario: unknown; household?: unknown };
 
   return engineInput({
     asOf: calendarDate(snapshot.asOf),
     assumptions: parseAssumptionSet(snapshot.assumptions) as CurrentAssumptionSet,
     scenario: parseScenarioInputs(snapshot.scenario),
+    // Re-parse the household through its Zod boundary (never a bare cast) — the same loader path the
+    // snapshot loader uses (T-03-01..02). Omitted when the snapshot carried no household.
+    ...(snapshot.household !== undefined
+      ? { household: parseHousehold(snapshot.household) }
+      : {}),
   });
 }
