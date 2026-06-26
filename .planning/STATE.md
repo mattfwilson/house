@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 03-03-PLAN.md (true affordability — savings floor + cash-on-hand gate)
-last_updated: "2026-06-26T12:40:00.000Z"
-last_activity: 2026-06-26 -- Completed 03-03 (AFF-02 true affordability)
+status: phase-complete
+stopped_at: Completed 03-04-PLAN.md (affordability gap + verdict + barrel + golden) — Phase 03 COMPLETE
+last_updated: "2026-06-26T13:00:00.000Z"
+last_activity: 2026-06-26 -- Completed 03-04 (AFF-03 gap/verdict); Phase 03 complete
 progress:
   total_phases: 7
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 15
-  completed_plans: 14
-  percent: 33
+  completed_plans: 15
+  percent: 43
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-06-22)
 
 ## Current Position
 
-Phase: 03 (affordability-engine) — EXECUTING
-Plan: 4 of 4
-Status: 03-03 complete (AFF-02); ready for 03-04
-Last activity: 2026-06-26 -- Completed 03-03 (AFF-02 true affordability)
+Phase: 03 (affordability-engine) — COMPLETE
+Plan: 4 of 4 complete
+Status: 03-04 complete (AFF-03 gap/verdict); Phase 03 closed (AFF-01/02/03 all done); ready for Phase 04
+Last activity: 2026-06-26 -- Completed 03-04 (AFF-03 gap + directional verdict + public barrel + reproducibility golden)
 
-Progress: 2 of 7 phases complete
+Progress: 3 of 7 phases complete
 
 ## Performance Metrics
 
@@ -67,6 +67,7 @@ Progress: 2 of 7 phases complete
 | Phase 03 P01 | 5min | 4 tasks | 3 files |
 | Phase 03 P02 | 12min | 2 tasks | 4 files |
 | Phase 03 P03 | 6min | 2 tasks | 2 files |
+| Phase 03 P04 | 10min | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -115,6 +116,7 @@ Recent decisions affecting current work:
 - [Phase ?]: [Phase 03-01]: [Affordability]: Household is the durable person-vs-house input contract (D-09) — a Zod .strict()/decStr/targetSavingsRate-in-[0,1) trust boundary mirroring ScenarioInputs, parseHousehold the only loader; OPTIONAL on EngineInput (A3) so TCO-only callers + the byte-identical tco-golden-snapshot.json are untouched, and the household KEY is omitted entirely (not undefined) when absent to satisfy exactOptionalPropertyTypes
 - [Phase 03-02]: [Affordability]: lenderDtiCarryingCost is the D-14 numerator = P+I + propertyTax + insurance + pmi + hoa (PITI+HOA+PMI), summed from the TcoBreakdown line monthlies — EXCLUDES maintenance + amortizedClosing and NEVER reads tco.total (Pitfall 1); both DTI ratios divide by GROSS-monthly income with no tax haircut (Pitfall 2)
 - [Phase 03-02]: [Affordability]: bankAffordability (AFF-01) solves the max approvable price to the cent via monotonic bisection — low strictly above downPaymentCash so trial pct = cash/price < 1 (Pitfall 3), exponential high bracket (no hard ceiling) + iteration caps (T-03-04), thresholds read from assumptions.dti.* (Shared P4); reuses computeTco per trial price (never re-derives amortization, Shared P2); returns bankMaxPrice, bankMaxLoan = price − cash (D-06), both ratios, and the bindingRatio; monotonic across the PMI kink
+- [Phase 03-04]: [Affordability]: affordabilityGap (AFF-03) composes the bank + true ceilings: signedGap = bankMaxPrice − trueMaxPrice (Money); verdict decided on Money.toCents() bigints vs ALIGNED_TOLERANCE_CENTS (exported $1,000 constant, A2) — bankExceedsTrue (anti-funnel) | trueExceedsBank | aligned (D-13, structured enum, NO UI copy). Carries bank bindingRatio + true bindingConstraint (D-12). ANTI-FUNNEL PROVEN reachable AND pinned in the golden fixture itself (bank $672,721 vs true $475,515, signedGap +$197,206, verdict bankExceedsTrue, Pitfall 6). evaluateScenario (D-06) REPORTS at a fixed price (computeTco once, reuses dti.ts + cashSavingsDrain): ratios + pass flags + savingsRateImpact + headroom below the binding ceiling. affordability.type-test.ts guards every dollar field on all four result shapes as Money-only (CORE-02). Public @house/core barrel publishes the four entry points + result types + verdict/binding enums + lenderDtiCarryingCost/cashSavingsDrain (Money-returning) + Household/HouseholdSchema/parseHousehold; frontEndRatio/backEndRatio NOT exported (they return internal Dec). Golden round-trip carries household through parseHousehold (Pitfall 5); UPDATE_GOLDEN-gated, never toMatchSnapshot (T-03-07); tco + canary goldens byte-identical
 - [Phase 03-03]: [Affordability]: trueAffordability (AFF-02) = min of two ceilings via ONE shared solveMaxPrice bisection. cashSavingsDrain is the SECOND D-14 numerator (tco.total − amortizedClosing, KEEPS maintenance — differs from the lender numerator by exactly maintenance). Savings-rate floor: (currentAnnualSavings − (drain − currentRent)×12)/grossAnnualIncome ≥ targetSavingsRate (GROSS denom D-04, currentAnnualSavings baseline D-17, incremental over currentRent D-03). Cash-on-hand gate: downPaymentCash + closingCosts(price) ≤ availableNetWorth − reserve (D-05, closingCosts reused, reserve as-is A1). trueMaxPrice = min(A,B) cent-exact via toCents(); bindingConstraint reports the lower ceiling (savingsFloor wins ties)
 
 ### Pending Todos
@@ -146,6 +148,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-26T12:40:00.000Z
-Stopped at: Completed 03-03-PLAN.md (AFF-02 true affordability — savings floor + cash-on-hand gate)
-Resume file: .planning/phases/03-affordability-engine/03-04-PLAN.md
+Last session: 2026-06-26T13:00:00.000Z
+Stopped at: Completed 03-04-PLAN.md (AFF-03 gap + directional verdict + barrel + golden) — Phase 03 COMPLETE
+Resume file: None — Phase 03 closed; next is Phase 04 (FI-Impact Engine & Sensitivity)
