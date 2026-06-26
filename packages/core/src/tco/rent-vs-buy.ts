@@ -43,6 +43,7 @@
 import { Dec } from '../money/decimal-config.js';
 import { Money } from '../money/money.js';
 import type { EngineInput } from '../engine/engine-input.js';
+import { monthlyGrowthFactor } from './compounding.js';
 import { computeTco } from './tco.js';
 import { amortizationSchedule } from './amortization.js';
 import { maintenanceAnnual, homeValueAt } from './carrying-costs.js';
@@ -74,15 +75,6 @@ export interface RentVsBuyResult {
  */
 export function toReal(nominal: string, inflation: string): InstanceType<typeof Dec> {
   return new Dec(1).plus(new Dec(nominal)).div(new Dec(1).plus(new Dec(inflation))).minus(1);
-}
-
-/**
- * The monthly compounding factor for an ANNUAL real rate `r`: `(1 + r)^(1/12)`, kept at full
- * `Dec` precision. Monthly compounding of an annual real return (not a naive `r/12`) so the
- * portfolio grows consistently with the annual figure.
- */
-function monthlyGrowthFactor(annualReal: string): InstanceType<typeof Dec> {
-  return new Dec(1).plus(new Dec(annualReal)).pow(new Dec(1).div(12));
 }
 
 /**
