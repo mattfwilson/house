@@ -148,7 +148,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 4** *(blocked on Wave 3)*
 
-  - [ ] 04-04-PLAN.md — Six-driver tornado (ranked FI-date swing, top drivers flagged) + no-bare-number type-test + FI golden master + round-trip (ASMP-02, FI-05)
+  - [x] 04-04-PLAN.md — Six-driver tornado (ranked FI-date swing, top drivers flagged) + no-bare-number type-test + FI golden master + round-trip (ASMP-02, FI-05)
 
 ### Phase 5: Town Scoring & Heatmap
 
@@ -203,7 +203,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 1. Foundations & Determinism Core | 4/4 | Complete    | 2026-06-24 |
 | 2. TCO Engine | 7/7 | Complete    | 2026-06-25 |
 | 3. Affordability Engine | 5/5 | Complete    | 2026-06-26 |
-| 4. FI-Impact Engine & Sensitivity | 3/4 | In progress | - |
+| 4. FI-Impact Engine & Sensitivity | 4/4 | Complete    | 2026-06-26 |
 | 5. Town Scoring & Heatmap | 0/TBD | Not started | - |
 | 6. Persistence & Listings Adapter | 0/TBD | Not started | - |
 | 7. Web Shell | 0/TBD | Not started | - |

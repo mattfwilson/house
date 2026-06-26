@@ -55,7 +55,7 @@ Requirements for the core-engine build. Each maps to a roadmap phase.
 ### Assumptions & Sensitivity (ASMP)
 
 - [x] **ASMP-01**: All assumptions (tax rates, DTI thresholds, return assumptions, maintenance %, SWR) are configurable, stored data — never hardcoded
-- [ ] **ASMP-02**: Tool provides sensitivity analysis showing how key outputs swing with key assumptions (return rate, maintenance %, tax), shipped alongside the FI engine
+- [x] **ASMP-02**: Tool provides sensitivity analysis showing how key outputs swing with key assumptions (return rate, maintenance %, tax), shipped alongside the FI engine
 
 ### Listings Adapter (LIST)
 
@@ -115,9 +115,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FI-02 | Phase 4 | Complete (04-02) |
 | FI-03 | Phase 4 | Complete (04-03) |
 | FI-04 | Phase 4 | Complete (04-03) |
-| FI-05 | Phase 4 | Complete (04-02) |
+| FI-05 | Phase 4 | Complete (04-02 oracle + 04-04 golden) |
 | FI-06 | Phase 4 | Complete (04-03) |
-| ASMP-02 | Phase 4 | Pending |
+| ASMP-02 | Phase 4 | Complete (04-04) |
 | TOWN-01 | Phase 5 | Pending |
 | TOWN-02 | Phase 5 | Pending |
 | TOWN-03 | Phase 5 | Pending |
