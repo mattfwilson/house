@@ -152,7 +152,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Gap Closure** *(post-verification; gaps_found 4/5 + code review 1 Critical + 4 Warnings)*
 
-  - [ ] 04-05-PLAN.md — Tornado tax driver bites (overridable mill rate, perturbed relatively, GAP 1/SC5/ASMP-02) + swr.rate zero/negative guard at boundary, in divideBySwr, and tornado swr-low clamp (GAP 2/CR-01) (ASMP-02, FI-05)
+  - [x] 04-05-PLAN.md — Tornado tax driver bites (overridable mill rate, perturbed relatively, GAP 1/SC5/ASMP-02) + swr.rate zero/negative guard at boundary, in divideBySwr, and tornado swr-low clamp (GAP 2/CR-01) (ASMP-02, FI-05) (completed 2026-06-26)
   - [ ] 04-06-PLAN.md — Reconcile equityFor year index with rentVsBuy + correct false "verbatim" comments + month-12 equity-year pin (GAP 3/WR-01; closes IN-02) (FI-05)
 
 ### Phase 5: Town Scoring & Heatmap

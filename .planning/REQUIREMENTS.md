@@ -115,9 +115,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FI-02 | Phase 4 | Complete (04-02) |
 | FI-03 | Phase 4 | Complete (04-03) |
 | FI-04 | Phase 4 | Complete (04-03) |
-| FI-05 | Phase 4 | Complete (04-02 oracle + 04-04 golden) |
+| FI-05 | Phase 4 | Complete (04-02 oracle + 04-04 golden; 04-05 swr.rate guarded) |
 | FI-06 | Phase 4 | Complete (04-03) |
-| ASMP-02 | Phase 4 | Complete (04-04) |
+| ASMP-02 | Phase 4 | Complete (04-04; 04-05 tax driver now bites — SC5 met) |
 | TOWN-01 | Phase 5 | Pending |
 | TOWN-02 | Phase 5 | Pending |
 | TOWN-03 | Phase 5 | Pending |

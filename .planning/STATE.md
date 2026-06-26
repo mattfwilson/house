@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-04-PLAN.md (Phase 04 complete)
-last_updated: "2026-06-26T21:58:51.000Z"
-last_activity: 2026-06-26 -- Phase 04 Wave 4 (04-04) complete; Phase 04 (FI-Impact Engine & Sensitivity) DONE
+stopped_at: Completed 04-05-PLAN.md (Phase 04 gap-closure GAP 1 + GAP 2/CR-01 closed)
+last_updated: "2026-06-26T18:43:00.000Z"
+last_activity: 2026-06-26 -- Phase 04 gap-closure 04-05 complete; tornado tax driver bites + swr.rate fully guarded; goldens byte-identical; suite 352 green
 progress:
   total_phases: 7
   completed_phases: 4
-  total_plans: 20
-  completed_plans: 20
+  total_plans: 21
+  completed_plans: 21
   percent: 57
 ---
 
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-06-22)
 
 ## Current Position
 
-Phase: 4 (fi-impact-engine-&-sensitivity) — COMPLETE (4/4 plans)
-Plan: 04-04 complete (Wave 4 — tornado sensitivity + FI golden + type-test); Phase 04 done
-Status: Executing — next is Phase 05 (Town Scoring & Heatmap)
-Last activity: 2026-06-26 -- Phase 04 Wave 4 (04-04) complete; flagship FI phase DONE
+Phase: 4 (fi-impact-engine-&-sensitivity) — COMPLETE + gap-closure 04-05 done
+Plan: 04-05 complete (gap-closure — tornado tax driver bites via overridable mill rate; swr.rate guarded at boundary/divide/tornado); 04-06 still pending
+Status: Executing — next is gap-closure 04-06, then Phase 05 (Town Scoring & Heatmap)
+Last activity: 2026-06-26 -- Phase 04 gap-closure 04-05 complete (GAP 1 SC5/ASMP-02 + GAP 2 CR-01)
 
-Progress: 4 of 7 phases complete (Phase 4: 4/4 plans)
+Progress: 4 of 7 phases complete (Phase 4: 4/4 plans + 1/2 gap-closure)
 
 ## Performance Metrics
 
@@ -74,6 +74,7 @@ Progress: 4 of 7 phases complete (Phase 4: 4/4 plans)
 | Phase 04 P02 | ~12min | 3 tasks | 5 files |
 | Phase 04 P03 | ~10min | 3 tasks | 5 files |
 | Phase 04 P04 | 12min | 3 tasks | 6 files |
+| Phase 04 P05 | ~12min | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -132,6 +133,7 @@ Recent decisions affecting current work:
 - [Phase 04-02]: [FI]: FI-05 oracle is INDEPENDENT (D-09/D-10) — an in-test closed-form FV-of-annuity solve-for-n (n=ceil(ln(A/B)/ln(f)) via Dec.ln), NOT a copy of the engine loop, asserting EXACT === month agreement at 0% (linear anchor ceil((T-S)/C), Pitfall 1 convention lock), under 5%/3% compounding, through toReal (Fisher high-inflation D-11/L2), and on unreachability (oracle Infinity vs engine kind:'unreached'). Oracle C<=0 branch corrected to the general A/B closed form (seed-only growth IS reachable; only a diverging negative contribution is truly unreachable)
 - [Phase 04-03]: [FI]: fiImpact (FI-01/FI-03) composes fiTargets + projectFiDate over the Phase-2 substrate — the opportunity-cost SYMMETRY is the correctness core: the buy path's foregone t=0 seed (availableNetWorth − DP+closing, reusing closingCosts) and foregone monthly contribution (savings − ownership premium, premium = buyMonthlyOutflowAt − grown rent, REUSED not re-summed) are EXACTLY the dollars the keep-renting baseline keeps invested (D-05: full NW seed, full savings, no equity, price-independent). Buy NW = liquid + liquidated equity (A5 equityFor). Reports fiDeltaMonths = owner−renter (positive ⇒ buying delays FI) + fiDeltaYears (decimal string); BOTH null when either path unreached. Surfaces both FiOutcomes + both targets (D-02). ANTI-FUNNEL ACCEPTANCE PROVEN as a test: a realistic strained input ($1.4M house / $36k savings) yields buy:unreached + baseline:reached — the tool is verified ABLE to conclude don't-buy
 - [Phase 04-03]: [FI]: compareScenarios (FI-04/FI-06) ranks N buys against ONE keep-renting baseline (row 0, isBaseline, delta 0, carries the renter outcome) via a kind-branching comparator — reached-before-unreached, reached by fiDeltaMonths ascending, two unreached by cappedAtMonth ascending, stable input-index tie-break — so the unreached 'don't buy' row sorts WORST. NO non-finite sort key ever materialized (L3): grep gate 0 literal Infinity in compare.ts + a JSON.stringify runtime assertion. A5 product truth surfaced: a cash-heavy buyer of an expensive home can still hit FI on the liquidated equity, so 'expensive' alone ≠ 'don't buy' — LEVERAGE is the discriminator (the unreachable fixture is $4M at 10% down). FI engine block published from index.ts (fiImpact/compareScenarios/fiTargets/projectFiDate + closed types + FiOutcome/FiTargets); Dec/monthlyGrowthFactor stay unexported. Full suite 326 green
+- [Phase 04-05]: [FI gap-closure]: the tornado tax driver now BITES (GAP 1/SC5/ASMP-02). Property tax flows through tco.resolvedMillRate (the single chokepoint both ownerHousingAt + buyMonthlyOutflowAt read), so an OPTIONAL tax.millRateOverride decStr leaf (V3 only, absent from defaults → goldens byte-identical) was added; computeTco honors it (effectiveMillRate = millRateOverride ?? resolveMillRate(town), millRateFy stays town FY for provenance). The tax driver perturbs THAT live rate relatively (×(1±taxBandRelative)), seeded inside perturb from the resolved town rate (town lives on the scenario, not assumptions) and threaded via a new DriverSpec.apply baseRate param — NO switch(driver) projection math (Pitfall 10 intact). swingMonths > 0 for a reached scenario; taxBandRelative '0' collapses to zero (stored-band sourcing). GAP 2/CR-01: swr.rate is positive-by-construction in THREE layers — V3 Zod .refine (Number(s)>0, load-bearing), divideBySwr lessThanOrEqualTo(0) throw (defense in depth, replaces silent Money.of('Infinity')/negative month-0 target), and a tornado swr low-band clamp to SWR_FLOOR='0.0001' (a band ≥ rate is degenerate input the model floors, not a tornado-crash). All four goldens byte-identical (NO regen); suite 352 green (+15)
 - [Phase 04-04]: [FI]: tornado (ASMP-02/D-12/D-13/D-14) is sensitivity-as-cheap-re-run — a data-driven DRIVER_SPECS table perturbs ONE V3 sensitivity band per driver (return/inflation/appreciation/maintenance/tax/swr) and re-runs the SAME fiImpact(...).buy; NO switch(driver) projection math. Tax is the ONLY relative band (×(1±taxBandRelative), L6); the other five absolute (±band). Each perturb re-freezes through engineInput (re-validates at the Zod boundary, T-04-13); bands from stored data, never hardcoded. swingMonths = |highBound − lowBound| via reached month OR unreached cappedAtMonth — finite, no Infinity (L3, grep 0 in sensitivity.ts); rows sort DESC by swing, topDrivers = top-3. Published tornado + TornadoResult/TornadoRow/TornadoDriver. fi.type-test.ts makes no-bare-number + no-numeric-FI-sentinel a tsc -b guarantee (every FiTargets dollar Money, fiDeltaYears/FiOutcome.years decimal strings, a bare -1 not assignable where a FiOutcome is expected). FI-05 reproducibility CLOSED: canonicalFiResult + committed fi-golden-snapshot.json (gated UPDATE_GOLDEN, never toMatchSnapshot) + a round-trip through parseHousehold proving targetAnnualRetirementSpend survives serialize→re-parse byte-identically; golden is a REACHED buy (month 175) vs reached baseline (month 217), fiDeltaMonths -42. Full suite 337 green. FLAGSHIP PHASE 04 COMPLETE. DEFERRED (out of scope, logged): tax.propertyRateAnnual is INERT (property tax flows through the resolved town mill rate), so the tornado tax driver swing is currently 0 — the relative-band machinery is correct/tested but wiring a perturbable rate is a follow-up; plus 1 pre-existing unrelated lint error in rent-vs-buy.test.ts
 
 ### Pending Todos
@@ -163,6 +165,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-26T21:58:51.000Z
-Stopped at: Completed 04-04-PLAN.md (Phase 04 complete)
+Last session: 2026-06-26T18:43:00.000Z
+Stopped at: Completed 04-05-PLAN.md (Phase 04 gap-closure GAP 1 + GAP 2/CR-01 closed)
 Resume file: None
