@@ -102,3 +102,22 @@ export {
 // boundary that exists precisely to keep `Dec` internal (the L6-9 omission). The ratios reach
 // downstream code as decimal STRINGS through `evaluateScenario`'s result instead.
 export { lenderDtiCarryingCost } from './affordability/dti.js';
+
+// FI engine (Phase 4): the flagship FI-impact instrument. This block covers FI-01..FI-06 (the buy
+// vs keep-renting FI-date impact, the asymmetric targets, the termination-guaranteed projection, and
+// the N-scenario ranking with the anti-funnel "don't buy" row) + ASMP-02 (the sensitivity tornado
+// lands in Plan 04). The four entry points — `fiImpact` (FI-01/FI-03), `compareScenarios`
+// (FI-04/FI-06), `fiTargets` (D-01/D-02), and `projectFiDate` (FI-02) — cross with their CLOSED
+// result types + the discriminated `FiOutcome`/`FiTargets`. Raw `Dec`/`Decimal` remain UNEXPORTED:
+// every dollar crosses as `Money`, and `FiOutcome.years` / `fiDeltaYears` cross as decimal STRINGS,
+// so no downstream code can re-open the bare-float hole. The within-package compounding /
+// outflow helpers are deliberately NOT re-exported — they return / consume the internal decimal
+// type, which must not leak across this boundary.
+export { fiImpact, type FiImpactResult } from './fi/fi-impact.js';
+export {
+  compareScenarios,
+  type CompareResult,
+  type CompareRow,
+} from './fi/compare.js';
+export { fiTargets, type FiTargets } from './fi/fi-target.js';
+export { projectFiDate, type FiOutcome } from './fi/projection.js';
