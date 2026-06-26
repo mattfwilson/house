@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: phase-complete
-stopped_at: Completed 03-04-PLAN.md (affordability gap + verdict + barrel + golden) — Phase 03 COMPLETE
+status: gaps-found
+stopped_at: Phase 03 executed (4/4 plans), verification found 1 correctness gap (solver passes(low) precondition) — gap closure pending
 last_updated: "2026-06-26T13:00:00.000Z"
-last_activity: 2026-06-26 -- Completed 03-04 (AFF-03 gap/verdict); Phase 03 complete
+last_activity: 2026-06-26 -- Phase 03 verified gaps_found (CR-01 solver precondition); awaiting /gsd-plan-phase 3 --gaps
 progress:
   total_phases: 7
-  completed_phases: 3
+  completed_phases: 2
   total_plans: 15
   completed_plans: 15
-  percent: 43
+  percent: 29
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-06-22)
 
 ## Current Position
 
-Phase: 03 (affordability-engine) — COMPLETE
-Plan: 4 of 4 complete
-Status: 03-04 complete (AFF-03 gap/verdict); Phase 03 closed (AFF-01/02/03 all done); ready for Phase 04
-Last activity: 2026-06-26 -- Completed 03-04 (AFF-03 gap + directional verdict + public barrel + reproducibility golden)
+Phase: 03 (affordability-engine) — GAPS FOUND (verification)
+Plan: 4 of 4 plans executed; 1 verification gap open
+Status: All 4 plans executed (AFF-01/02/03 implemented). Verification gaps_found: bankAffordability + solveMaxPrice never check passes(low) → infeasible households get a plausible-but-wrong ceiling instead of $0/infeasible (CR-01/CR-02). Gap closure pending before Phase 03 is complete.
+Last activity: 2026-06-26 -- Phase 03 verified gaps_found; run /gsd-plan-phase 3 --gaps
 
-Progress: 3 of 7 phases complete
+Progress: 2 of 7 phases complete
 
 ## Performance Metrics
 

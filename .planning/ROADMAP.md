@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundations & Determinism Core** - Monorepo, decimal-precise money, pure-core boundary, assumptions-as-data, reproducibility harness (completed 2026-06-23)
 - [x] **Phase 2: TCO Engine** - Amortization, MA mill-rate tax, PMI, insurance, maintenance, HOA, closing costs, rent-vs-buy (completed 2026-06-25)
-- [x] **Phase 3: Affordability Engine** - Bank DTI affordability, true affordability, and the gap between them
+- [ ] **Phase 3: Affordability Engine** - Bank DTI affordability, true affordability, and the gap between them (executed; verification gaps_found — solver passes(low) precondition, gap closure pending)
 - [ ] **Phase 4: FI-Impact Engine & Sensitivity (flagship)** - Opportunity cost, FI-date delta, ranked comparison, oracle reconciliation, anti-funnel, sensitivity bands
 - [ ] **Phase 5: Town Scoring & Heatmap** - Weighted normalized composite, budget bucketing, heatmap, MA-specific flags
 - [ ] **Phase 6: Persistence & Listings Adapter** - Local SQLite repos, two profiles, named scenarios, ListingsProvider + MockListingsProvider
@@ -182,7 +182,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 |-------|----------------|--------|-----------|
 | 1. Foundations & Determinism Core | 4/4 | Complete    | 2026-06-24 |
 | 2. TCO Engine | 7/7 | Complete    | 2026-06-25 |
-| 3. Affordability Engine | 4/4 | Complete    | 2026-06-26 |
+| 3. Affordability Engine | 4/4 | Gaps Found  | -          |
 | 4. FI-Impact Engine & Sensitivity | 0/TBD | Not started | - |
 | 5. Town Scoring & Heatmap | 0/TBD | Not started | - |
 | 6. Persistence & Listings Adapter | 0/TBD | Not started | - |
