@@ -109,12 +109,33 @@ function inputAtPrice(base: EngineInput, household: Household, priceDec: Decimal
  * hard ceiling); bisect while `high − low > $0.01`; iteration caps as DoS defense (T-03-06).
  */
 function solveMaxPrice(cash: DecimalInstance, passes: (price: DecimalInstance) => boolean): Money {
-  let low = cash.plus(1);
+  const low0 = cash.plus(1);
+
+  // CR-01 GUARD: the bisection invariant REQUIRES `passes(low0)`. If even the minimum trial price
+  // fails the constraint, NO price passes — return a $0 ceiling rather than silently bisecting an
+  // unbracketed interval down to ≈downPaymentCash+1 (a fundable-looking wrong answer, T-03-09).
+  // This single guard fixes BOTH ceilings (savings floor + cash gate) since they share this solver.
+  if (!passes(low0)) {
+    return Money.zero();
+  }
+
+  let low = low0;
   let high = cash.times(2);
   let doublings = 0;
   while (passes(high) && doublings < MAX_BRACKET_DOUBLINGS) {
     high = high.times(2);
     doublings += 1;
+  }
+
+  // CR-02 GUARD: if the bracket loop exited because the doubling CAP was hit while `passes(high)` is
+  // STILL true, the failing-side invariant is violated and bisection would return a non-maximal
+  // (silently wrong) ceiling. Surface it as a loud, diagnosable Error (T-03-10). Before bisection.
+  if (passes(high)) {
+    throw new Error(
+      `solveMaxPrice (true-affordability): exhausted MAX_BRACKET_DOUBLINGS (${MAX_BRACKET_DOUBLINGS}) ` +
+        'without bracketing a failing price — the constraint never became false within the search ' +
+        'range (check passes() monotonicity).',
+    );
   }
 
   let steps = 0;

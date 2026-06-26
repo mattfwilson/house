@@ -60,6 +60,21 @@ const HOUSEHOLD_ROOMY_CASH: Household = {
 // Tight cash (availableNetWorth − reserve = $110,000) → the cash-on-hand gate binds first.
 const HOUSEHOLD_TIGHT_CASH: Household = { ...HOUSEHOLD_ROOMY_CASH, availableNetWorth: '130000' };
 
+// INFEASIBLE CASH GATE (CR-01): availableNetWorth − reserve = $90,000 < downPaymentCash ($100,000),
+// so `passesCash(low0)` is false at the minimum trial (need $102,500.025 > $90,000 budget). The
+// savings floor stays feasible (roomy income), so the $0 cash ceiling binds: trueMaxPrice === $0,
+// bindingConstraint === 'cashOnHand'.
+const HOUSEHOLD_INFEASIBLE_CASH: Household = { ...HOUSEHOLD_ROOMY_CASH, availableNetWorth: '110000' };
+
+// INFEASIBLE SAVINGS FLOOR (CR-01): roomy cash (so the cash gate is NOT the binder) but a savings
+// baseline so low that even at the minimum trial price the post-purchase savings rate (0.1845) is
+// already below the 0.2 target — `passesFloor(low0)` is false at every price. The $0 savings
+// ceiling binds: trueMaxPrice === $0, bindingConstraint === 'savingsFloor'.
+const HOUSEHOLD_INFEASIBLE_SAVINGS: Household = {
+  ...HOUSEHOLD_ROOMY_CASH,
+  currentAnnualSavings: '1000',
+};
+
 const inputFor = (household: Household): EngineInput =>
   engineInput({ asOf: ASOF, assumptions: DEFAULT_ASSUMPTIONS, scenario: BASE_SCENARIO, household });
 
@@ -192,5 +207,48 @@ describe('cash-on-hand gate + trueMaxPrice = min(savingsRateCeiling, cashOnHandC
       scenario: BASE_SCENARIO,
     });
     expect(() => trueAffordability(noHousehold)).toThrow(/household/i);
+  });
+});
+
+describe('CR-01 — infeasible inputs yield a $0 ceiling via the shared solveMaxPrice guard', () => {
+  test('infeasible cash gate (budget < downPaymentCash): cashOnHandCeiling === $0, binds the result', () => {
+    // Premise: at the low-bound trial price, downPaymentCash + closing already exceeds the budget,
+    // so passesCash(low0) is false and NO price can be funded.
+    const budget = new Dec(HOUSEHOLD_INFEASIBLE_CASH.availableNetWorth).minus(
+      new Dec(HOUSEHOLD_INFEASIBLE_CASH.reserve),
+    );
+    const low0 = new Dec(HOUSEHOLD_INFEASIBLE_CASH.downPaymentCash).plus(1).toFixed();
+    const needAtLow0 = new Dec(HOUSEHOLD_INFEASIBLE_CASH.downPaymentCash).plus(
+      new Dec(
+        closingCosts(
+          low0,
+          DEFAULT_ASSUMPTIONS.closing.rateOfPrice,
+          BASE_SCENARIO.closingCostsOverride,
+        ).toDecimalString(),
+      ),
+    );
+    expect(needAtLow0.lessThanOrEqualTo(budget)).toBe(false);
+
+    const result = trueAffordability(inputFor(HOUSEHOLD_INFEASIBLE_CASH));
+    expect(result.cashOnHandCeiling.toDecimalString()).toBe('0');
+    // $0 cash ceiling is the lower of the two, so it binds the headline true price.
+    expect(result.trueMaxPrice.toDecimalString()).toBe('0');
+    expect(result.bindingConstraint).toBe('cashOnHand');
+  });
+
+  test('infeasible savings floor (rate < target at every price): savingsRateCeiling === $0, binds the result', () => {
+    // Premise: at the low-bound trial price the post-purchase savings rate is already below target
+    // (its maximum, since savings fall as price rises), so passesFloor(low0) is false everywhere.
+    const low0 = new Dec(HOUSEHOLD_INFEASIBLE_SAVINGS.downPaymentCash).plus(1).toFixed();
+    const target = new Dec(HOUSEHOLD_INFEASIBLE_SAVINGS.targetSavingsRate);
+    expect(
+      postPurchaseSavingsRate(HOUSEHOLD_INFEASIBLE_SAVINGS, low0).greaterThanOrEqualTo(target),
+    ).toBe(false);
+
+    const result = trueAffordability(inputFor(HOUSEHOLD_INFEASIBLE_SAVINGS));
+    expect(result.savingsRateCeiling.toDecimalString()).toBe('0');
+    // $0 savings ceiling is the lower (roomy cash), so it binds; ties resolve to savingsFloor.
+    expect(result.trueMaxPrice.toDecimalString()).toBe('0');
+    expect(result.bindingConstraint).toBe('savingsFloor');
   });
 });
