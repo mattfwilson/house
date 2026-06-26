@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-05-PLAN.md (Phase 04 gap-closure GAP 1 + GAP 2/CR-01 closed)
-last_updated: "2026-06-26T18:43:00.000Z"
-last_activity: 2026-06-26 -- Phase 04 gap-closure 04-05 complete; tornado tax driver bites + swr.rate fully guarded; goldens byte-identical; suite 352 green
+stopped_at: Completed 04-06-PLAN.md (Phase 04 gap-closure GAP 3/WR-01 closed; IN-02 + IN-04 closed; PHASE 04 COMPLETE)
+last_updated: "2026-06-26T22:50:48.000Z"
+last_activity: 2026-06-26 -- Phase 04 gap-closure 04-06 complete; equityFor year index reconciled with rentVsBuy (month 12 -> year 1), false "verbatim" comments corrected, month-12 convention pinned; FI golden byte-identical; suite 355 green; PHASE 04 COMPLETE
 progress:
   total_phases: 7
   completed_phases: 4
-  total_plans: 21
-  completed_plans: 21
+  total_plans: 22
+  completed_plans: 22
   percent: 57
 ---
 
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-22)
 
 **Core value:** Answer "what does buying this house do to our early-retirement timeline?" — and be allowed to conclude "don't buy / rent and invest the difference."
-**Current focus:** Phase 04 — fi-impact-engine & sensitivity (COMPLETE); next is Phase 05 — Town Scoring & Heatmap
+**Current focus:** Phase 04 — fi-impact-engine & sensitivity (COMPLETE, all gap-closure done); next is Phase 05 — Town Scoring & Heatmap
 
 ## Current Position
 
-Phase: 4 (fi-impact-engine-&-sensitivity) — COMPLETE + gap-closure 04-05 done
-Plan: 04-05 complete (gap-closure — tornado tax driver bites via overridable mill rate; swr.rate guarded at boundary/divide/tornado); 04-06 still pending
-Status: Executing — next is gap-closure 04-06, then Phase 05 (Town Scoring & Heatmap)
-Last activity: 2026-06-26 -- Phase 04 gap-closure 04-05 complete (GAP 1 SC5/ASMP-02 + GAP 2 CR-01)
+Phase: 4 (fi-impact-engine-&-sensitivity) — COMPLETE (4 plans + 2/2 gap-closure)
+Plan: 04-06 complete (gap-closure — equityFor year index reconciled with rentVsBuy, false "verbatim" comments corrected, month-12 convention pinned; GAP 3/WR-01 + IN-02 + IN-04 closed)
+Status: Executing — Phase 04 COMPLETE; next is Phase 05 (Town Scoring & Heatmap)
+Last activity: 2026-06-26 -- Phase 04 gap-closure 04-06 complete (GAP 3/WR-01; IN-02 + IN-04)
 
-Progress: 4 of 7 phases complete (Phase 4: 4/4 plans + 1/2 gap-closure)
+Progress: 4 of 7 phases complete (Phase 4: 4/4 plans + 2/2 gap-closure — DONE)
 
 ## Performance Metrics
 
@@ -75,6 +75,7 @@ Progress: 4 of 7 phases complete (Phase 4: 4/4 plans + 1/2 gap-closure)
 | Phase 04 P03 | ~10min | 3 tasks | 5 files |
 | Phase 04 P04 | 12min | 3 tasks | 6 files |
 | Phase 04 P05 | ~12min | 3 tasks | 8 files |
+| Phase 04 P06 | ~3min | 1 task | 2 files |
 
 ## Accumulated Context
 
@@ -136,6 +137,8 @@ Recent decisions affecting current work:
 - [Phase 04-05]: [FI gap-closure]: the tornado tax driver now BITES (GAP 1/SC5/ASMP-02). Property tax flows through tco.resolvedMillRate (the single chokepoint both ownerHousingAt + buyMonthlyOutflowAt read), so an OPTIONAL tax.millRateOverride decStr leaf (V3 only, absent from defaults → goldens byte-identical) was added; computeTco honors it (effectiveMillRate = millRateOverride ?? resolveMillRate(town), millRateFy stays town FY for provenance). The tax driver perturbs THAT live rate relatively (×(1±taxBandRelative)), seeded inside perturb from the resolved town rate (town lives on the scenario, not assumptions) and threaded via a new DriverSpec.apply baseRate param — NO switch(driver) projection math (Pitfall 10 intact). swingMonths > 0 for a reached scenario; taxBandRelative '0' collapses to zero (stored-band sourcing). GAP 2/CR-01: swr.rate is positive-by-construction in THREE layers — V3 Zod .refine (Number(s)>0, load-bearing), divideBySwr lessThanOrEqualTo(0) throw (defense in depth, replaces silent Money.of('Infinity')/negative month-0 target), and a tornado swr low-band clamp to SWR_FLOOR='0.0001' (a band ≥ rate is degenerate input the model floors, not a tornado-crash). All four goldens byte-identical (NO regen); suite 352 green (+15)
 - [Phase 04-04]: [FI]: tornado (ASMP-02/D-12/D-13/D-14) is sensitivity-as-cheap-re-run — a data-driven DRIVER_SPECS table perturbs ONE V3 sensitivity band per driver (return/inflation/appreciation/maintenance/tax/swr) and re-runs the SAME fiImpact(...).buy; NO switch(driver) projection math. Tax is the ONLY relative band (×(1±taxBandRelative), L6); the other five absolute (±band). Each perturb re-freezes through engineInput (re-validates at the Zod boundary, T-04-13); bands from stored data, never hardcoded. swingMonths = |highBound − lowBound| via reached month OR unreached cappedAtMonth — finite, no Infinity (L3, grep 0 in sensitivity.ts); rows sort DESC by swing, topDrivers = top-3. Published tornado + TornadoResult/TornadoRow/TornadoDriver. fi.type-test.ts makes no-bare-number + no-numeric-FI-sentinel a tsc -b guarantee (every FiTargets dollar Money, fiDeltaYears/FiOutcome.years decimal strings, a bare -1 not assignable where a FiOutcome is expected). FI-05 reproducibility CLOSED: canonicalFiResult + committed fi-golden-snapshot.json (gated UPDATE_GOLDEN, never toMatchSnapshot) + a round-trip through parseHousehold proving targetAnnualRetirementSpend survives serialize→re-parse byte-identically; golden is a REACHED buy (month 175) vs reached baseline (month 217), fiDeltaMonths -42. Full suite 337 green. FLAGSHIP PHASE 04 COMPLETE. DEFERRED (out of scope, logged): tax.propertyRateAnnual is INERT (property tax flows through the resolved town mill rate), so the tornado tax driver swing is currently 0 — the relative-band machinery is correct/tested but wiring a perturbable rate is a follow-up; plus 1 pre-existing unrelated lint error in rent-vs-buy.test.ts
 
+- [Phase 04-06]: [FI gap-closure]: the buy-path liquidated-equity YEAR convention is now RECONCILED with rentVsBuy's year-boundary snapshot (WR-01/IN-04). `equityFor` was extracted to a pure, exported `buyEquityAt` (so the convention is unit-pinned — T-04-G4: a future blind re-sync fails CI) using `year = Math.max(0, Math.floor(month/12))`: month 12 → year 1 (AGREES with rentVsBuy's `month/12` at boundaries — the old `floor((month-1)/12)` valued month 12 at year 0, one year of appreciation too few), month 0 → year 0 (no NEGATIVE year — closes IN-02 since projection.ts:85 seeds the month-0 check with equityFor(0)), months 1-11 → year 0. Schedule-balance index `month-1` UNCHANGED (already agreed). The false "verbatim from rent-vs-buy.ts 246-253" comments corrected to the actual reconciled convention (IN-04; grep confirms 0 false equity claims). FI golden BYTE-IDENTICAL (buy month 175 / baseline 217 / delta -42 unchanged — the reconciliation did not straddle a year boundary for the fixed golden input, so NO UPDATE_GOLDEN regen). Suite 355 green (+3 convention pins). FLAGSHIP PHASE 04 fully COMPLETE — all 5 verification gaps + the code-review Critical + 4 Warnings closed.
+
 ### Pending Todos
 
 [From .planning/todos/pending/ — ideas captured during sessions]
@@ -165,6 +168,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-26T18:43:00.000Z
-Stopped at: Completed 04-05-PLAN.md (Phase 04 gap-closure GAP 1 + GAP 2/CR-01 closed)
+Last session: 2026-06-26T22:50:48.000Z
+Stopped at: Completed 04-06-PLAN.md (Phase 04 gap-closure GAP 3/WR-01 + IN-02 + IN-04 closed; PHASE 04 COMPLETE)
 Resume file: None
