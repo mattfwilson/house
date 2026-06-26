@@ -121,3 +121,13 @@ export {
 } from './fi/compare.js';
 export { fiTargets, type FiTargets } from './fi/fi-target.js';
 export { projectFiDate, type FiOutcome } from './fi/projection.js';
+// The sensitivity tornado (ASMP-02 / D-12/D-13/D-14): the per-driver one-way FI-date swing, ranked
+// with the top drivers flagged — the "no headline number without a range" instrument. Its closed
+// `TornadoResult`/`TornadoRow` carry the discriminated `FiOutcome`s + a finite `swingMonths` (no
+// Infinity, L3); the driver names are plain string literals (no UI copy). Raw `Dec` stays unexported.
+export {
+  tornado,
+  type TornadoResult,
+  type TornadoRow,
+  type TornadoDriver,
+} from './fi/sensitivity.js';
