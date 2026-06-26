@@ -132,7 +132,23 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. A realistic input set produces a "rent and invest the difference / don't buy" verdict, present as a first-class comparison row (anti-funnel acceptance check)
   5. Sensitivity analysis ships in this phase: a one-way/tornado view shows FI-date swing across return, inflation, maintenance %, tax, and SWR, with the top drivers labeled (no headline number without a range)
 
-**Plans**: TBD
+**Plans**: 4 plans
+
+**Wave 1**
+
+  - [ ] 04-01-PLAN.md — Foundations: promote monthlyGrowthFactor to a shared helper, bump to AssumptionsV3 (six sensitivity bands + max-horizon), add targetAnnualRetirementSpend household leaf, regenerate the three existing goldens (ASMP-02, FI-01, FI-02)
+
+**Wave 2** *(blocked on Wave 1)*
+
+  - [ ] 04-02-PLAN.md — Asymmetric FI targets + monthly projection loop + unreachable verdict, gated by the independent FV-of-annuity oracle (0% exact + high-inflation via Fisher) (FI-01, FI-02, FI-05, FI-06)
+
+**Wave 3** *(blocked on Wave 2)*
+
+  - [ ] 04-03-PLAN.md — fiImpact orchestrator (both paths + FI-date delta) + compareScenarios ranking (baseline row 0, unreached last) + public barrel exports (FI-01, FI-03, FI-04, FI-06)
+
+**Wave 4** *(blocked on Wave 3)*
+
+  - [ ] 04-04-PLAN.md — Six-driver tornado (ranked FI-date swing, top drivers flagged) + no-bare-number type-test + FI golden master + round-trip (ASMP-02, FI-05)
 
 ### Phase 5: Town Scoring & Heatmap
 
@@ -187,7 +203,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 1. Foundations & Determinism Core | 4/4 | Complete    | 2026-06-24 |
 | 2. TCO Engine | 7/7 | Complete    | 2026-06-25 |
 | 3. Affordability Engine | 5/5 | Complete    | 2026-06-26 |
-| 4. FI-Impact Engine & Sensitivity | 0/TBD | Not started | - |
+| 4. FI-Impact Engine & Sensitivity | 0/4 | Not started | - |
 | 5. Town Scoring & Heatmap | 0/TBD | Not started | - |
 | 6. Persistence & Listings Adapter | 0/TBD | Not started | - |
 | 7. Web Shell | 0/TBD | Not started | - |
