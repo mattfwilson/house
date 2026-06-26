@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundations & Determinism Core** - Monorepo, decimal-precise money, pure-core boundary, assumptions-as-data, reproducibility harness (completed 2026-06-23)
 - [x] **Phase 2: TCO Engine** - Amortization, MA mill-rate tax, PMI, insurance, maintenance, HOA, closing costs, rent-vs-buy (completed 2026-06-25)
-- [ ] **Phase 3: Affordability Engine** - Bank DTI affordability, true affordability, and the gap between them (executed; verification gaps_found — solver passes(low) precondition, gap closure pending)
+- [ ] **Phase 3: Affordability Engine** - Bank DTI affordability, true affordability, and the gap between them (executed; verification gaps_found — solver passes(low) precondition; gap-closure plan 03-05 created)
 - [ ] **Phase 4: FI-Impact Engine & Sensitivity (flagship)** - Opportunity cost, FI-date delta, ranked comparison, oracle reconciliation, anti-funnel, sensitivity bands
 - [ ] **Phase 5: Town Scoring & Heatmap** - Weighted normalized composite, budget bucketing, heatmap, MA-specific flags
 - [ ] **Phase 6: Persistence & Listings Adapter** - Local SQLite repos, two profiles, named scenarios, ListingsProvider + MockListingsProvider
@@ -34,7 +34,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Money arithmetic uses a decimal-precise representation (branded `Money` type / decimal lib) with a documented rounding policy; bare-`number` dollar math is rejected by tests
   3. Core functions are deterministic — no `Date.now()`, `Math.random()`, env reads, or module-level mutable defaults; `asOf` and all assumptions are explicit parameters (verified by tests)
   4. An `AssumptionSet` type holds every tunable (tax rates, DTI thresholds, return, inflation, maintenance %, SWR, PMI rules) as versioned, serializable data — nothing is hardcoded
-  5. A reproducibility golden test exists: recomputing a frozen snapshot deep-equals the stored result (cent-identical), proving determinism before persistence exists**Plans**: 4 plans
+  5. A reproducibility golden test exists: recomputing a frozen snapshot deep-equals the stored result (cent-identical), proving determinism before persistence exists**Plans**: 5 plans
 
 **Wave 1**
 
@@ -65,7 +65,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. The full TCO breakdown (P+I, tax, insurance, maintenance reserve, HOA, PMI, amortized closing costs) is presented both monthly and annualized
   5. Rent-vs-buy is computed at the household's real numbers, investing the down payment and monthly difference symmetrically and treating principal as forced savings (no opportunity-cost asymmetry)
 
-**Plans**: 5 plans
+**Plans**: 4 plans
 
 **Wave 1**
 
@@ -100,7 +100,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. True affordability computes the price that fits the household's target savings rate without pushing the FI date past its threshold
   3. The tool surfaces the numeric gap between bank affordability and true affordability as an explicit output
 
-**Plans**: 4 plans
+**Plans**: 5 plans
 
 **Wave 1**
 
@@ -114,6 +114,10 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Wave 3** *(blocked on Wave 2)*
 
   - [x] 03-04-PLAN.md — The gap + directional verdict (anti-funnel bankExceedsTrue, D-12/D-13) + evaluate-scenario + type-test + public barrel + reproducibility golden (AFF-03)
+
+**Wave 4** *(gap closure — solver passes(low) precondition, CR-01/CR-02)*
+
+  - [ ] 03-05-PLAN.md — Solver feasibility guards: infeasible household → $0 ceiling (CR-01) + bracket-cap exhaustion throws (CR-02), feasible behavior + golden snapshot byte-identical (AFF-01, AFF-02, AFF-03)
 
 ### Phase 4: FI-Impact Engine & Sensitivity (flagship)
 

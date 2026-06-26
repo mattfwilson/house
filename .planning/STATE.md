@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-22)
 Phase: 03 (affordability-engine) — GAPS FOUND (verification)
 Plan: 4 of 4 plans executed; 1 verification gap open
 Status: All 4 plans executed (AFF-01/02/03 implemented). Verification gaps_found: bankAffordability + solveMaxPrice never check passes(low) → infeasible households get a plausible-but-wrong ceiling instead of $0/infeasible (CR-01/CR-02). Gap closure pending before Phase 03 is complete.
-Last activity: 2026-06-26 -- Phase 03 verified gaps_found; run /gsd-plan-phase 3 --gaps
+Last activity: 2026-06-26 -- Gap-closure plan 03-05 created + plan-checker PASSED; run /gsd-execute-phase 3 --gaps-only
 
 Progress: 2 of 7 phases complete
 
