@@ -15,6 +15,7 @@ export {
   AssumptionSetSchema,
   AssumptionsV1,
   AssumptionsV2,
+  AssumptionsV3,
   decStr,
   CURRENT_VERSION,
   type AnyAssumptionSet,

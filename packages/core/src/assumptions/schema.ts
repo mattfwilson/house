@@ -141,13 +141,92 @@ export const AssumptionsV2 = z
   .strict();
 
 /**
+ * AssumptionsV3 — schemaVersion 3. KEEPS every V2 slice verbatim and adds the Phase-4
+ * FI-Impact + sensitivity tunables (ASMP-02 / D-07/D-12/D-13). Built by copying the V2 shape,
+ * bumping the discriminant literal, and appending two new `group({...})` slices — every leaf a
+ * `decStr` (never `z.number()`, T-04-01):
+ *   - `sensitivity` (D-12/D-13): the six tornado driver bands. FIVE are ABSOLUTE ± perturbations
+ *     on a rate (`returnBand`/`inflationBand`/`appreciationBand`/`maintenanceBand`/`swrBand` —
+ *     e.g. `returnBand: '0.015'` means ±1.5 percentage points on `returns.realAnnual`). The
+ *     SIXTH, `taxBandRelative`, is a RELATIVE ±fraction of the tax figure (L6 — e.g. `'0.15'`
+ *     means ±15% of the property-tax line), NOT an absolute rate band.
+ *   - `projection` (D-07): `maxHorizonYears`, the FI-projection termination cap. Conceptually an
+ *     INTEGER year crossing, stored as a `decStr` (no `z.number()` at the boundary — T-04-02);
+ *     calc converts it via `Number()` ONLY at the loop bound (the `downPaymentPct` `.refine`
+ *     Number-comparison precedent), never re-entering as a bare number across the boundary.
+ */
+export const AssumptionsV3 = z
+  .object({
+    schemaVersion: z.literal(3),
+    // --- V2 slices, copied verbatim (every leaf a decStr). ---
+    tax: group({
+      effectiveIncomeRate: decStr, // blended marginal-ish income tax rate
+      propertyRateAnnual: decStr, // placeholder statewide property tax rate (of value)
+      assessmentRatio: decStr, // assessed value ÷ market value (e.g. "1.0")
+    }),
+    dti: group({
+      frontEnd: decStr,
+      backEnd: decStr,
+    }),
+    returns: group({
+      realAnnual: decStr,
+    }),
+    inflation: group({
+      annual: decStr,
+    }),
+    maintenance: group({
+      annualPctOfValue: decStr,
+    }),
+    swr: group({
+      rate: decStr,
+    }),
+    pmi: group({
+      annualRateOfLoan: decStr,
+      dropOffLtv: decStr,
+    }),
+    appreciation: group({
+      realAnnual: decStr,
+    }),
+    transaction: group({
+      sellCostPct: decStr,
+    }),
+    rent: group({
+      realGrowthAnnual: decStr,
+    }),
+    closing: group({
+      rateOfPrice: decStr,
+    }),
+    // --- NEW V3 slices (Phase 4). ---
+    // The six tornado sensitivity driver bands (D-12/D-13). Five are ABSOLUTE ± on a rate;
+    // `taxBandRelative` is a RELATIVE ±fraction of the tax figure (L6).
+    sensitivity: group({
+      returnBand: decStr, // ± absolute on returns.realAnnual
+      inflationBand: decStr, // ± absolute on inflation.annual
+      appreciationBand: decStr, // ± absolute on appreciation.realAnnual
+      maintenanceBand: decStr, // ± absolute on maintenance.annualPctOfValue
+      taxBandRelative: decStr, // RELATIVE ± fraction of the property-tax figure (L6), NOT absolute
+      swrBand: decStr, // ± absolute on swr.rate
+    }),
+    // FI-projection termination cap (D-07). A conceptual INTEGER year count stored as a decStr
+    // (no z.number()); converted via Number() only at the loop bound inside calc.
+    projection: group({
+      maxHorizonYears: decStr,
+    }),
+  })
+  .strict();
+
+/**
  * AssumptionSetSchema — the versioned discriminated union (D-05). Adding a version is a
  * one-line append: another object schema in the `z.discriminatedUnion` list.
  */
-export const AssumptionSetSchema = z.discriminatedUnion('schemaVersion', [AssumptionsV1, AssumptionsV2]);
+export const AssumptionSetSchema = z.discriminatedUnion('schemaVersion', [
+  AssumptionsV1,
+  AssumptionsV2,
+  AssumptionsV3,
+]);
 
 /** The current schema version (integer, monotonic). */
-export const CURRENT_VERSION = 2 as const;
+export const CURRENT_VERSION = 3 as const;
 
 /**
  * Any accepted (parseable) AssumptionSet — the union across all known versions.
@@ -158,7 +237,10 @@ export const CURRENT_VERSION = 2 as const;
  * the `migrate` switch depends on. The members are the SAME schemas the union is built from,
  * so this stays a single source of truth (a member shape change still flows through).
  */
-export type AnyAssumptionSet = z.infer<typeof AssumptionsV1> | z.infer<typeof AssumptionsV2>;
+export type AnyAssumptionSet =
+  | z.infer<typeof AssumptionsV1>
+  | z.infer<typeof AssumptionsV2>
+  | z.infer<typeof AssumptionsV3>;
 
 /** The current-version AssumptionSet (what calc code consumes). */
-export type CurrentAssumptionSet = z.infer<typeof AssumptionsV2>;
+export type CurrentAssumptionSet = z.infer<typeof AssumptionsV3>;

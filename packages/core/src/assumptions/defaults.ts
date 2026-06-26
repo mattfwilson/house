@@ -12,7 +12,7 @@
 import type { CurrentAssumptionSet } from './schema.js';
 
 export const DEFAULT_ASSUMPTIONS: CurrentAssumptionSet = {
-  schemaVersion: 2,
+  schemaVersion: 3,
   tax: {
     // Blended effective income tax rate (fed + MA 5% flat), placeholder.
     effectiveIncomeRate: '0.27',
@@ -66,5 +66,26 @@ export const DEFAULT_ASSUMPTIONS: CurrentAssumptionSet = {
     // [ASSUMED] Default one-time closing cost as ~2.5% of purchase price (D-12),
     // overridable per scenario — pending user confirmation.
     rateOfPrice: '0.025',
+  },
+  sensitivity: {
+    // [ASSUMED] The six tornado driver bands (RESEARCH A4 / D-12 — LOCKED values) — pending
+    // user confirmation. FIVE are ABSOLUTE ± perturbations on a rate (percentage points):
+    // a returnBand of '0.015' perturbs returns.realAnnual by ±1.5pp. The SIXTH,
+    // taxBandRelative, is a RELATIVE ±fraction of the tax figure (L6): '0.15' = ±15% of the
+    // property-tax line, NOT an absolute rate band.
+    returnBand: '0.015', // ± absolute on returns.realAnnual
+    inflationBand: '0.01', // ± absolute on inflation.annual
+    appreciationBand: '0.01', // ± absolute on appreciation.realAnnual
+    maintenanceBand: '0.005', // ± absolute on maintenance.annualPctOfValue
+    taxBandRelative: '0.15', // RELATIVE ±15% of the property-tax figure (L6), NOT absolute
+    swrBand: '0.005', // ± absolute on swr.rate
+  },
+  projection: {
+    // [ASSUMED] FI-projection termination cap (RESEARCH A3 / D-07) — pending user confirmation.
+    // 60 years = 720 months, comfortably past any realistic FI date. Conceptually an INTEGER
+    // year count stored as a decStr (no z.number()); calc converts via Number() ONLY at the
+    // loop bound (the downPaymentPct .refine Number-comparison precedent), never re-entering
+    // as a bare number across the boundary.
+    maxHorizonYears: '60',
   },
 };
