@@ -53,6 +53,7 @@ const HOUSEHOLD_STRONG: Household = {
   downPaymentCash: '80000',
   reserve: '20000',
   currentAnnualSavings: '60000',
+  targetAnnualRetirementSpend: '66000',
 };
 
 const HOUSEHOLD_MODEST: Household = {
@@ -64,6 +65,7 @@ const HOUSEHOLD_MODEST: Household = {
   downPaymentCash: '180000',
   reserve: '20000',
   currentAnnualSavings: '25000',
+  targetAnnualRetirementSpend: '33000',
 };
 
 const inputFor = (scenario: ScenarioInputs, household: Household): EngineInput =>

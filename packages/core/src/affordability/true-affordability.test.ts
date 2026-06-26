@@ -55,6 +55,7 @@ const HOUSEHOLD_ROOMY_CASH: Household = {
   downPaymentCash: '100000',
   reserve: '20000',
   currentAnnualSavings: '40000',
+  targetAnnualRetirementSpend: '54000',
 };
 
 // Tight cash (availableNetWorth − reserve = $110,000) → the cash-on-hand gate binds first.

@@ -54,6 +54,7 @@ const HOUSEHOLD_CONSERVATIVE: Household = {
   downPaymentCash: '150000',
   reserve: '50000',
   currentAnnualSavings: '90000',
+  targetAnnualRetirementSpend: '66000',
 };
 
 // CASH-RICH (the trueExceedsBank direction): a LOW income (so the bank under-approves on DTI)
@@ -68,6 +69,7 @@ const HOUSEHOLD_CASH_RICH: Household = {
   downPaymentCash: '300000',
   reserve: '50000',
   currentAnnualSavings: '60000',
+  targetAnnualRetirementSpend: '27000',
 };
 
 const inputFor = (household: Household): EngineInput =>

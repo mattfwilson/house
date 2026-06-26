@@ -49,6 +49,7 @@ const HOUSEHOLD_LOW_DEBT: Household = {
   downPaymentCash: '100000',
   reserve: '20000',
   currentAnnualSavings: '40000',
+  targetAnnualRetirementSpend: '54000',
 };
 
 // Same household but debt-heavy: the back-end ceiling (0.36) becomes the binding constraint.

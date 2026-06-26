@@ -12,13 +12,14 @@ import { DEFAULT_ASSUMPTIONS } from './defaults.js';
 
 describe('DEFAULT_ASSUMPTIONS — versioned pure seed data (D-07)', () => {
   test('declares the current schemaVersion', () => {
-    expect(DEFAULT_ASSUMPTIONS.schemaVersion).toBe(2);
+    expect(DEFAULT_ASSUMPTIONS.schemaVersion).toBe(3);
   });
 
-  test('has every namespaced group (D-04), including the V2 TCO slices', () => {
+  test('has every namespaced group (D-04), including the V2 TCO + V3 FI/sensitivity slices', () => {
     for (const k of [
       'tax', 'dti', 'returns', 'inflation', 'maintenance', 'swr', 'pmi',
       'appreciation', 'transaction', 'rent', 'closing',
+      'sensitivity', 'projection',
     ] as const) {
       expect(DEFAULT_ASSUMPTIONS[k]).toBeDefined();
     }
@@ -48,7 +49,7 @@ describe('DEFAULT_ASSUMPTIONS — versioned pure seed data (D-07)', () => {
 describe('parseAssumptionSet / serializeAssumptionSet (boundary helpers)', () => {
   test('parseAssumptionSet returns the validated set for good data', () => {
     const parsed = parseAssumptionSet(DEFAULT_ASSUMPTIONS);
-    expect(parsed.schemaVersion).toBe(2);
+    expect(parsed.schemaVersion).toBe(3);
   });
 
   test('parseAssumptionSet throws on malformed data (never trusts raw JSON — T-03-03)', () => {

@@ -84,6 +84,9 @@ const FIXED_HOUSEHOLD: Household = {
   downPaymentCash: '90000',
   reserve: '30000',
   currentAnnualSavings: '48000',
+  // Target annual retirement spend (D-01) — the new required Household leaf. A plausible
+  // retirement spend for the seeded $200k household; the FI number = this ÷ swr.rate (Plan 02).
+  targetAnnualRetirementSpend: '60000',
 };
 
 /**
