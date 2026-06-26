@@ -145,8 +145,8 @@ describe('cash-on-hand gate + trueMaxPrice = min(savingsRateCeiling, cashOnHandC
     expect(result.bindingConstraint).toBe('cashOnHand');
     // availableNetWorth − reserve = $110,000; closing = price × 0.025; cash = $100,000:
     //   100000 + 0.025·price <= 110000  ⇒  price <= $400,000 (exact).
-    expect(result.cashOnHandCeiling.toDecimalString()).toBe('400000.00');
-    expect(result.trueMaxPrice.toDecimalString()).toBe('400000.00');
+    expect(result.cashOnHandCeiling.toDecimalString()).toBe('400000');
+    expect(result.trueMaxPrice.toDecimalString()).toBe('400000');
   });
 
   test('cash ceiling: downPaymentCash + closingCosts(ceiling) <= availableNetWorth − reserve, +$0.01 fails', () => {
