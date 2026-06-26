@@ -38,12 +38,12 @@ Requirements for the core-engine build. Each maps to a roadmap phase.
 
 ### FI-Impact Engine (FI) — flagship
 
-- [ ] **FI-01**: Tool models the down payment + closing costs as foregone investment and the monthly housing delta vs renting as a recurring foregone contribution
+- [x] **FI-01**: Tool models the down payment + closing costs as foregone investment and the monthly housing delta vs renting as a recurring foregone contribution
 - [x] **FI-02**: Tool projects net-worth trajectory and FI date for a scenario vs the no-purchase baseline, using configurable real return and a long-horizon-appropriate SWR default (~3–3.5%, not 4%)
-- [ ] **FI-03**: Tool outputs the shift in FI date (months/years) caused by a scenario
-- [ ] **FI-04**: User can compare N scenarios side by side, ranked by FI-date impact
+- [x] **FI-03**: Tool outputs the shift in FI date (months/years) caused by a scenario
+- [x] **FI-04**: User can compare N scenarios side by side, ranked by FI-date impact
 - [x] **FI-05**: FI projection math reconciles against the existing retirement model, validated by a golden-master/oracle test
-- [ ] **FI-06**: Tool can reach a "rent and invest the difference" / "don't buy" conclusion when the numbers warrant it (anti-funnel guarantee)
+- [x] **FI-06**: Tool can reach a "rent and invest the difference" / "don't buy" conclusion when the numbers warrant it (anti-funnel guarantee)
 
 ### Town Scoring & Heatmap (TOWN)
 
@@ -111,12 +111,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AFF-01 | Phase 3 | Complete (03-02) |
 | AFF-02 | Phase 3 | Complete |
 | AFF-03 | Phase 3 | Complete (03-04) |
-| FI-01 | Phase 4 | Pending |
+| FI-01 | Phase 4 | Complete (04-03) |
 | FI-02 | Phase 4 | Complete (04-02) |
-| FI-03 | Phase 4 | Pending |
-| FI-04 | Phase 4 | Pending |
+| FI-03 | Phase 4 | Complete (04-03) |
+| FI-04 | Phase 4 | Complete (04-03) |
 | FI-05 | Phase 4 | Complete (04-02) |
-| FI-06 | Phase 4 | Pending |
+| FI-06 | Phase 4 | Complete (04-03) |
 | ASMP-02 | Phase 4 | Pending |
 | TOWN-01 | Phase 5 | Pending |
 | TOWN-02 | Phase 5 | Pending |

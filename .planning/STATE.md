@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-02-PLAN.md
-last_updated: "2026-06-26T21:35:00.000Z"
-last_activity: 2026-06-26 -- Phase 04 Wave 2 (04-02) complete; next is 04-03
+stopped_at: Completed 04-03-PLAN.md
+last_updated: "2026-06-26T21:42:00.000Z"
+last_activity: 2026-06-26 -- Phase 04 Wave 3 (04-03) complete; next is 04-04
 progress:
   total_phases: 7
   completed_phases: 3
-  total_plans: 18
-  completed_plans: 18
-  percent: 47
+  total_plans: 19
+  completed_plans: 19
+  percent: 50
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-22)
 
 **Core value:** Answer "what does buying this house do to our early-retirement timeline?" — and be allowed to conclude "don't buy / rent and invest the difference."
-**Current focus:** Phase 04 — fi-impact-engine & sensitivity (next)
+**Current focus:** Phase 04 — fi-impact-engine & sensitivity (in progress)
 
 ## Current Position
 
 Phase: 4 (fi-impact-engine-&-sensitivity) — in progress
-Plan: 04-02 complete; next is 04-03 (Wave 3)
+Plan: 04-03 complete; next is 04-04 (Wave 4 — tornado sensitivity + golden)
 Status: Executing
-Last activity: 2026-06-26 -- Phase 04 Wave 2 (04-02) complete; next is 04-03
+Last activity: 2026-06-26 -- Phase 04 Wave 3 (04-03) complete; next is 04-04
 
-Progress: 3 of 7 phases complete (Phase 4: 2/4 plans)
+Progress: 3 of 7 phases complete (Phase 4: 3/4 plans)
 
 ## Performance Metrics
 
@@ -72,6 +72,7 @@ Progress: 3 of 7 phases complete (Phase 4: 2/4 plans)
 | Phase 03 P05 | 7min | 3 tasks | 4 files |
 | Phase 04 P01 | ~25min | 4 tasks | 9 files |
 | Phase 04 P02 | ~12min | 3 tasks | 5 files |
+| Phase 04 P03 | ~10min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -128,6 +129,8 @@ Recent decisions affecting current work:
 - [Phase 04-02]: [FI]: projectFiDate is the termination-guaranteed monthly NW loop — contribute-then-compound through the SHARED monthlyGrowthFactor (L1), first month NW>=target => FiOutcome kind:'reached' (years=month/12 Dec string), else kind:'unreached' cappedAtMonth=maxHorizonYears*12 (D-07/L3 — a discriminated variant, never an Infinity/-1 sentinel; the canonicalJson-serializable encoding). Optional equityFor adds the buy-path liquidated home equity (A5 = liquid + liquidated equity, matching rentVsBuy's ending-NW), proven to reach STRICTLY earlier than liquid-only
 - [Phase 04-02]: [FI]: fiTargets surfaces the asymmetric renter/owner FI targets — renterTarget=(spend+currentRent*12)/swr, ownerTarget=(spend+year-0 tax+ins+maint)/swr — all four Money fields exposed (D-02 fulcrum visible). Owner housing at the YEAR-0 basis (A1, avoids the target↔FI-year fixed point L7; fiYear param keeps the appreciated-basis upgrade API-stable). Division in Dec only (Money has no div), crossed to Money once; SWR knob proven live (higher swr => lower target) for the Plan-04 tornado
 - [Phase 04-02]: [FI]: FI-05 oracle is INDEPENDENT (D-09/D-10) — an in-test closed-form FV-of-annuity solve-for-n (n=ceil(ln(A/B)/ln(f)) via Dec.ln), NOT a copy of the engine loop, asserting EXACT === month agreement at 0% (linear anchor ceil((T-S)/C), Pitfall 1 convention lock), under 5%/3% compounding, through toReal (Fisher high-inflation D-11/L2), and on unreachability (oracle Infinity vs engine kind:'unreached'). Oracle C<=0 branch corrected to the general A/B closed form (seed-only growth IS reachable; only a diverging negative contribution is truly unreachable)
+- [Phase 04-03]: [FI]: fiImpact (FI-01/FI-03) composes fiTargets + projectFiDate over the Phase-2 substrate — the opportunity-cost SYMMETRY is the correctness core: the buy path's foregone t=0 seed (availableNetWorth − DP+closing, reusing closingCosts) and foregone monthly contribution (savings − ownership premium, premium = buyMonthlyOutflowAt − grown rent, REUSED not re-summed) are EXACTLY the dollars the keep-renting baseline keeps invested (D-05: full NW seed, full savings, no equity, price-independent). Buy NW = liquid + liquidated equity (A5 equityFor). Reports fiDeltaMonths = owner−renter (positive ⇒ buying delays FI) + fiDeltaYears (decimal string); BOTH null when either path unreached. Surfaces both FiOutcomes + both targets (D-02). ANTI-FUNNEL ACCEPTANCE PROVEN as a test: a realistic strained input ($1.4M house / $36k savings) yields buy:unreached + baseline:reached — the tool is verified ABLE to conclude don't-buy
+- [Phase 04-03]: [FI]: compareScenarios (FI-04/FI-06) ranks N buys against ONE keep-renting baseline (row 0, isBaseline, delta 0, carries the renter outcome) via a kind-branching comparator — reached-before-unreached, reached by fiDeltaMonths ascending, two unreached by cappedAtMonth ascending, stable input-index tie-break — so the unreached 'don't buy' row sorts WORST. NO non-finite sort key ever materialized (L3): grep gate 0 literal Infinity in compare.ts + a JSON.stringify runtime assertion. A5 product truth surfaced: a cash-heavy buyer of an expensive home can still hit FI on the liquidated equity, so 'expensive' alone ≠ 'don't buy' — LEVERAGE is the discriminator (the unreachable fixture is $4M at 10% down). FI engine block published from index.ts (fiImpact/compareScenarios/fiTargets/projectFiDate + closed types + FiOutcome/FiTargets); Dec/monthlyGrowthFactor stay unexported. Full suite 326 green
 
 ### Pending Todos
 

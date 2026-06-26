@@ -144,7 +144,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 3** *(blocked on Wave 2)*
 
-  - [ ] 04-03-PLAN.md — fiImpact orchestrator (both paths + FI-date delta) + compareScenarios ranking (baseline row 0, unreached last) + public barrel exports (FI-01, FI-03, FI-04, FI-06)
+  - [x] 04-03-PLAN.md — fiImpact orchestrator (both paths + FI-date delta) + compareScenarios ranking (baseline row 0, unreached last) + public barrel exports (FI-01, FI-03, FI-04, FI-06)
 
 **Wave 4** *(blocked on Wave 3)*
 
@@ -203,7 +203,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 1. Foundations & Determinism Core | 4/4 | Complete    | 2026-06-24 |
 | 2. TCO Engine | 7/7 | Complete    | 2026-06-25 |
 | 3. Affordability Engine | 5/5 | Complete    | 2026-06-26 |
-| 4. FI-Impact Engine & Sensitivity | 2/4 | In progress | - |
+| 4. FI-Impact Engine & Sensitivity | 3/4 | In progress | - |
 | 5. Town Scoring & Heatmap | 0/TBD | Not started | - |
 | 6. Persistence & Listings Adapter | 0/TBD | Not started | - |
 | 7. Web Shell | 0/TBD | Not started | - |
