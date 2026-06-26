@@ -51,6 +51,7 @@ const VALID_HOUSEHOLD: Household = {
   downPaymentCash: '120000',
   reserve: '30000',
   currentAnnualSavings: '60000',
+  targetAnnualRetirementSpend: '60000',
 };
 
 const baseParts = () => ({
@@ -63,7 +64,7 @@ describe('engineInput factory — the immutable snapshot unit (D-11)', () => {
   test('assembles an object with asOf + assumptions + scenario', () => {
     const input = engineInput(baseParts());
     expect(input.asOf).toBe('2026-06-23');
-    expect(input.assumptions.schemaVersion).toBe(2);
+    expect(input.assumptions.schemaVersion).toBe(3);
     expect(input.scenario.label).toBe('boundary-valid: Newton $450k');
   });
 
@@ -287,5 +288,27 @@ describe('parseHousehold — the household half of the affordability trust bound
 
   test('HouseholdSchema is .strict() (rejects unknown keys directly)', () => {
     expect(HouseholdSchema.safeParse({ ...VALID_HOUSEHOLD, extra: 1 }).success).toBe(false);
+  });
+
+  describe('targetAnnualRetirementSpend is a required, canonical decStr leaf (D-01, FI-01/FI-02)', () => {
+    test('a canonical value round-trips through parseHousehold', () => {
+      const parsed = parseHousehold({ ...VALID_HOUSEHOLD, targetAnnualRetirementSpend: '60000' });
+      expect(parsed.targetAnnualRetirementSpend).toBe('60000');
+    });
+    test("a thousands-separated value ('60,000') is rejected (decStr regex)", () => {
+      expect(() =>
+        parseHousehold({ ...VALID_HOUSEHOLD, targetAnnualRetirementSpend: '60,000' }),
+      ).toThrow();
+    });
+    test('a bare JS number (60000) is rejected (decStr is string-only)', () => {
+      expect(() =>
+        parseHousehold({ ...VALID_HOUSEHOLD, targetAnnualRetirementSpend: 60000 as unknown as string }),
+      ).toThrow();
+    });
+    test('a missing targetAnnualRetirementSpend throws (REQUIRED leaf — no honest default)', () => {
+      const { targetAnnualRetirementSpend, ...missing } = VALID_HOUSEHOLD;
+      void targetAnnualRetirementSpend;
+      expect(() => parseHousehold(missing)).toThrow();
+    });
   });
 });

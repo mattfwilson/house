@@ -145,6 +145,12 @@ export interface Household {
    * baseline. Makes the savings-rate floor well-defined.
    */
   readonly currentAnnualSavings: string;
+  /**
+   * Target annual retirement spend, today's dollars (D-01). The FI number = this ÷ swr.rate.
+   * A REQUIRED leaf in the same annual-dollar family as `currentAnnualSavings`: the FI engine
+   * (Plan 02) needs it and a missing spend has no honest default.
+   */
+  readonly targetAnnualRetirementSpend: string;
 }
 
 /**
@@ -175,6 +181,10 @@ export const HouseholdSchema = z
     downPaymentCash: decStr,
     reserve: decStr,
     currentAnnualSavings: decStr,
+    // Target annual retirement spend, today's dollars (D-01). Plain `decStr` (no `.refine`): an
+    // unbounded positive dollar amount, NOT a [0,1) ratio — mirrors `availableNetWorth`, not the
+    // `targetSavingsRate` refine. The FI number = this ÷ swr.rate (Plan 02).
+    targetAnnualRetirementSpend: decStr,
   })
   .strict();
 
