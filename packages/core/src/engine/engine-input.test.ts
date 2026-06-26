@@ -14,8 +14,11 @@ import { DEFAULT_ASSUMPTIONS } from '../assumptions/defaults.js';
 import {
   engineInput,
   parseScenarioInputs,
+  parseHousehold,
   ScenarioInputsSchema,
+  HouseholdSchema,
   type ScenarioInputs,
+  type Household,
 } from './engine-input.js';
 
 /**
@@ -33,6 +36,21 @@ const VALID_SCENARIO: ScenarioInputs = {
   insuranceAnnual: '2000',
   hoaMonthly: '0',
   monthlyRent: '2800',
+};
+
+/**
+ * A well-formed household (the person-vs-house block, D-09): canonical decimal strings for
+ * every dollar field, targetSavingsRate in [0,1), incl. currentAnnualSavings (D-17).
+ */
+const VALID_HOUSEHOLD: Household = {
+  grossAnnualIncome: '200000',
+  existingMonthlyDebt: '500',
+  targetSavingsRate: '0.30',
+  availableNetWorth: '350000',
+  currentRent: '2800',
+  downPaymentCash: '120000',
+  reserve: '30000',
+  currentAnnualSavings: '60000',
 };
 
 const baseParts = () => ({
@@ -84,6 +102,31 @@ describe('engineInput factory — the immutable snapshot unit (D-11)', () => {
   test('engineInput parses the scenario through the schema — a forged scenario throws', () => {
     const forged = { ...VALID_SCENARIO, holdingYears: -1 };
     expect(() => engineInput({ ...baseParts(), scenario: forged as ScenarioInputs })).toThrow();
+  });
+
+  test('engineInput WITH a household freezes it and round-trips it (D-09)', () => {
+    const input = engineInput({ ...baseParts(), household: VALID_HOUSEHOLD });
+    expect(input.household).toStrictEqual(VALID_HOUSEHOLD);
+    expect(Object.isFrozen(input.household)).toBe(true);
+    expect(Object.isFrozen(input)).toBe(true);
+  });
+
+  test('engineInput WITHOUT a household yields household === undefined (optional, A3)', () => {
+    const input = engineInput(baseParts());
+    expect(input.household).toBeUndefined();
+    expect(Object.isFrozen(input)).toBe(true);
+  });
+
+  test('a TCO-only engineInput omits the household key entirely (golden stays byte-identical)', () => {
+    const input = engineInput(baseParts());
+    expect(Object.prototype.hasOwnProperty.call(input, 'household')).toBe(false);
+  });
+
+  test('engineInput parses the household through the schema — a forged household throws', () => {
+    const forged = { ...VALID_HOUSEHOLD, targetSavingsRate: '1.5' };
+    expect(() =>
+      engineInput({ ...baseParts(), household: forged as Household }),
+    ).toThrow();
   });
 });
 
@@ -180,5 +223,69 @@ describe('parseScenarioInputs — the scenario half of the snapshot trust bounda
 
   test('ScenarioInputsSchema is .strict() (rejects unknown keys directly)', () => {
     expect(ScenarioInputsSchema.safeParse({ ...VALID_SCENARIO, extra: 1 }).success).toBe(false);
+  });
+});
+
+describe('parseHousehold — the household half of the affordability trust boundary (T-03-01..02)', () => {
+  test('ACCEPTS a well-formed household and returns it (deep-equals the input)', () => {
+    const parsed = parseHousehold(VALID_HOUSEHOLD);
+    expect(parsed).toStrictEqual(VALID_HOUSEHOLD);
+  });
+
+  describe('targetSavingsRate is admitted only in [0,1)', () => {
+    test("'0' is accepted (zero savings target)", () => {
+      expect(
+        parseHousehold({ ...VALID_HOUSEHOLD, targetSavingsRate: '0' }).targetSavingsRate,
+      ).toBe('0');
+    });
+    test("'0.5' is accepted (mid value)", () => {
+      expect(
+        parseHousehold({ ...VALID_HOUSEHOLD, targetSavingsRate: '0.5' }).targetSavingsRate,
+      ).toBe('0.5');
+    });
+    test("'0.99' is accepted", () => {
+      expect(
+        parseHousehold({ ...VALID_HOUSEHOLD, targetSavingsRate: '0.99' }).targetSavingsRate,
+      ).toBe('0.99');
+    });
+    test("'1' is rejected (out of [0,1))", () => {
+      expect(() => parseHousehold({ ...VALID_HOUSEHOLD, targetSavingsRate: '1' })).toThrow();
+    });
+    test("'1.5' is rejected (>= 1)", () => {
+      expect(() => parseHousehold({ ...VALID_HOUSEHOLD, targetSavingsRate: '1.5' })).toThrow();
+    });
+    test("'-0.1' is rejected (negative)", () => {
+      expect(() => parseHousehold({ ...VALID_HOUSEHOLD, targetSavingsRate: '-0.1' })).toThrow();
+    });
+  });
+
+  describe('REJECTS non-canonical decimal strings in decStr fields', () => {
+    test("thousands separator '100,000' in grossAnnualIncome throws", () => {
+      expect(() => parseHousehold({ ...VALID_HOUSEHOLD, grossAnnualIncome: '100,000' })).toThrow();
+    });
+    test("exponent form '1e5' in availableNetWorth throws", () => {
+      expect(() => parseHousehold({ ...VALID_HOUSEHOLD, availableNetWorth: '1e5' })).toThrow();
+    });
+    test("whitespace '  5 ' in reserve throws", () => {
+      expect(() => parseHousehold({ ...VALID_HOUSEHOLD, reserve: '  5 ' })).toThrow();
+    });
+    test("'NaN' in currentAnnualSavings throws", () => {
+      expect(() => parseHousehold({ ...VALID_HOUSEHOLD, currentAnnualSavings: 'NaN' })).toThrow();
+    });
+  });
+
+  describe('REJECTS structurally-forged households (V5 / T-03-V5)', () => {
+    test('an unknown extra key throws (.strict() — forged-snapshot control)', () => {
+      expect(() => parseHousehold({ ...VALID_HOUSEHOLD, smuggledField: 'evil' })).toThrow();
+    });
+    test('a missing required field throws (omit currentAnnualSavings)', () => {
+      const { currentAnnualSavings, ...missing } = VALID_HOUSEHOLD;
+      void currentAnnualSavings;
+      expect(() => parseHousehold(missing)).toThrow();
+    });
+  });
+
+  test('HouseholdSchema is .strict() (rejects unknown keys directly)', () => {
+    expect(HouseholdSchema.safeParse({ ...VALID_HOUSEHOLD, extra: 1 }).success).toBe(false);
   });
 });
