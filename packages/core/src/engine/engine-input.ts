@@ -105,6 +105,91 @@ export function parseScenarioInputs(input: unknown): ScenarioInputs {
 }
 
 /**
+ * The household (profile) block — the person-vs-house side of an affordability solve (D-09).
+ * This is the durable input the affordability solvers (Waves 2-3) consume and Phase 6 will
+ * persist. Like `ScenarioInputs`, every dollar leaf crosses this boundary as a canonical
+ * decimal STRING (never a bare float — CORE-02 / D-06) and the whole shape is `readonly`.
+ *
+ * `targetSavingsRate` is the only NON-dollar leaf: a fraction-of-gross savings target,
+ * constrained to the half-open interval [0,1) at the schema boundary.
+ */
+export interface Household {
+  /**
+   * GROSS (pre-tax) annual household income, dollar string (D-02 / D-04). This is GROSS,
+   * not net/take-home (Pitfall 2) — the savings-rate target is measured against gross.
+   */
+  readonly grossAnnualIncome: string;
+  /**
+   * Single MONTHLY minimum-obligations total (car/student/card minimums) — a monthly payment
+   * total, NOT outstanding balances (D-10). Feeds the DTI back-end in the solvers.
+   */
+  readonly existingMonthlyDebt: string;
+  /** Target savings rate as a fraction of GROSS income, in [0,1) (D-02 / D-04). */
+  readonly targetSavingsRate: string;
+  /** Investable net worth available for the cash-on-hand gate (D-05), dollar string. */
+  readonly availableNetWorth: string;
+  /**
+   * Current household monthly rent (D-11). DISTINCT from `scenario.monthlyRent`, which is the
+   * market rent of the rent-vs-buy COMPARISON unit; this is what the household pays today.
+   */
+  readonly currentRent: string;
+  /** Fixed dollar down payment the household intends to put down (D-07), dollar string. */
+  readonly downPaymentCash: string;
+  /**
+   * Cash buffer/reserve subtracted in the cash-on-hand gate (D-05), dollar string. Consumed
+   * as-is — the engine applies NO default (A1).
+   */
+  readonly reserve: string;
+  /**
+   * Baseline ANNUAL savings while renting (D-17) — the savings-rate floor's denominator
+   * baseline. Makes the savings-rate floor well-defined.
+   */
+  readonly currentAnnualSavings: string;
+}
+
+/**
+ * HouseholdSchema — the Zod 4 runtime mirror of the `Household` interface and the HOUSEHOLD
+ * half of the affordability trust boundary (T-03-01..02), mirroring `ScenarioInputsSchema`:
+ *   - every dollar field is a canonical decimal STRING (`decStr`) — a JS float, thousands
+ *     separator, or exponent form can never enter the calc (D-06).
+ *   - `targetSavingsRate` is constrained to [0,1) so a forged value can never poison the
+ *     savings-rate floor. As with `downPaymentPct`, the canonical-string contract is already
+ *     enforced by `decStr`; the `.refine` is a pure BOUNDARY range guard (not money math),
+ *     so a plain `Number(s)` comparison is acceptable.
+ *   - `.strict()` rejects unknown keys, so a forged snapshot can't smuggle extra fields
+ *     past the boundary (V5 / T-03-V5, mirrors `ScenarioInputsSchema.strict()`).
+ */
+export const HouseholdSchema = z
+  .object({
+    grossAnnualIncome: decStr,
+    existingMonthlyDebt: decStr,
+    targetSavingsRate: decStr.refine(
+      (s) => {
+        const n = Number(s);
+        return n >= 0 && n < 1;
+      },
+      { message: 'targetSavingsRate must be in [0,1)' },
+    ),
+    availableNetWorth: decStr,
+    currentRent: decStr,
+    downPaymentCash: decStr,
+    reserve: decStr,
+    currentAnnualSavings: decStr,
+  })
+  .strict();
+
+/**
+ * Validate untrusted data into a trusted `Household`. Throws (with a Zod error) on any
+ * forged/corrupt profile — a non-canonical decimal string, a `targetSavingsRate` outside
+ * [0,1), an unknown extra key, or a missing required field. `engineInput()` goes through this
+ * when a household is present; never spread raw JSON into the calc (mirrors
+ * `parseScenarioInputs`, T-03-01..02).
+ */
+export function parseHousehold(input: unknown): Household {
+  return HouseholdSchema.parse(input) as Household;
+}
+
+/**
  * The immutable snapshot unit: `asOf` + `assumptions` + scenario inputs, all readonly.
  * This is what a top-level engine function receives AND what a snapshot serializes.
  */
@@ -112,6 +197,13 @@ export interface EngineInput {
   readonly asOf: CalendarDate;
   readonly assumptions: CurrentAssumptionSet;
   readonly scenario: ScenarioInputs;
+  /**
+   * The household (profile) block (D-09). OPTIONAL on `EngineInput` (A3): TCO-only call sites
+   * (`computeTco`, `rentVsBuy`) ignore it and need no change, and the existing TCO golden
+   * snapshot stays byte-identical. The affordability solvers (Waves 2-3) require/validate its
+   * presence at their own entry points.
+   */
+  readonly household?: Household;
 }
 
 /**
@@ -123,6 +215,7 @@ export function engineInput(parts: {
   readonly asOf: CalendarDate;
   readonly assumptions: CurrentAssumptionSet;
   readonly scenario: ScenarioInputs;
+  readonly household?: Household;
 }): EngineInput {
   return Object.freeze({
     asOf: parts.asOf,
@@ -130,5 +223,13 @@ export function engineInput(parts: {
     // Validate the scenario at assembly — a forged snapshot is rejected here, not silently
     // computed (CR-03). `assumptions` is already parsed at its own boundary (parseAssumptionSet).
     scenario: Object.freeze(parseScenarioInputs(parts.scenario)),
+    // Validate the household ONLY when present (A3): TCO-only callers omit it and stay
+    // untouched. The `household` KEY is OMITTED ENTIRELY when absent (not set to `undefined`)
+    // so the serialized snapshot for a TCO-only input stays byte-identical — the existing
+    // tco-golden-snapshot.json is unaffected. A forged household is rejected here, never
+    // silently computed (T-03-01..02).
+    ...(parts.household
+      ? { household: Object.freeze(parseHousehold(parts.household)) }
+      : {}),
   });
 }
