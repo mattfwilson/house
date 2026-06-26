@@ -136,7 +136,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 1**
 
-  - [ ] 04-01-PLAN.md — Foundations: promote monthlyGrowthFactor to a shared helper, bump to AssumptionsV3 (six sensitivity bands + max-horizon), add targetAnnualRetirementSpend household leaf, regenerate the three existing goldens (ASMP-02, FI-01, FI-02)
+  - [x] 04-01-PLAN.md — Foundations: promote monthlyGrowthFactor to a shared helper, bump to AssumptionsV3 (six sensitivity bands + max-horizon), add targetAnnualRetirementSpend household leaf, regenerate the three existing goldens (ASMP-02, FI-01, FI-02)
 
 **Wave 2** *(blocked on Wave 1)*
 
@@ -203,7 +203,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 1. Foundations & Determinism Core | 4/4 | Complete    | 2026-06-24 |
 | 2. TCO Engine | 7/7 | Complete    | 2026-06-25 |
 | 3. Affordability Engine | 5/5 | Complete    | 2026-06-26 |
-| 4. FI-Impact Engine & Sensitivity | 0/4 | Not started | - |
+| 4. FI-Impact Engine & Sensitivity | 1/4 | In progress | - |
 | 5. Town Scoring & Heatmap | 0/TBD | Not started | - |
 | 6. Persistence & Listings Adapter | 0/TBD | Not started | - |
 | 7. Web Shell | 0/TBD | Not started | - |

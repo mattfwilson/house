@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 4 context gathered
-last_updated: "2026-06-26T20:26:47.524Z"
-last_activity: 2026-06-26 -- Phase 03 closed; next is Phase 04
+stopped_at: Completed 04-01-PLAN.md
+last_updated: "2026-06-26T21:20:00.000Z"
+last_activity: 2026-06-26 -- Phase 04 Wave 1 (04-01) complete; next is 04-02
 progress:
   total_phases: 7
   completed_phases: 3
-  total_plans: 16
-  completed_plans: 16
-  percent: 43
+  total_plans: 17
+  completed_plans: 17
+  percent: 45
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-06-22)
 
 ## Current Position
 
-Phase: 4 (fi-impact-engine-&-sensitivity) — not started
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-06-26 -- Phase 03 closed; next is Phase 04
+Phase: 4 (fi-impact-engine-&-sensitivity) — in progress
+Plan: 04-01 complete; next is 04-02 (Wave 2)
+Status: Executing
+Last activity: 2026-06-26 -- Phase 04 Wave 1 (04-01) complete; next is 04-02
 
-Progress: 3 of 7 phases complete
+Progress: 3 of 7 phases complete (Phase 4: 1/4 plans)
 
 ## Performance Metrics
 
@@ -70,6 +70,7 @@ Progress: 3 of 7 phases complete
 | Phase 03 P03 | 6min | 2 tasks | 2 files |
 | Phase 03 P04 | 10min | 3 tasks | 8 files |
 | Phase 03 P05 | 7min | 3 tasks | 4 files |
+| Phase 04 P01 | ~25min | 4 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -121,6 +122,8 @@ Recent decisions affecting current work:
 - [Phase 03-04]: [Affordability]: affordabilityGap (AFF-03) composes the bank + true ceilings: signedGap = bankMaxPrice − trueMaxPrice (Money); verdict decided on Money.toCents() bigints vs ALIGNED_TOLERANCE_CENTS (exported $1,000 constant, A2) — bankExceedsTrue (anti-funnel) | trueExceedsBank | aligned (D-13, structured enum, NO UI copy). Carries bank bindingRatio + true bindingConstraint (D-12). ANTI-FUNNEL PROVEN reachable AND pinned in the golden fixture itself (bank $672,721 vs true $475,515, signedGap +$197,206, verdict bankExceedsTrue, Pitfall 6). evaluateScenario (D-06) REPORTS at a fixed price (computeTco once, reuses dti.ts + cashSavingsDrain): ratios + pass flags + savingsRateImpact + headroom below the binding ceiling. affordability.type-test.ts guards every dollar field on all four result shapes as Money-only (CORE-02). Public @house/core barrel publishes the four entry points + result types + verdict/binding enums + lenderDtiCarryingCost/cashSavingsDrain (Money-returning) + Household/HouseholdSchema/parseHousehold; frontEndRatio/backEndRatio NOT exported (they return internal Dec). Golden round-trip carries household through parseHousehold (Pitfall 5); UPDATE_GOLDEN-gated, never toMatchSnapshot (T-03-07); tco + canary goldens byte-identical
 - [Phase 03-05]: [Affordability]: Both max-price solvers GUARD the bisection precondition — if !passes(low0) (cash+1) they return Money.zero() instead of silently bisecting an unbracketed interval to ≈downPaymentCash+1 (CR-01, T-03-09): an infeasible bank household (back-end DTI > 0.36 at the floor) gets a $0 ceiling with the real ratiosAt(low0) reported; the shared solveMaxPrice $0 fixes BOTH true ceilings (cash-gate budget < downPaymentCash, savings-floor rate < target at every price) at once. Bracket-cap exhaustion while passes(high) is still true THROWS a diagnosable Error before bisection (CR-02, T-03-10). Decision: $0 sentinel over a feasible:false field — keeps all four result SHAPES, index.ts, gap.ts, affordability.type-test.ts unchanged; $0 composes through min/signedGap/verdict as the honest "infeasible at this profile" answer. Feasible prices (635347.53/477861.63/482309.67/400000) + affordability-golden-snapshot.json byte-identical (no UPDATE_GOLDEN); core suite 287 green
 - [Phase 03-03]: [Affordability]: trueAffordability (AFF-02) = min of two ceilings via ONE shared solveMaxPrice bisection. cashSavingsDrain is the SECOND D-14 numerator (tco.total − amortizedClosing, KEEPS maintenance — differs from the lender numerator by exactly maintenance). Savings-rate floor: (currentAnnualSavings − (drain − currentRent)×12)/grossAnnualIncome ≥ targetSavingsRate (GROSS denom D-04, currentAnnualSavings baseline D-17, incremental over currentRent D-03). Cash-on-hand gate: downPaymentCash + closingCosts(price) ≤ availableNetWorth − reserve (D-05, closingCosts reused, reserve as-is A1). trueMaxPrice = min(A,B) cent-exact via toCents(); bindingConstraint reports the lower ceiling (savingsFloor wins ties)
+- [Phase 04-01]: [FI]: AssumptionsV3 is current (CURRENT_VERSION=3) — a sensitivity slice (six LOCKED driver bands: return 0.015 / inflation 0.01 / appreciation 0.01 / maintenance 0.005 / taxBandRelative 0.15 RELATIVE ±15% L6 / swr 0.005) + a projection slice (maxHorizonYears 60, D-07) as first-class decStr stored data (ASMP-02). v2ToV3 migrate arm + chained v1ToV2→V3 so every prior version lands a complete V3, seeded from DEFAULT_ASSUMPTIONS; proven by distinct-valued migrate.test fixtures
+- [Phase 04-01]: [FI]: targetAnnualRetirementSpend is a REQUIRED decStr Household leaf (no .refine, unbounded positive dollars) — FI number = spend ÷ swr.rate (D-01, FI-01/FI-02); a missing spend has no honest default. monthlyGrowthFactor promoted to tco/compounding.ts as the ONE within-package definition (L1/A6 closed), imported by rent-vs-buy, NOT exported from index.ts (returns unexported Dec). The three existing goldens regenerated byte-IDENTICAL under V3 (they serialize only computed results, not the assumption set) — provable zero computed-money coupling via empty fixture diff (L5 confirmed at a blocking human checkpoint)
 
 ### Pending Todos
 
@@ -151,6 +154,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-26T19:47:44.849Z
-Stopped at: Phase 4 context gathered
-Resume file: .planning/phases/04-fi-impact-engine-sensitivity-flagship/04-CONTEXT.md
+Last session: 2026-06-26T21:20:00.000Z
+Stopped at: Completed 04-01-PLAN.md
+Resume file: None
