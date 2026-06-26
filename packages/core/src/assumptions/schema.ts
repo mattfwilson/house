@@ -161,8 +161,12 @@ export const AssumptionsV3 = z
     // --- V2 slices, copied verbatim (every leaf a decStr). ---
     tax: group({
       effectiveIncomeRate: decStr, // blended marginal-ish income tax rate
-      propertyRateAnnual: decStr, // placeholder statewide property tax rate (of value)
+      propertyRateAnnual: decStr, // placeholder statewide property tax rate (of value) — INERT (kept for migrate stability; property tax flows through the resolved mill rate)
       assessmentRatio: decStr, // assessed value ÷ market value (e.g. "1.0")
+      // The published residential mill rate per $1,000, OVERRIDING the town-table resolution;
+      // absent = resolve from the town table. Consumed by computeTco and perturbed RELATIVELY by
+      // the sensitivity tax driver (L6). Optional so it stays absent-by-default (goldens untouched).
+      millRateOverride: decStr.optional(),
     }),
     dti: group({
       frontEnd: decStr,

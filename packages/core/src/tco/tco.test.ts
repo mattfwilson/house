@@ -183,6 +183,47 @@ describe('snapshot self-containment (Pitfall 11): resolved mill rate + FY captur
   });
 });
 
+describe('tax.millRateOverride — overridable mill rate at the assumption boundary (GAP 1)', () => {
+  const inputWithOverride = (scenario: ScenarioInputs, millRateOverride: string) =>
+    engineInput({
+      asOf: calendarDate('2026-01-01'),
+      assumptions: {
+        ...DEFAULT_ASSUMPTIONS,
+        tax: { ...DEFAULT_ASSUMPTIONS.tax, millRateOverride },
+      },
+      scenario,
+    });
+
+  test('with NO override, the captured resolvedMillRate equals the town-table rate (byte-identical)', () => {
+    const tco = computeTco(inputFor(SCENARIO_20PCT));
+    const resolved = resolveMillRate('Newton');
+    expect(tco.resolvedMillRate).toBe(resolved.residentialMillRate);
+    expect(tco.resolvedMillRate).toBe('9.86');
+    // millRateFy stays the town's published FY (provenance unchanged by an absent override).
+    expect(tco.millRateFy).toBe(resolved.fy);
+  });
+
+  test('with an override, the captured resolvedMillRate is the OVERRIDE, not the town rate', () => {
+    // Newton's town rate is 9.86; override with double that.
+    const tco = computeTco(inputWithOverride(SCENARIO_20PCT, '19.72'));
+    expect(tco.resolvedMillRate).toBe('19.72');
+    // The FY provenance is still the town's published FY (traceability — the rate is the override).
+    expect(tco.millRateFy).toBe(resolveMillRate('Newton').fy);
+  });
+
+  test('a strictly higher override produces a strictly higher property-tax bill', () => {
+    const baseline = computeTco(inputFor(SCENARIO_20PCT));
+    const doubled = computeTco(inputWithOverride(SCENARIO_20PCT, '19.72'));
+    expect(doubled.propertyTax.annualized.toCents()).toBeGreaterThan(
+      baseline.propertyTax.annualized.toCents(),
+    );
+    // Doubling the mill rate doubles the property-tax line (a linear rate × assessed value).
+    expect(doubled.propertyTax.annualized.toCents()).toBe(
+      baseline.propertyTax.annualized.toCents() * 2n,
+    );
+  });
+});
+
 describe('computeTco is deterministic over a frozen EngineInput', () => {
   test('two runs on the same input produce cent-identical totals', () => {
     const a = computeTco(inputFor(SCENARIO_20PCT));

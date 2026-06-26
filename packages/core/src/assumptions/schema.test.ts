@@ -84,6 +84,43 @@ describe('AssumptionSetSchema — discriminated union on schemaVersion (D-05)', 
     expect(AssumptionSetSchema.safeParse(withoutSwr).success).toBe(false);
   });
 
+  test('a V3 set WITHOUT tax.millRateOverride still parses (the leaf is optional)', () => {
+    // The override is absent from DEFAULT_ASSUMPTIONS; the optional leaf must not be required.
+    const r = AssumptionSetSchema.safeParse(DEFAULT_ASSUMPTIONS);
+    expect(r.success).toBe(true);
+    expect('millRateOverride' in DEFAULT_ASSUMPTIONS.tax).toBe(false);
+  });
+
+  test('a V3 set WITH a canonical tax.millRateOverride parses and round-trips the value', () => {
+    const withOverride = {
+      ...DEFAULT_ASSUMPTIONS,
+      tax: { ...DEFAULT_ASSUMPTIONS.tax, millRateOverride: '13.50' },
+    };
+    const r = AssumptionSetSchema.safeParse(withOverride);
+    expect(r.success).toBe(true);
+    if (r.success && r.data.schemaVersion === 3) {
+      expect(r.data.tax.millRateOverride).toBe('13.50');
+    }
+  });
+
+  test('rejects a non-canonical tax.millRateOverride (decStr guard holds)', () => {
+    for (const bad of ['13,5', 'Infinity', '1e3', 'abc']) {
+      const r = AssumptionSetSchema.safeParse({
+        ...DEFAULT_ASSUMPTIONS,
+        tax: { ...DEFAULT_ASSUMPTIONS.tax, millRateOverride: bad },
+      });
+      expect(r.success).toBe(false);
+    }
+  });
+
+  test('the strict tax group still rejects an unknown tax key (override did not loosen .strict())', () => {
+    const r = AssumptionSetSchema.safeParse({
+      ...DEFAULT_ASSUMPTIONS,
+      tax: { ...DEFAULT_ASSUMPTIONS.tax, bogusTaxKey: '1.0' },
+    });
+    expect(r.success).toBe(false);
+  });
+
   test('a canonical-decimal-string value round-trips without becoming a binary float', () => {
     const parsed = AssumptionSetSchema.parse(DEFAULT_ASSUMPTIONS);
     const json = JSON.stringify(parsed);

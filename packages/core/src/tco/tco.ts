@@ -155,6 +155,13 @@ export function computeTco(input: EngineInput): TcoBreakdown {
 
   // Snapshot self-containment (Pitfall 11): capture the resolved rate + FY, not a live re-read.
   const resolved = resolveMillRate(town);
+  // GAP 1: an OPTIONAL assumption-boundary override wins over the town-table resolution. This is
+  // the SINGLE resolution point both `ownerHousingAt` (fi-target.ts) and `buyMonthlyOutflowAt`
+  // (rent-vs-buy.ts) inherit via `tco.resolvedMillRate`, so the override flows through BOTH the
+  // owner perpetual-tax target AND the monthly ownership premium with no further wiring (ASMP-02 /
+  // D-12). The captured rate becomes the override; `millRateFy` stays the town's published FY (the
+  // override changes the rate, not the provenance — kept for traceability).
+  const effectiveMillRate = assumptions.tax.millRateOverride ?? resolved.residentialMillRate;
 
   // --- P+I: natural unit is the monthly scheduled payment; annualized = payment × 12. ---
   const principalAndInterest = lineFromAnnual(
@@ -163,9 +170,7 @@ export function computeTco(input: EngineInput): TcoBreakdown {
 
   // --- Property tax (year-0 bill): assessed value × mill rate (per $1,000). ---
   const assessedValueYear0 = assessedValueAt(price, assessmentRatio, appreciationRealAnnual, 0);
-  const propertyTax = lineFromAnnual(
-    annualPropertyTax(assessedValueYear0, resolved.residentialMillRate),
-  );
+  const propertyTax = lineFromAnnual(annualPropertyTax(assessedValueYear0, effectiveMillRate));
 
   // --- Insurance (flat) + maintenance (year-0 home value) + HOA (×12 flat). ---
   const insurance = lineFromAnnual(insuranceAnnual(insuranceAnnualInput));
@@ -229,7 +234,7 @@ export function computeTco(input: EngineInput): TcoBreakdown {
     total,
     pmiApplies: pmiResult.applies,
     pmiDropOffMonth: pmiResult.applies ? pmiResult.dropOffMonth : null,
-    resolvedMillRate: resolved.residentialMillRate,
+    resolvedMillRate: effectiveMillRate,
     millRateFy: resolved.fy,
     propTwoAndHalfFlag: PROP_2_5_FLAG,
   };
