@@ -26,7 +26,9 @@ import {
 } from '../engine/engine-input.js';
 import { DEFAULT_ASSUMPTIONS } from '../assumptions/defaults.js';
 import { calendarDate } from '../time/calendar-date.js';
-import { fiImpact } from './fi-impact.js';
+import { fiImpact, buyEquityAt } from './fi-impact.js';
+import { homeValueAt } from '../tco/carrying-costs.js';
+import { amortizationSchedule } from '../tco/amortization.js';
 
 const ASOF = calendarDate('2026-01-01');
 
@@ -154,6 +156,64 @@ describe('fiImpact — the anti-funnel "don\'t buy" outcome (FI-06)', () => {
 describe('fiImpact — requires household (the FI number lives on the household)', () => {
   test('throws a clear error when household is absent', () => {
     expect(() => fiImpact(inputFor(COMFORTABLE_SCENARIO, undefined))).toThrow(/household/i);
+  });
+});
+
+// WR-01 / IN-02 / IN-04 — the buy-path liquidated-equity YEAR convention is RECONCILED with
+// rentVsBuy's year-boundary equity snapshot (rent-vs-buy.ts:242-245) and pinned here so the two
+// instruments cannot be silently re-desynced later in a way that shifts FI dates (T-04-G4).
+//
+// The reconciled convention: `year = Math.max(0, Math.floor(month / 12))`, so
+//   - month 12 → year 1 (one year of appreciation) — AGREES with rentVsBuy's `month/12` at the boundary
+//   - month 0 → year 0 (NOT a negative year) — closes IN-02 (projection.ts:85 seeds with equityFor(0))
+//   - months 1-11 → year 0 (a sensible per-month value between boundaries)
+// The schedule-BALANCE index stays `month - 1` (it already agreed with rentVsBuy — must not regress).
+describe('buyEquityAt — the reconciled equity-year convention (WR-01 / IN-02 / IN-04)', () => {
+  // A fixed buy scenario whose primitives we can recompute from the public helpers below.
+  const PRICE = '600000';
+  const APPR = DEFAULT_ASSUMPTIONS.appreciation.realAnnual;
+  const SELL_COST = DEFAULT_ASSUMPTIONS.transaction.sellCostPct;
+  const DOWN_PCT = '0.20';
+  const ANNUAL_RATE = '0.06375';
+  const TERM_MONTHS = 360;
+  const loan = new Dec(PRICE).times(new Dec(1).minus(new Dec(DOWN_PCT))).toFixed();
+  const schedule = amortizationSchedule(loan, ANNUAL_RATE, TERM_MONTHS);
+  const sellRetain = new Dec(1).minus(new Dec(SELL_COST));
+
+  const equityAt = (month: number) =>
+    buyEquityAt({ price: PRICE, appreciationRealAnnual: APPR, schedule, sellRetain, month });
+
+  test('month 12 values the home at YEAR 1 — genuinely AGREES with rentVsBuy at the year boundary', () => {
+    // rentVsBuy snapshots month-12 equity at year = 12/12 = 1 (one year of appreciation). The FI
+    // buy path MUST value the same hold-month-12 home at the SAME year, not year 0 (the old bug).
+    const homeValueY1 = new Dec(homeValueAt(PRICE, APPR, 1).toDecimalString());
+    const balance12 = new Dec(schedule.rows[11]!.balance.toDecimalString());
+    const expected = homeValueY1.minus(balance12).times(sellRetain);
+    expect(equityAt(12).toFixed()).toBe(expected.toFixed());
+
+    // And it is STRICTLY different from the old (year-0, no-appreciation) basis — proving the
+    // reconciliation actually bit (year 1 > year 0 home value ⇒ more equity).
+    const homeValueY0 = new Dec(homeValueAt(PRICE, APPR, 0).toDecimalString());
+    const oldBasis = homeValueY0.minus(balance12).times(sellRetain);
+    expect(equityAt(12).greaterThan(oldBasis)).toBe(true);
+  });
+
+  test('month 0 uses YEAR 0 — never a NEGATIVE year (closes IN-02)', () => {
+    // projection.ts seeds the month-0 check with equityFor(0). The old `floor((0-1)/12) = -1`
+    // would have valued the home at a NEGATIVE year. The clamp pins month 0 → year 0.
+    const homeValueY0 = new Dec(homeValueAt(PRICE, APPR, 0).toDecimalString());
+    // At month 0 there is no schedule row (index -1) → balance 0 (today's full equity, liquidated).
+    const expected = homeValueY0.times(sellRetain);
+    expect(equityAt(0).toFixed()).toBe(expected.toFixed());
+  });
+
+  test('the schedule-balance index stays month-1 at the year boundary (must not regress)', () => {
+    // The balance component already AGREED with rentVsBuy (rent-vs-buy.ts:249 uses rows[month-1]).
+    // Month 12 must still read rows[11].balance — only the appreciation YEAR was reconciled.
+    const homeValueY1 = new Dec(homeValueAt(PRICE, APPR, 1).toDecimalString());
+    const balanceRow11 = new Dec(schedule.rows[11]!.balance.toDecimalString());
+    const expected = homeValueY1.minus(balanceRow11).times(sellRetain);
+    expect(equityAt(12).toFixed()).toBe(expected.toFixed());
   });
 });
 
