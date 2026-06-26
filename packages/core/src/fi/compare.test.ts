@@ -60,11 +60,20 @@ const inputFor = (scenario: ScenarioInputs): EngineInput =>
   engineInput({ asOf: ASOF, assumptions: DEFAULT_ASSUMPTIONS, scenario, household: HOUSEHOLD });
 
 // Three DISTINCT scenarios built via separate engineInput calls (the plan's "distinct scenarios"
-// requirement). A modest house (beats renting), a pricey house (delays FI), a brutal house (unreached).
+// requirement). A modest house (beats renting — the buyer keeps most savings AND builds equity), a
+// pricey house (delays FI — the premium outweighs the equity), and a brutal high-leverage house
+// (unreachable — the premium swamps savings AND the thin equity never closes the gap, the don't-buy
+// row). Prices/leverage are tuned so each scenario lands cleanly in its ordering band (the A5 equity
+// inclusion makes a high-but-low-leverage house reach via its equity windfall, so the unreachable
+// case must be BOTH expensive AND high-leverage).
 const MODEST = inputFor(baseScenario('modest — beats renting', { price: '550000' }));
-const PRICEY = inputFor(baseScenario('pricey — delays FI', { price: '950000' }));
+const PRICEY = inputFor(baseScenario('pricey — delays FI', { price: '2200000', insuranceAnnual: '6000' }));
 const BRUTAL = inputFor(
-  baseScenario('brutal — unreachable (don\'t buy)', { price: '2200000', insuranceAnnual: '6000' }),
+  baseScenario('brutal — unreachable (don\'t buy)', {
+    price: '4000000',
+    downPaymentPct: '0.10',
+    insuranceAnnual: '12000',
+  }),
 );
 
 describe('compareScenarios — the ranking shape (D-08, FI-04)', () => {
@@ -95,6 +104,8 @@ describe('compareScenarios — ordering: best first, unreached last (FI-06)', ()
       'pricey — delays FI',
       'brutal — unreachable (don\'t buy)',
     ]);
+    // The labels above are a STRUCTURAL ranking assertion (beats < delays < unreached), independent
+    // of the human copy — the don't-buy row is last by its `unreached` kind, not by its label.
 
     // The modest buy reaches and BEATS renting (negative delta); the pricey buy reaches but DELAYS
     // (positive delta); the brutal buy is unreached (the don't-buy row, sorted worst).
