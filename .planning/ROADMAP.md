@@ -104,7 +104,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 1**
 
-  - [ ] 03-01-PLAN.md — Household/profile input contract on EngineInput (HouseholdSchema + parseHousehold, optional, currentAnnualSavings D-17) + boundary tests (AFF-02 boundary)
+  - [x] 03-01-PLAN.md — Household/profile input contract on EngineInput (HouseholdSchema + parseHousehold, optional, currentAnnualSavings D-17) + boundary tests (AFF-02 boundary)
 
 **Wave 2** *(blocked on Wave 1)*
 
@@ -182,7 +182,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 |-------|----------------|--------|-----------|
 | 1. Foundations & Determinism Core | 4/4 | Complete    | 2026-06-24 |
 | 2. TCO Engine | 7/7 | Complete    | 2026-06-25 |
-| 3. Affordability Engine | 0/4 | Planned     | - |
+| 3. Affordability Engine | 1/4 | In Progress|  |
 | 4. FI-Impact Engine & Sensitivity | 0/TBD | Not started | - |
 | 5. Town Scoring & Heatmap | 0/TBD | Not started | - |
 | 6. Persistence & Listings Adapter | 0/TBD | Not started | - |

@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: Phase 3 context gathered
-last_updated: "2026-06-26T16:09:43.518Z"
-last_activity: 2026-06-26 -- Phase 03 planning complete
+last_updated: "2026-06-26T16:23:47.001Z"
+last_activity: 2026-06-26 -- Phase 03 execution started
 progress:
   total_phases: 7
   completed_phases: 2
-  total_plans: 11
-  completed_plans: 11
+  total_plans: 15
+  completed_plans: 12
   percent: 29
 ---
 
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-22)
 
 **Core value:** Answer "what does buying this house do to our early-retirement timeline?" — and be allowed to conclude "don't buy / rent and invest the difference."
-**Current focus:** Phase 03 — affordability-engine (next)
+**Current focus:** Phase 03 — affordability-engine
 
 ## Current Position
 
-Phase: 3 (affordability-engine) — not started
-Plan: Not started
+Phase: 03 (affordability-engine) — EXECUTING
+Plan: 2 of 4
 Status: Ready to execute
-Last activity: 2026-06-26 -- Phase 03 planning complete
+Last activity: 2026-06-26 -- Phase 03 execution started
 
 Progress: 2 of 7 phases complete
 
@@ -64,6 +64,7 @@ Progress: 2 of 7 phases complete
 | Phase 02-tco-engine P05 | 14min | 2 tasks | 5 files |
 | Phase 02-tco-engine P06 | 8 | 3 tasks | 7 files |
 | Phase 02-tco-engine P07 | 3min | 2 tasks | 5 files |
+| Phase 03 P01 | 5min | 4 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -109,6 +110,7 @@ Recent decisions affecting current work:
 - [Phase ?]: [Phase 02-06]: [TCO]: PMI is drop-off-aware everywhere — computeTco annualizes the hold average (premium x chargedMonths / holdingYears) + exposes pmiDropOffMonth; rentVsBuy charges PMI only while month <= dropOffMonth
 - [Phase ?]: [Phase 02-06]: [TCO]: the rentVsBuy buy outflow is time-varying — property-tax + maintenance grow per hold year on the appreciating value (P+I/ins/HOA flat); golden fixture regenerated cent-identically, RENT still wins
 - [Phase 02-07]: [TCO]: ScenarioInputs is validated at the snapshot trust boundary by ScenarioInputsSchema (Zod .strict(), decStr leaves, positive-int counts, downPaymentPct in [0,1)), mirroring AssumptionSetSchema — CR-03 closed; parseScenarioInputs is the loader helper, engineInput() parses through it, and the golden round-trip rebuilds through a real parse (not a bare cast). downPaymentPct's [0,1) range is a decStr.refine boundary guard (Number(s), not money math)
+- [Phase ?]: [Phase 03-01]: [Affordability]: Household is the durable person-vs-house input contract (D-09) — a Zod .strict()/decStr/targetSavingsRate-in-[0,1) trust boundary mirroring ScenarioInputs, parseHousehold the only loader; OPTIONAL on EngineInput (A3) so TCO-only callers + the byte-identical tco-golden-snapshot.json are untouched, and the household KEY is omitted entirely (not undefined) when absent to satisfy exactOptionalPropertyTypes
 
 ### Pending Todos
 
@@ -139,6 +141,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-26T15:24:54.649Z
+Last session: 2026-06-26T16:23:17.719Z
 Stopped at: Phase 3 context gathered
 Resume file: .planning/phases/03-affordability-engine/03-CONTEXT.md

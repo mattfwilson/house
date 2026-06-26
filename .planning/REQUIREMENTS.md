@@ -23,7 +23,7 @@ Requirements for the core-engine build. Each maps to a roadmap phase.
 ### Affordability (AFF)
 
 - [ ] **AFF-01**: Tool computes bank affordability (max approvable loan) from configurable front-end (~28%) and back-end (~36%) DTI ratios, factoring existing debts
-- [ ] **AFF-02**: Tool computes true affordability — the price that fits the household's target savings rate without pushing the FI date past its threshold
+- [x] **AFF-02**: Tool computes true affordability — the price that fits the household's target savings rate without pushing the FI date past its threshold
 - [ ] **AFF-03**: Tool surfaces the gap between bank affordability and true affordability
 
 ### Total Cost of Ownership (TCO)
@@ -109,7 +109,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TCO-06 | Phase 2 | Complete |
 | TCO-07 | Phase 2 | Complete (02-05) |
 | AFF-01 | Phase 3 | Pending |
-| AFF-02 | Phase 3 | Pending |
+| AFF-02 | Phase 3 | Complete |
 | AFF-03 | Phase 3 | Pending |
 | FI-01 | Phase 4 | Pending |
 | FI-02 | Phase 4 | Pending |
