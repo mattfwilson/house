@@ -25,6 +25,7 @@
 import { Dec } from '../money/decimal-config.js';
 import { engineInput, type EngineInput } from '../engine/engine-input.js';
 import type { CurrentAssumptionSet } from '../assumptions/schema.js';
+import { resolveMillRate } from '../towns/town-table.js';
 import { fiImpact } from './fi-impact.js';
 import type { FiOutcome } from './projection.js';
 
@@ -77,11 +78,19 @@ interface DriverSpec {
   readonly band: keyof CurrentAssumptionSet['sensitivity'];
   /** True only for `tax` (L6): the band is a relative ±fraction, not an absolute ± on the rate. */
   readonly relative: boolean;
-  /** Produce new assumptions with this driver's rate perturbed in `Dec` by `band` in `dir`. */
+  /**
+   * Produce new assumptions with this driver's rate perturbed in `Dec` by `band` in `dir`. The
+   * `baseRate` is the LIVE rate to perturb FROM — for every driver except `tax` it is the driver's
+   * own assumption rate (read off `assumptions` inside `apply`); for `tax` it is the resolved town
+   * mill rate (or an existing override), seeded by `perturb` since the town lives on the scenario,
+   * not on `assumptions`. This is the only per-driver threading — there is NO `switch(driver)`
+   * projection math (Pitfall 10); the projection is the SAME `fiImpact` re-run.
+   */
   readonly apply: (
     assumptions: CurrentAssumptionSet,
     band: string,
     dir: Direction,
+    baseRate: string,
   ) => CurrentAssumptionSet;
 }
 
@@ -135,12 +144,15 @@ const DRIVER_SPECS: Record<TornadoDriver, DriverSpec> = {
     }),
   },
   tax: {
-    // L6 — the ONLY relative band: scale the property-tax rate by × (1 ± taxBandRelative).
+    // L6 — the ONLY relative band: scale the LIVE property-tax (mill) rate by × (1 ± taxBandRelative)
+    // via the assumption-boundary override (GAP 1). `baseRate` is seeded by `perturb` from the
+    // resolved town rate (or an existing override), so the perturbed mill rate flows through
+    // computeTco → the owner perpetual-tax target AND the monthly ownership premium — a real swing.
     band: 'taxBandRelative',
     relative: true,
-    apply: (a, band, dir) => ({
+    apply: (a, band, dir, baseRate) => ({
       ...a,
-      tax: { ...a.tax, propertyRateAnnual: relative(a.tax.propertyRateAnnual, band, dir) },
+      tax: { ...a.tax, millRateOverride: relative(baseRate, band, dir) },
     }),
   },
   swr: {
@@ -161,7 +173,17 @@ const DRIVER_SPECS: Record<TornadoDriver, DriverSpec> = {
 function perturb(input: EngineInput, driver: TornadoDriver, dir: Direction): EngineInput {
   const spec = DRIVER_SPECS[driver];
   const band = input.assumptions.sensitivity[spec.band];
-  const assumptions = spec.apply(input.assumptions, band, dir);
+  // For `tax`, seed the base rate from the LIVE mill rate the unperturbed projection used: an
+  // existing override if present, else the resolved town rate (computeTco resolves it the same
+  // way). The town lives on the scenario, not on `assumptions`, so the seed is computed HERE and
+  // passed into `apply`. For the other five drivers the base rate is unused (each reads its own
+  // assumption rate); '' is a harmless placeholder. NO per-driver projection math (Pitfall 10).
+  const baseRate =
+    driver === 'tax'
+      ? (input.assumptions.tax.millRateOverride ??
+        resolveMillRate(input.scenario.town).residentialMillRate)
+      : '';
+  const assumptions = spec.apply(input.assumptions, band, dir, baseRate);
   return engineInput({
     asOf: input.asOf,
     assumptions,

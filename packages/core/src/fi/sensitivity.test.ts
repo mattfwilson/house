@@ -84,24 +84,26 @@ describe('tornado — six-driver cheap re-run (ASMP-02 / D-12/D-13)', () => {
 });
 
 describe('tornado — band semantics (D-12 / L6)', () => {
-  test('the tax driver perturbs the RELATIVE band (taxBandRelative), not an absolute rate band', () => {
-    // L6: the tax driver reads `sensitivity.taxBandRelative` and perturbs the property-tax rate
-    // MULTIPLICATIVELY (× (1 ± band)) — it is the ONLY relative band; the other five are absolute ±.
-    // Each driver's perturbation re-freezes through `engineInput`, re-validating at the Zod boundary,
-    // so a perturbed band is always canonical. We assert the tax row is well-formed (a real low/base/
-    // high triple with a finite swing) — proving the relative band is consumed without error.
-    //
-    // NOTE (documented in 04-04-SUMMARY): `assumptions.tax.propertyRateAnnual` is presently INERT in
-    // the FI/TCO path (property tax flows through the resolved TOWN mill rate, not this assumption),
-    // so the tax row's FI-date swing is currently 0 for typical scenarios. The relative-band MACHINERY
-    // (L6) is exercised here; wiring the mill rate to a perturbable rate is a follow-up (out of scope).
+  test('the tax driver perturbs the live mill rate RELATIVELY (taxBandRelative) and BITES (GAP 1)', () => {
+    // L6: the tax driver perturbs the LIVE property-tax (mill) rate MULTIPLICATIVELY (× (1 ± band)) —
+    // it is the ONLY relative band; the other five are absolute ±. After GAP 1, the perturbation
+    // flows through `tax.millRateOverride` → computeTco → the owner perpetual-tax target AND the
+    // monthly ownership premium, so the tax row produces a REAL, non-zero FI-date swing.
     const result = tornado(input());
     const taxRow = result.rows.find((r) => r.driver === 'tax')!;
-    expect(taxRow.low.kind).toMatch(/^(reached|unreached)$/);
-    expect(taxRow.high.kind).toMatch(/^(reached|unreached)$/);
+    // For this comfortable REACHED scenario both endpoints reach FI.
+    expect(taxRow.low.kind).toBe('reached');
+    expect(taxRow.high.kind).toBe('reached');
     expect(canonicalJson(taxRow.base)).toBe(canonicalJson(fiImpact(input()).buy));
-    expect(Number.isFinite(taxRow.swingMonths)).toBe(true);
-    expect(taxRow.swingMonths).toBeGreaterThanOrEqual(0);
+    // The swing is now POSITIVE — the previously-inert driver bites.
+    expect(taxRow.swingMonths).toBeGreaterThan(0);
+    expect(taxRow.low.kind === 'reached' && taxRow.high.kind === 'reached').toBe(true);
+    // Direction sanity: HIGHER property tax raises the owner's perpetual carry AND the monthly
+    // premium, so the high-tax endpoint's FI month is >= the low-tax endpoint's (higher tax delays
+    // FI when buying).
+    if (taxRow.low.kind === 'reached' && taxRow.high.kind === 'reached') {
+      expect(taxRow.high.month).toBeGreaterThanOrEqual(taxRow.low.month);
+    }
 
     // The relative band is genuinely consumed: a non-canonical/garbage band would throw at the Zod
     // boundary inside `perturb`. A huge relative band (×0.0001 / ×1.9999) parses + runs cleanly.
@@ -109,6 +111,7 @@ describe('tornado — band semantics (D-12 / L6)', () => {
       asOf: ASOF,
       assumptions: {
         ...DEFAULT_ASSUMPTIONS,
+        projection: { maxHorizonYears: '40' },
         sensitivity: { ...DEFAULT_ASSUMPTIONS.sensitivity, taxBandRelative: '0.9999' },
       },
       scenario: SCENARIO,
@@ -116,6 +119,23 @@ describe('tornado — band semantics (D-12 / L6)', () => {
     });
     const hugeTaxRow = tornado(hugeBand).rows.find((r) => r.driver === 'tax')!;
     expect(Number.isFinite(hugeTaxRow.swingMonths)).toBe(true);
+  });
+
+  test('a taxBandRelative of 0 collapses the tax row to a zero swing (stored-band sourcing proven)', () => {
+    const zeroTax = engineInput({
+      asOf: ASOF,
+      assumptions: {
+        ...DEFAULT_ASSUMPTIONS,
+        projection: { maxHorizonYears: '40' },
+        sensitivity: { ...DEFAULT_ASSUMPTIONS.sensitivity, taxBandRelative: '0' },
+      },
+      scenario: SCENARIO,
+      household: HOUSEHOLD,
+    });
+    const taxRow = tornado(zeroTax).rows.find((r) => r.driver === 'tax')!;
+    expect(canonicalJson(taxRow.low)).toBe(canonicalJson(taxRow.base));
+    expect(canonicalJson(taxRow.high)).toBe(canonicalJson(taxRow.base));
+    expect(taxRow.swingMonths).toBe(0);
   });
 
   test('bands are read from the stored V3 sensitivity slice (a zero band collapses low/high to base)', () => {
