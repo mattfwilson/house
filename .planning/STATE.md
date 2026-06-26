@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 3 context gathered
-last_updated: "2026-06-26T16:23:47.001Z"
-last_activity: 2026-06-26 -- Phase 03 execution started
+stopped_at: Completed 03-02-PLAN.md (bank affordability — DTI + max-price solver)
+last_updated: "2026-06-26T12:32:00.000Z"
+last_activity: 2026-06-26 -- Completed 03-02 (AFF-01 bank affordability)
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 15
-  completed_plans: 12
-  percent: 29
+  completed_plans: 13
+  percent: 31
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-06-22)
 ## Current Position
 
 Phase: 03 (affordability-engine) — EXECUTING
-Plan: 2 of 4
-Status: Ready to execute
-Last activity: 2026-06-26 -- Phase 03 execution started
+Plan: 3 of 4
+Status: 03-02 complete (AFF-01); ready for 03-03
+Last activity: 2026-06-26 -- Completed 03-02 (AFF-01 bank affordability)
 
 Progress: 2 of 7 phases complete
 
@@ -65,6 +65,7 @@ Progress: 2 of 7 phases complete
 | Phase 02-tco-engine P06 | 8 | 3 tasks | 7 files |
 | Phase 02-tco-engine P07 | 3min | 2 tasks | 5 files |
 | Phase 03 P01 | 5min | 4 tasks | 3 files |
+| Phase 03 P02 | 12min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -111,6 +112,8 @@ Recent decisions affecting current work:
 - [Phase ?]: [Phase 02-06]: [TCO]: the rentVsBuy buy outflow is time-varying — property-tax + maintenance grow per hold year on the appreciating value (P+I/ins/HOA flat); golden fixture regenerated cent-identically, RENT still wins
 - [Phase 02-07]: [TCO]: ScenarioInputs is validated at the snapshot trust boundary by ScenarioInputsSchema (Zod .strict(), decStr leaves, positive-int counts, downPaymentPct in [0,1)), mirroring AssumptionSetSchema — CR-03 closed; parseScenarioInputs is the loader helper, engineInput() parses through it, and the golden round-trip rebuilds through a real parse (not a bare cast). downPaymentPct's [0,1) range is a decStr.refine boundary guard (Number(s), not money math)
 - [Phase ?]: [Phase 03-01]: [Affordability]: Household is the durable person-vs-house input contract (D-09) — a Zod .strict()/decStr/targetSavingsRate-in-[0,1) trust boundary mirroring ScenarioInputs, parseHousehold the only loader; OPTIONAL on EngineInput (A3) so TCO-only callers + the byte-identical tco-golden-snapshot.json are untouched, and the household KEY is omitted entirely (not undefined) when absent to satisfy exactOptionalPropertyTypes
+- [Phase 03-02]: [Affordability]: lenderDtiCarryingCost is the D-14 numerator = P+I + propertyTax + insurance + pmi + hoa (PITI+HOA+PMI), summed from the TcoBreakdown line monthlies — EXCLUDES maintenance + amortizedClosing and NEVER reads tco.total (Pitfall 1); both DTI ratios divide by GROSS-monthly income with no tax haircut (Pitfall 2)
+- [Phase 03-02]: [Affordability]: bankAffordability (AFF-01) solves the max approvable price to the cent via monotonic bisection — low strictly above downPaymentCash so trial pct = cash/price < 1 (Pitfall 3), exponential high bracket (no hard ceiling) + iteration caps (T-03-04), thresholds read from assumptions.dti.* (Shared P4); reuses computeTco per trial price (never re-derives amortization, Shared P2); returns bankMaxPrice, bankMaxLoan = price − cash (D-06), both ratios, and the bindingRatio; monotonic across the PMI kink
 
 ### Pending Todos
 
@@ -141,6 +144,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-26T16:23:17.719Z
-Stopped at: Phase 3 context gathered
-Resume file: .planning/phases/03-affordability-engine/03-CONTEXT.md
+Last session: 2026-06-26T12:32:00.000Z
+Stopped at: Completed 03-02-PLAN.md (AFF-01 bank affordability — DTI + max-price solver)
+Resume file: .planning/phases/03-affordability-engine/03-03-PLAN.md

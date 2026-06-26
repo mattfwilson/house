@@ -108,7 +108,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 2** *(blocked on Wave 1)*
 
-  - [ ] 03-02-PLAN.md — Bank affordability: two-numerator DTI split (lenderDtiCarryingCost, D-14) + max-price binary-search solver (AFF-01)
+  - [x] 03-02-PLAN.md — Bank affordability: two-numerator DTI split (lenderDtiCarryingCost, D-14) + max-price binary-search solver (AFF-01)
   - [ ] 03-03-PLAN.md — True affordability: savings-rate floor (currentAnnualSavings baseline) + cash-on-hand gate, min of the two (AFF-02)
 
 **Wave 3** *(blocked on Wave 2)*
