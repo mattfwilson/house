@@ -38,6 +38,7 @@ import { runCanary, type CanaryResult } from './engine/canary.js';
 import { computeTco } from './tco/tco.js';
 import { rentVsBuy } from './tco/rent-vs-buy.js';
 import { affordabilityGap } from './affordability/gap.js';
+import { fiImpact } from './fi/fi-impact.js';
 import { canonicalJson } from './serialize/canonical-json.js';
 import { DEFAULT_ASSUMPTIONS } from './assumptions/defaults.js';
 import { parseAssumptionSet } from './assumptions/assumption-set.js';
@@ -48,6 +49,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const GOLDEN_PATH = resolve(here, '__fixtures__', 'golden-snapshot.json');
 const TCO_GOLDEN_PATH = resolve(here, '__fixtures__', 'tco-golden-snapshot.json');
 const AFFORDABILITY_GOLDEN_PATH = resolve(here, '__fixtures__', 'affordability-golden-snapshot.json');
+const FI_GOLDEN_PATH = resolve(here, '__fixtures__', 'fi-golden-snapshot.json');
 
 /**
  * THE fixed, deterministic house scenario the golden masters are computed from: a $450k Newton
@@ -136,6 +138,17 @@ function canonicalAffordabilityResult(input: EngineInput): string {
   return canonicalJson(affordabilityGap(input));
 }
 
+/**
+ * Canonical-JSON form of the FI-IMPACT result (FI-01 / FI-03, FI-05): both per-path discriminated
+ * `FiOutcome`s (`kind` strings — NO non-finite numbers, so `canonicalJson` never throws), the
+ * months/years deltas, and both `Money` targets (each emitted as a decimal string). Equal results
+ * are byte-identical — the reproducibility half of FI-05. Requires `input.household` (the FI number
+ * `targetAnnualRetirementSpend` lives there).
+ */
+function canonicalFiResult(input: EngineInput): string {
+  return canonicalJson(fiImpact(input));
+}
+
 describe('golden master: the canary recomputes cent-identically (PROF-04)', () => {
   test('produced canonical result deep-equals the committed golden fixture', () => {
     const produced = canonicalResult(runCanary(fixedInput()));
@@ -184,6 +197,22 @@ describe('golden master: the affordability GAP result recomputes cent-identicall
   });
 });
 
+describe('golden master: the FI-impact result recomputes cent-identically (FI-05)', () => {
+  test('produced canonical FI result deep-equals the committed fi-golden fixture', () => {
+    const produced = canonicalFiResult(fixedInput());
+
+    // Gated regeneration ONLY (reviewable git diff). NEVER toMatchSnapshot (T-04-14 auto-bless drift).
+    if (process.env.UPDATE_GOLDEN === '1') {
+      mkdirSync(dirname(FI_GOLDEN_PATH), { recursive: true });
+      writeFileSync(FI_GOLDEN_PATH, produced + '\n', 'utf8');
+      return;
+    }
+
+    const golden = readFileSync(FI_GOLDEN_PATH, 'utf8').trim();
+    expect(produced).toBe(golden);
+  });
+});
+
 describe('snapshot round-trip is lossless (D-08 data reproducibility)', () => {
   test('serialize -> deserialize -> recompute yields the identical canonical canary result', () => {
     const original = fixedInput();
@@ -212,6 +241,22 @@ describe('snapshot round-trip is lossless (D-08 data reproducibility)', () => {
     const rebuilt = roundTrip(original);
     expect(rebuilt.household).toBeDefined();
     const second = canonicalAffordabilityResult(rebuilt);
+    expect(second).toBe(first);
+  });
+
+  test('serialize -> deserialize -> recompute yields the identical canonical FI result (FI-05: targetAnnualRetirementSpend carried)', () => {
+    const original = fixedInput();
+    const first = canonicalFiResult(original);
+
+    // The round-trip serializes + re-parses `household` through `parseHousehold` — so the NEW
+    // `targetAnnualRetirementSpend` leaf (the FI number numerator) must survive serialize->re-parse
+    // byte-identically, and a non-canonical number cannot silently re-enter the FI math (T-04-13).
+    const rebuilt = roundTrip(original);
+    expect(rebuilt.household).toBeDefined();
+    expect(rebuilt.household!.targetAnnualRetirementSpend).toBe(
+      original.household!.targetAnnualRetirementSpend,
+    );
+    const second = canonicalFiResult(rebuilt);
     expect(second).toBe(first);
   });
 });
