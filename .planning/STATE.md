@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-02-PLAN.md (bank affordability — DTI + max-price solver)
-last_updated: "2026-06-26T12:32:00.000Z"
-last_activity: 2026-06-26 -- Completed 03-02 (AFF-01 bank affordability)
+stopped_at: Completed 03-03-PLAN.md (true affordability — savings floor + cash-on-hand gate)
+last_updated: "2026-06-26T12:40:00.000Z"
+last_activity: 2026-06-26 -- Completed 03-03 (AFF-02 true affordability)
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 15
-  completed_plans: 13
-  percent: 31
+  completed_plans: 14
+  percent: 33
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-06-22)
 ## Current Position
 
 Phase: 03 (affordability-engine) — EXECUTING
-Plan: 3 of 4
-Status: 03-02 complete (AFF-01); ready for 03-03
-Last activity: 2026-06-26 -- Completed 03-02 (AFF-01 bank affordability)
+Plan: 4 of 4
+Status: 03-03 complete (AFF-02); ready for 03-04
+Last activity: 2026-06-26 -- Completed 03-03 (AFF-02 true affordability)
 
 Progress: 2 of 7 phases complete
 
@@ -66,6 +66,7 @@ Progress: 2 of 7 phases complete
 | Phase 02-tco-engine P07 | 3min | 2 tasks | 5 files |
 | Phase 03 P01 | 5min | 4 tasks | 3 files |
 | Phase 03 P02 | 12min | 2 tasks | 4 files |
+| Phase 03 P03 | 6min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -114,6 +115,7 @@ Recent decisions affecting current work:
 - [Phase ?]: [Phase 03-01]: [Affordability]: Household is the durable person-vs-house input contract (D-09) — a Zod .strict()/decStr/targetSavingsRate-in-[0,1) trust boundary mirroring ScenarioInputs, parseHousehold the only loader; OPTIONAL on EngineInput (A3) so TCO-only callers + the byte-identical tco-golden-snapshot.json are untouched, and the household KEY is omitted entirely (not undefined) when absent to satisfy exactOptionalPropertyTypes
 - [Phase 03-02]: [Affordability]: lenderDtiCarryingCost is the D-14 numerator = P+I + propertyTax + insurance + pmi + hoa (PITI+HOA+PMI), summed from the TcoBreakdown line monthlies — EXCLUDES maintenance + amortizedClosing and NEVER reads tco.total (Pitfall 1); both DTI ratios divide by GROSS-monthly income with no tax haircut (Pitfall 2)
 - [Phase 03-02]: [Affordability]: bankAffordability (AFF-01) solves the max approvable price to the cent via monotonic bisection — low strictly above downPaymentCash so trial pct = cash/price < 1 (Pitfall 3), exponential high bracket (no hard ceiling) + iteration caps (T-03-04), thresholds read from assumptions.dti.* (Shared P4); reuses computeTco per trial price (never re-derives amortization, Shared P2); returns bankMaxPrice, bankMaxLoan = price − cash (D-06), both ratios, and the bindingRatio; monotonic across the PMI kink
+- [Phase 03-03]: [Affordability]: trueAffordability (AFF-02) = min of two ceilings via ONE shared solveMaxPrice bisection. cashSavingsDrain is the SECOND D-14 numerator (tco.total − amortizedClosing, KEEPS maintenance — differs from the lender numerator by exactly maintenance). Savings-rate floor: (currentAnnualSavings − (drain − currentRent)×12)/grossAnnualIncome ≥ targetSavingsRate (GROSS denom D-04, currentAnnualSavings baseline D-17, incremental over currentRent D-03). Cash-on-hand gate: downPaymentCash + closingCosts(price) ≤ availableNetWorth − reserve (D-05, closingCosts reused, reserve as-is A1). trueMaxPrice = min(A,B) cent-exact via toCents(); bindingConstraint reports the lower ceiling (savingsFloor wins ties)
 
 ### Pending Todos
 
@@ -144,6 +146,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-26T12:32:00.000Z
-Stopped at: Completed 03-02-PLAN.md (AFF-01 bank affordability — DTI + max-price solver)
-Resume file: .planning/phases/03-affordability-engine/03-03-PLAN.md
+Last session: 2026-06-26T12:40:00.000Z
+Stopped at: Completed 03-03-PLAN.md (AFF-02 true affordability — savings floor + cash-on-hand gate)
+Resume file: .planning/phases/03-affordability-engine/03-04-PLAN.md
