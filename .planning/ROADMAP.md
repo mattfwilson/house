@@ -100,7 +100,20 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. True affordability computes the price that fits the household's target savings rate without pushing the FI date past its threshold
   3. The tool surfaces the numeric gap between bank affordability and true affordability as an explicit output
 
-**Plans**: TBD
+**Plans**: 4 plans
+
+**Wave 1**
+
+  - [ ] 03-01-PLAN.md — Household/profile input contract on EngineInput (HouseholdSchema + parseHousehold, optional, currentAnnualSavings D-17) + boundary tests (AFF-02 boundary)
+
+**Wave 2** *(blocked on Wave 1)*
+
+  - [ ] 03-02-PLAN.md — Bank affordability: two-numerator DTI split (lenderDtiCarryingCost, D-14) + max-price binary-search solver (AFF-01)
+  - [ ] 03-03-PLAN.md — True affordability: savings-rate floor (currentAnnualSavings baseline) + cash-on-hand gate, min of the two (AFF-02)
+
+**Wave 3** *(blocked on Wave 2)*
+
+  - [ ] 03-04-PLAN.md — The gap + directional verdict (anti-funnel bankExceedsTrue, D-12/D-13) + evaluate-scenario + type-test + public barrel + reproducibility golden (AFF-03)
 
 ### Phase 4: FI-Impact Engine & Sensitivity (flagship)
 
@@ -169,7 +182,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 |-------|----------------|--------|-----------|
 | 1. Foundations & Determinism Core | 4/4 | Complete    | 2026-06-24 |
 | 2. TCO Engine | 7/7 | Complete    | 2026-06-25 |
-| 3. Affordability Engine | 0/TBD | Not started | - |
+| 3. Affordability Engine | 0/4 | Planned     | - |
 | 4. FI-Impact Engine & Sensitivity | 0/TBD | Not started | - |
 | 5. Town Scoring & Heatmap | 0/TBD | Not started | - |
 | 6. Persistence & Listings Adapter | 0/TBD | Not started | - |
