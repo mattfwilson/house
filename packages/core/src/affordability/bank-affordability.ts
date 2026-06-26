@@ -122,13 +122,47 @@ export function bankAffordability(input: EngineInput): BankAffordabilityResult {
   };
 
   // LOW BOUND strictly above downPaymentCash so downPaymentCash / price < 1 always (Pitfall 3).
-  let low = cash.plus(1);
+  const low0 = cash.plus(1);
+
+  // CR-01 GUARD: the bisection invariant REQUIRES `passes(low0)`. If even the minimum trial price
+  // already fails a DTI ceiling, NO price clears both — there is no fundable ceiling. Return a $0
+  // ceiling (NOT a silently-bisected ≈downPaymentCash+1 garbage price) so an infeasible household
+  // can never receive a fundable-looking number (T-03-09 / "trustworthiness is the product"). The
+  // result SHAPE is unchanged: report the REAL ratios at the infeasible floor and the binding one
+  // (whichever is furthest OVER its threshold) via the existing frontGap<=backGap tie convention.
+  if (!passes(low0)) {
+    const { front, back } = ratiosAt(low0);
+    const frontGap = frontThreshold.minus(front);
+    const backGap = backThreshold.minus(back);
+    const bindingRatio: BindingRatio = frontGap.lessThanOrEqualTo(backGap) ? 'frontEnd' : 'backEnd';
+    return {
+      bankMaxPrice: Money.zero(),
+      bankMaxLoan: Money.zero().sub(Money.of(cash.toFixed())),
+      frontEndRatio: front.toFixed(),
+      backEndRatio: back.toFixed(),
+      bindingRatio,
+    };
+  }
+
+  let low = low0;
   // HIGH BOUND: exponentially bracket until it FAILS (no hard-coded ceiling). Start at 2× cash.
   let high = cash.times(2);
   let doublings = 0;
   while (passes(high) && doublings < MAX_BRACKET_DOUBLINGS) {
     high = high.times(2);
     doublings += 1;
+  }
+
+  // CR-02 GUARD: the bracket loop can also exit because the doubling CAP was hit while `passes(high)`
+  // is STILL true — the failing-side invariant is then violated and bisection would narrow around
+  // still-passing prices, returning a non-maximal (silently wrong) ceiling. Surface it as a loud,
+  // diagnosable Error instead (T-03-10). Placed BEFORE the bisection loop.
+  if (passes(high)) {
+    throw new Error(
+      `bankAffordability: exhausted MAX_BRACKET_DOUBLINGS (${MAX_BRACKET_DOUBLINGS}) without ` +
+        'bracketing a failing price — the constraint never became false within the search range ' +
+        '(check passes() monotonicity).',
+    );
   }
 
   // Bisect to the cent: invariant `passes(low) && !passes(high)`, narrowed to $0.01.

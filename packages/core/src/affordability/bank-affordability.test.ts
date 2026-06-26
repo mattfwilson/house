@@ -54,6 +54,13 @@ const HOUSEHOLD_LOW_DEBT: Household = {
 // Same household but debt-heavy: the back-end ceiling (0.36) becomes the binding constraint.
 const HOUSEHOLD_DEBT_HEAVY: Household = { ...HOUSEHOLD_LOW_DEBT, existingMonthlyDebt: '2500' };
 
+// INFEASIBLE bank household (CR-01): gross income so low that the back-end DTI ratio already
+// EXCEEDS 0.36 at the minimum trial price (downPaymentCash + 1 = $100,001) — so `passes(low0)` is
+// false and NO price clears both ceilings. The pre-guard solver silently returned ≈$100,001; the
+// guard must return a $0 ceiling instead. (front stays under 0.28 at the floor; back is the
+// blocking ratio, ~0.5057 > 0.36 — verified by the floor-ratio assertion below.)
+const HOUSEHOLD_INFEASIBLE: Household = { ...HOUSEHOLD_LOW_DEBT, grossAnnualIncome: '15000' };
+
 const inputFor = (household: Household, scenario: ScenarioInputs = BASE_SCENARIO): EngineInput =>
   engineInput({ asOf: ASOF, assumptions: DEFAULT_ASSUMPTIONS, scenario, household });
 
@@ -126,6 +133,34 @@ describe('bankAffordability — max price to the cent under the lower DTI ceilin
     const result = bankAffordability(inputFor(HOUSEHOLD_LOW_DEBT));
     expect(new Dec(result.frontEndRatio).lessThanOrEqualTo(new Dec('0.28'))).toBe(true);
     expect(new Dec(result.backEndRatio).lessThanOrEqualTo(new Dec('0.36'))).toBe(true);
+  });
+});
+
+describe('CR-01 — infeasible household yields a $0 ceiling, never a fundable-looking ≈cash+1 price', () => {
+  test('the back-end ratio already EXCEEDS 0.36 at the low-bound trial price (the infeasibility premise)', () => {
+    // Confirm via the SAME trial rebuild the solver uses: at downPaymentCash + 1, back > 0.36 so
+    // `passes(low0)` is false. This is the precondition the guard must defend.
+    const price = new Dec(HOUSEHOLD_INFEASIBLE.downPaymentCash).plus(1).toFixed();
+    const tco = computeTco(inputAtPrice(HOUSEHOLD_INFEASIBLE, price));
+    const back = backEndRatio(tco, HOUSEHOLD_INFEASIBLE.grossAnnualIncome, HOUSEHOLD_INFEASIBLE.existingMonthlyDebt);
+    expect(back.greaterThan(new Dec(DEFAULT_ASSUMPTIONS.dti.backEnd))).toBe(true);
+  });
+
+  test('bankMaxPrice === $0 and bankMaxLoan === 0 − downPaymentCash for an infeasible household', () => {
+    const result = bankAffordability(inputFor(HOUSEHOLD_INFEASIBLE));
+    expect(result.bankMaxPrice.toDecimalString()).toBe('0');
+    // The implied loan is still bankMaxPrice − downPaymentCash = 0 − 100000 (D-06 shape preserved).
+    expect(result.bankMaxLoan.toDecimalString()).toBe('-100000');
+  });
+
+  test('the $0 result still populates ratios + bindingRatio (from the infeasible floor), shape unchanged', () => {
+    const result = bankAffordability(inputFor(HOUSEHOLD_INFEASIBLE));
+    // Ratios reported are the REAL, reportable ratios at the minimum trial price.
+    expect(result.frontEndRatio).toBe('0.185744');
+    expect(result.backEndRatio).toBe('0.505744');
+    // Binding = whichever is furthest OVER its threshold (back-end here), via the existing
+    // frontGap <= backGap tie convention (frontGap 0.0942 <= backGap -0.1457 is false ⇒ backEnd).
+    expect(result.bindingRatio).toBe('backEnd');
   });
 });
 
