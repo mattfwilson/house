@@ -12,17 +12,31 @@ import { DEFAULT_ASSUMPTIONS } from './defaults.js';
 
 describe('DEFAULT_ASSUMPTIONS — versioned pure seed data (D-07)', () => {
   test('declares the current schemaVersion', () => {
-    expect(DEFAULT_ASSUMPTIONS.schemaVersion).toBe(3);
+    expect(DEFAULT_ASSUMPTIONS.schemaVersion).toBe(4);
   });
 
-  test('has every namespaced group (D-04), including the V2 TCO + V3 FI/sensitivity slices', () => {
+  test('has every namespaced group (D-04), including the V2 TCO + V3 FI/sensitivity + V4 townScoring slices', () => {
     for (const k of [
       'tax', 'dti', 'returns', 'inflation', 'maintenance', 'swr', 'pmi',
       'appreciation', 'transaction', 'rent', 'closing',
       'sensitivity', 'projection',
+      'townScoring',
     ] as const) {
       expect(DEFAULT_ASSUMPTIONS[k]).toBeDefined();
     }
+  });
+
+  test('the V4 townScoring slice carries every sub-group as decimal strings (TOWN-01/TOWN-02)', () => {
+    const ts = DEFAULT_ASSUMPTIONS.townScoring;
+    for (const k of ['weights', 'amenityWeights', 'ranges', 'bucket'] as const) {
+      expect(ts[k]).toBeDefined();
+    }
+    // Spot-check leaves are decimal STRINGS, never JS numbers.
+    expect(typeof ts.weights.medianPrice).toBe('string');
+    expect(typeof ts.amenityWeights.walkability).toBe('string');
+    expect(typeof ts.ranges.medianPrice.min).toBe('string');
+    expect(typeof ts.ranges.medianPrice.max).toBe('string');
+    expect(typeof ts.bucket.stretchFactor).toBe('string');
   });
 
   test('swr.rate is a long-horizon default (< 0.04, ~0.033 — locked SWR decision)', () => {
@@ -49,7 +63,7 @@ describe('DEFAULT_ASSUMPTIONS — versioned pure seed data (D-07)', () => {
 describe('parseAssumptionSet / serializeAssumptionSet (boundary helpers)', () => {
   test('parseAssumptionSet returns the validated set for good data', () => {
     const parsed = parseAssumptionSet(DEFAULT_ASSUMPTIONS);
-    expect(parsed.schemaVersion).toBe(3);
+    expect(parsed.schemaVersion).toBe(4);
   });
 
   test('parseAssumptionSet throws on malformed data (never trusts raw JSON — T-03-03)', () => {
