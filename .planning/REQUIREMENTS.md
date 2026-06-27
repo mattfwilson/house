@@ -47,10 +47,10 @@ Requirements for the core-engine build. Each maps to a roadmap phase.
 
 ### Town Scoring & Heatmap (TOWN)
 
-- [ ] **TOWN-01**: Tool scores MA towns via a weighted, normalized composite (mill rate, median price, commute to a configurable anchor, school rating, custom amenity weights)
-- [ ] **TOWN-02**: Given a budget, tool buckets towns into realistic / stretch / fantasy
-- [ ] **TOWN-03**: Tool displays an affordability heatmap across towns for a given budget
-- [ ] **TOWN-04**: Tool flags MA-specific realities qualitatively (Prop 2½ levy mechanics, betterment assessments, Title 5 septic, 40B developments)
+- [x] **TOWN-01**: Tool scores MA towns via a weighted, normalized composite (mill rate, median price, commute to a configurable anchor, school rating, custom amenity weights)
+- [x] **TOWN-02**: Given a budget, tool buckets towns into realistic / stretch / fantasy
+- [x] **TOWN-03**: Tool displays an affordability heatmap across towns for a given budget
+- [x] **TOWN-04**: Tool flags MA-specific realities qualitatively (Prop 2½ levy mechanics, betterment assessments, Title 5 septic, 40B developments)
 
 ### Assumptions & Sensitivity (ASMP)
 
@@ -118,10 +118,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FI-05 | Phase 4 | Complete (04-02 oracle + 04-04 golden; 04-05 swr.rate guarded) |
 | FI-06 | Phase 4 | Complete (04-03) |
 | ASMP-02 | Phase 4 | Complete (04-04; 04-05 tax driver now bites — SC5 met) |
-| TOWN-01 | Phase 5 | Pending |
-| TOWN-02 | Phase 5 | Pending |
-| TOWN-03 | Phase 5 | Pending |
-| TOWN-04 | Phase 5 | Pending |
+| TOWN-01 | Phase 5 | Complete |
+| TOWN-02 | Phase 5 | Complete |
+| TOWN-03 | Phase 5 | Complete |
+| TOWN-04 | Phase 5 | Complete |
 | PROF-01 | Phase 6 | Pending |
 | PROF-02 | Phase 6 | Pending |
 | PROF-03 | Phase 6 | Pending |
