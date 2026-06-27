@@ -167,7 +167,20 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. An affordability heatmap renders across towns for a given budget, with each town's per-metric contribution explainable
   4. MA-specific realities (Prop 2.5 levy mechanics, betterment assessments, Title 5 septic, 40B deed restrictions) are flagged qualitatively per relevant town
 
-**Plans**: TBD
+**Plans**: 4 plans
+
+**Wave 1**
+
+  - [ ] 05-01-PLAN.md — Extend the 24-town table with stamped scoring metrics + curated MA flags behind the .strict() Zod boundary (TOWN-01 data, TOWN-04 data)
+  - [ ] 05-02-PLAN.md — AssumptionsV4 townScoring block (weights, amenity sub-weights, fixed ranges, stretchFactor) + v3ToV4 migrate; four prior goldens byte-identical (TOWN-01, TOWN-02)
+
+**Wave 2** *(blocked on Wave 1)*
+
+  - [ ] 05-03-PLAN.md — Pure scoring math: normalize (fixed-range, direction-folded, clamped) + composite (explainable breakdown + missing renormalization) + bucket overlay (TOWN-01, TOWN-02, TOWN-03)
+
+**Wave 3** *(blocked on Wave 2)*
+
+  - [ ] 05-04-PLAN.md — scoreTowns engine entry + UI-SPEC heatmap contract output + universal/curated flags + no-bare-number type-test + reproducibility golden + public barrel (TOWN-01..TOWN-04)
 
 ### Phase 6: Persistence & Listings Adapter
 
