@@ -16,7 +16,7 @@ Answer **"what does buying this house do to our early-retirement timeline?"** �
 
 <!-- Shipped and confirmed valuable. -->
 
-(None yet — ship to validate)
+- [x] **Town Scoring & Affordability Heatmap** *(engine — Phase 5; heatmap rendering deferred to Phase 7)* — pure `scoreTowns` engine over the 24 curated MA towns: weighted, fixed-range-normalized, direction-corrected composite (mill rate, median price, commute-by-anchor, school rating, multi-amenity sub-scores) with explicit missing-data handling (drop + renormalize, never imputed); budget-driven realistic/stretch/fantasy bucketing (exact integer-cent compare, independent of the composite); per-metric explainable breakdown satisfying the UI-SPEC heatmap data contract; and qualitative MA flags (Prop 2½ universal, betterment/Title 5/40B curated). TOWN-01..TOWN-04.
 
 ### Active
 
@@ -27,7 +27,6 @@ Answer **"what does buying this house do to our early-retirement timeline?"** �
 - [ ] **Rent-vs-buy** computed at our actual numbers, not a generic calculator
 - [ ] **Opportunity-Cost / FI-Impact Engine (flagship)** — treat down payment + closing costs as foregone investment and the monthly housing delta vs renting as a recurring foregone contribution; output the shift in FI date and net-worth trajectory divergence vs the no-purchase baseline
 - [ ] **Scenario comparison** — N house scenarios side by side, each showing FI-date delta, ranked by FI-date impact (the headline output)
-- [ ] **Town Scoring & Affordability Heatmap** — weighted, normalized composite score across MA towns (mill rate, median price, commute to configurable anchor, school rating, custom amenity weights); given a budget, bucket towns into realistic / stretch / fantasy
 - [ ] **Two saved financial profiles**, multiple named scenarios per profile, saved and comparable side by side
 - [ ] **`ListingsProvider` adapter interface** defined now, with a `MockListingsProvider` (static fixtures) as the only implementation, proving the adapter end to end
 - [ ] **Assumptions as first-class data** — tax rates, DTI thresholds, return assumptions, maintenance % all configurable and stored, never hardcoded
@@ -88,4 +87,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-24 — Phase 1 (Foundations & Determinism Core) complete: pure framework-agnostic calc core, decimal-precise `Money`, runtime+lint determinism guards, versioned assumptions-as-data, and a golden-master reproducibility harness. No engine result computes yet by design — everything downstream imports these primitives. User-facing Active requirements remain unvalidated until an engine produces results.*
+*Last updated: 2026-06-27 — Phase 5 (Town Scoring & Heatmap) complete: pure `scoreTowns` engine in `packages/core/src/towns/` — weighted fixed-range-normalized composite, budget-driven realistic/stretch/fantasy bucketing, explainable per-metric breakdown (the Phase-7 heatmap data contract), and qualitative MA flags; tunables live in a new versioned AssumptionsV4 `townScoring` block (strictly additive — the four prior result goldens stay byte-identical). Engine-only by design; heatmap pixels are Phase 7. Core suite green at 399 tests with a new town-scoring reproducibility golden. TOWN-01..TOWN-04 validated.*
