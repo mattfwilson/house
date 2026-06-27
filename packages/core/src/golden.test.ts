@@ -39,6 +39,8 @@ import { computeTco } from './tco/tco.js';
 import { rentVsBuy } from './tco/rent-vs-buy.js';
 import { affordabilityGap } from './affordability/gap.js';
 import { fiImpact } from './fi/fi-impact.js';
+import { scoreTowns } from './towns/score-towns.js';
+import { Money } from './money/money.js';
 import { canonicalJson } from './serialize/canonical-json.js';
 import { DEFAULT_ASSUMPTIONS } from './assumptions/defaults.js';
 import { parseAssumptionSet } from './assumptions/assumption-set.js';
@@ -50,6 +52,7 @@ const GOLDEN_PATH = resolve(here, '__fixtures__', 'golden-snapshot.json');
 const TCO_GOLDEN_PATH = resolve(here, '__fixtures__', 'tco-golden-snapshot.json');
 const AFFORDABILITY_GOLDEN_PATH = resolve(here, '__fixtures__', 'affordability-golden-snapshot.json');
 const FI_GOLDEN_PATH = resolve(here, '__fixtures__', 'fi-golden-snapshot.json');
+const TOWN_SCORING_GOLDEN_PATH = resolve(here, '__fixtures__', 'town-scoring-golden-snapshot.json');
 
 /**
  * THE fixed, deterministic house scenario the golden masters are computed from: a $450k Newton
@@ -149,6 +152,23 @@ function canonicalFiResult(input: EngineInput): string {
   return canonicalJson(fiImpact(input));
 }
 
+/**
+ * Canonical-JSON form of the FULL Town-Scoring scoreboard (TOWN-01..04): every town's composite +
+ * itemized per-metric breakdown + bucket(|null) + universal-plus-curated flags, at a FIXED budget
+ * ($750k) and anchor (downtownBoston). `canonicalJson` emits every decimal-string value float-free
+ * (no NaN/Infinity — the composite math clamps + nulls, Plan 05-03) with recursively sorted keys, so
+ * equal scoreboards are byte-identical. Reads only `DEFAULT_ASSUMPTIONS.townScoring` (stored config).
+ */
+function canonicalTownScoreboard(): string {
+  return canonicalJson(
+    scoreTowns({
+      assumptions: DEFAULT_ASSUMPTIONS,
+      budget: Money.of('750000'),
+      anchor: 'downtownBoston',
+    }),
+  );
+}
+
 describe('golden master: the canary recomputes cent-identically (PROF-04)', () => {
   test('produced canonical result deep-equals the committed golden fixture', () => {
     const produced = canonicalResult(runCanary(fixedInput()));
@@ -209,6 +229,22 @@ describe('golden master: the FI-impact result recomputes cent-identically (FI-05
     }
 
     const golden = readFileSync(FI_GOLDEN_PATH, 'utf8').trim();
+    expect(produced).toBe(golden);
+  });
+});
+
+describe('golden master: the town-scoring scoreboard recomputes byte-identically (TOWN-01..04)', () => {
+  test('produced canonical scoreboard deep-equals the committed town-scoring-golden fixture', () => {
+    const produced = canonicalTownScoreboard();
+
+    // Gated regeneration ONLY (reviewable git diff). NEVER toMatchSnapshot (T-05-SC auto-bless drift).
+    if (process.env.UPDATE_GOLDEN === '1') {
+      mkdirSync(dirname(TOWN_SCORING_GOLDEN_PATH), { recursive: true });
+      writeFileSync(TOWN_SCORING_GOLDEN_PATH, produced + '\n', 'utf8');
+      return;
+    }
+
+    const golden = readFileSync(TOWN_SCORING_GOLDEN_PATH, 'utf8').trim();
     expect(produced).toBe(golden);
   });
 });

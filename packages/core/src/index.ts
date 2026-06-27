@@ -132,3 +132,22 @@ export {
   type TornadoRow,
   type TornadoDriver,
 } from './fi/sensitivity.js';
+
+// Town scoring engine (Phase 5: TOWN-01..04): the integrated `scoreTowns` entry + the closed
+// scoreboard result types satisfying the UI-SPEC heatmap contract (the towns×metrics matrix, the
+// explainable per-metric breakdown, the bucket enum, the MA-flag enums). Reads all scoring config
+// off `AssumptionsV4.townScoring` (stored data, never hardcoded). Raw `Dec`/`Decimal` remain
+// UNEXPORTED — the composite + per-metric contributions cross this boundary as decimal STRINGS and
+// the bucket as the `Bucket` enum (the documented boundary), so no downstream code can re-open the
+// bare-float hole.
+export {
+  scoreTowns,
+  type TownScore,
+  type TownScoreboard,
+  type TownScoringInput,
+  type MetricContribution,
+  type MetricDirection,
+  type Bucket,
+  type CommuteAnchor,
+  type MaFlag,
+} from './towns/score-towns.js';
