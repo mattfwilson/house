@@ -10,6 +10,7 @@ import {
   AssumptionsV1,
   AssumptionsV2,
   AssumptionsV3,
+  AssumptionsV4,
   type AnyAssumptionSet,
   CURRENT_VERSION,
 } from './schema.js';
@@ -35,28 +36,43 @@ export function migrate(input: AnyAssumptionSet): CurrentAssumptionSet {
   // also rejects a forged out-of-range schemaVersion before the switch (T-03-01).
   const set = parseAssumptionSet(input);
 
+  let migrated: CurrentAssumptionSet;
   switch (set.schemaVersion) {
     case 1:
       // V1 -> current: chain V1->V2->V3->V4 so a V1 snapshot lands a COMPLETE V4 (the TCO slices
       // from v1ToV2, the FI/sensitivity slices from v2ToV3, AND the townScoring slice from v3ToV4).
       // A REAL transform, not identity — proven by migrate.test.ts.
-      return v3ToV4(v2ToV3(v1ToV2(set)));
+      migrated = v3ToV4(v2ToV3(v1ToV2(set)));
+      break;
     case 2:
       // V2 -> current: chain V2->V3->V4 so the FI/sensitivity AND townScoring slices are filled
       // from the defaults (V2 is no longer current — a REAL transform, proven by migrate.test.ts).
-      return v3ToV4(v2ToV3(set));
+      migrated = v3ToV4(v2ToV3(set));
+      break;
     case 3:
       // V3 -> V4 step-up: fill the new townScoring slice from the V4 defaults (V3 is no longer
       // current — a REAL transform, proven by migrate.test.ts).
-      return v3ToV4(set);
+      migrated = v3ToV4(set);
+      break;
     case 4:
       // Already current.
-      return set;
+      migrated = set;
+      break;
     default:
       // `set` is `never` here once every version is handled — an exhaustiveness guard that
       // also throws at runtime for any version that slipped past validation.
       return assertNever(set);
   }
+
+  // Re-validate the migrated output against the CURRENT (V4) schema before returning it as a
+  // trusted set. The `parseAssumptionSet` above validates `input` against ITS OWN version, but
+  // V1/V2 `swr.rate` is a bare `decStr` with NO positivity refine (that refine exists only on
+  // V3/V4). Without this, a legacy V1/V2 snapshot carrying `swr.rate: '0'` (or negative) would
+  // migrate through verbatim and be returned as "trusted", re-opening the `Money.of('Infinity')`
+  // divide-by-SWR crash in FI calc. Parsing here rejects it at the trust boundary. Strictly
+  // additive for well-formed snapshots — a valid set re-parses to an identical value, so the
+  // reproducibility goldens stay byte-identical.
+  return AssumptionsV4.parse(migrated);
 }
 
 /**

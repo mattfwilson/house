@@ -212,4 +212,18 @@ describe('migrate — gates on schemaVersion', () => {
     const forged = { ...DEFAULT_ASSUMPTIONS, schemaVersion: 99 } as unknown as Parameters<typeof migrate>[0];
     expect(() => migrate(forged)).toThrow();
   });
+
+  // WR-01 regression: V1/V2 `swr.rate` has no positivity refine (that lives only on V3/V4), so a
+  // legacy snapshot with `swr.rate: '0'` parses against ITS version yet would migrate through
+  // verbatim into a "trusted" V4 — re-opening the `Money.of('Infinity')` divide-by-SWR crash in
+  // FI calc. migrate() now re-validates its output against the V4 schema, so these must THROW.
+  test('rejects a V1 snapshot with a non-positive swr.rate at the output boundary (WR-01)', () => {
+    const zeroSwrV1: z.infer<typeof AssumptionsV1> = { ...V1_FIXTURE, swr: { rate: '0' } };
+    expect(() => migrate(zeroSwrV1)).toThrow();
+  });
+
+  test('rejects a V2 snapshot with a non-positive swr.rate at the output boundary (WR-01)', () => {
+    const zeroSwrV2: z.infer<typeof AssumptionsV2> = { ...V2_FIXTURE, swr: { rate: '0' } };
+    expect(() => migrate(zeroSwrV2)).toThrow();
+  });
 });
