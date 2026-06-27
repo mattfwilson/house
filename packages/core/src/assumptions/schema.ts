@@ -227,6 +227,124 @@ export const AssumptionsV3 = z
   .strict();
 
 /**
+ * AssumptionsV4 — schemaVersion 4. KEEPS every V3 slice verbatim and adds the Phase-5
+ * Town-Scoring tunables (TOWN-01 / TOWN-02 / ASMP-01 / D-06/D-08/D-09). Built by copying the
+ * V3 shape, bumping the discriminant literal, and appending ONE new `group({...})` slice,
+ * `townScoring` — every leaf a `decStr` (never `z.number()`, T-05-06). STRICTLY ADDITIVE: not
+ * one V3 leaf is touched, so the four existing result goldens stay byte-identical (Pitfall 7 /
+ * A10 — proven in migrate/schema tests by running the golden suite WITHOUT regeneration).
+ *
+ * The `townScoring` slice supplies the composite-score configuration the Plan 05-03 scoring math
+ * reads as stored data (never hardcoded — the `sensitivity` precedent):
+ *   - `weights` (D-06): the five top-level metric weights for the weighted composite
+ *     (medianPrice / commute / school / millRate / amenities).
+ *   - `amenityWeights` (D-07): the per-sub-metric weights inside the amenities composite
+ *     (walkability / transit / dining / parks).
+ *   - `ranges` (D-09): the FIXED normalization reference ranges (min/max) per metric, so a
+ *     town's raw figure normalizes to [0,1] against a stored band rather than the live dataset
+ *     (medianPrice / commute / school / millRate / amenity).
+ *   - `bucket.stretchFactor` (D-08): the budget multiplier that bounds the "stretch" bucket
+ *     (e.g. `'1.25'` — a town priced at or below `budget × stretchFactor` is a stretch).
+ */
+export const AssumptionsV4 = z
+  .object({
+    schemaVersion: z.literal(4),
+    // --- V3 slices, copied verbatim (every leaf a decStr). ---
+    tax: group({
+      effectiveIncomeRate: decStr, // blended marginal-ish income tax rate
+      propertyRateAnnual: decStr, // placeholder statewide property tax rate (of value) — INERT (kept for migrate stability; property tax flows through the resolved mill rate)
+      assessmentRatio: decStr, // assessed value ÷ market value (e.g. "1.0")
+      // The published residential mill rate per $1,000, OVERRIDING the town-table resolution;
+      // absent = resolve from the town table. Consumed by computeTco and perturbed RELATIVELY by
+      // the sensitivity tax driver (L6). Optional so it stays absent-by-default (goldens untouched).
+      millRateOverride: decStr.optional(),
+    }),
+    dti: group({
+      frontEnd: decStr,
+      backEnd: decStr,
+    }),
+    returns: group({
+      realAnnual: decStr,
+    }),
+    inflation: group({
+      annual: decStr,
+    }),
+    maintenance: group({
+      annualPctOfValue: decStr,
+    }),
+    swr: group({
+      // CR-01: the FI number is annualNeed / swr.rate, so a zero rate crashes via Money.of('Infinity')
+      // and a negative rate yields a negative FI target read as "reached at month 0". A positivity
+      // refine (mirroring the targetSavingsRate/downPaymentPct Number-comparison precedent) rejects
+      // both at the boundary. Tightens validation only — no serialized value changes (defaults stay
+      // positive), so the goldens remain byte-identical.
+      rate: decStr.refine((s) => Number(s) > 0, {
+        message: 'swr.rate must be > 0 (the FI number is spend / swr.rate)',
+      }),
+    }),
+    pmi: group({
+      annualRateOfLoan: decStr,
+      dropOffLtv: decStr,
+    }),
+    appreciation: group({
+      realAnnual: decStr,
+    }),
+    transaction: group({
+      sellCostPct: decStr,
+    }),
+    rent: group({
+      realGrowthAnnual: decStr,
+    }),
+    closing: group({
+      rateOfPrice: decStr,
+    }),
+    sensitivity: group({
+      returnBand: decStr, // ± absolute on returns.realAnnual
+      inflationBand: decStr, // ± absolute on inflation.annual
+      appreciationBand: decStr, // ± absolute on appreciation.realAnnual
+      maintenanceBand: decStr, // ± absolute on maintenance.annualPctOfValue
+      taxBandRelative: decStr, // RELATIVE ± fraction of the property-tax figure (L6), NOT absolute
+      swrBand: decStr, // ± absolute on swr.rate
+    }),
+    projection: group({
+      maxHorizonYears: decStr,
+    }),
+    // --- NEW V4 slice (Phase 5 — Town Scoring & Heatmap). ---
+    // The town-scoring composite configuration (TOWN-01/TOWN-02). Every leaf a decStr — a float
+    // can never re-enter at this boundary (T-05-06). Strictly additive: NO V3 leaf changed.
+    townScoring: group({
+      // The five top-level metric weights for the weighted composite (D-06).
+      weights: group({
+        medianPrice: decStr,
+        commute: decStr,
+        school: decStr,
+        millRate: decStr,
+        amenities: decStr,
+      }),
+      // The per-sub-metric weights inside the amenities composite (D-07).
+      amenityWeights: group({
+        walkability: decStr,
+        transit: decStr,
+        dining: decStr,
+        parks: decStr,
+      }),
+      // The FIXED normalization reference ranges (min/max) per metric (D-09).
+      ranges: group({
+        medianPrice: group({ min: decStr, max: decStr }),
+        commute: group({ min: decStr, max: decStr }),
+        school: group({ min: decStr, max: decStr }),
+        millRate: group({ min: decStr, max: decStr }),
+        amenity: group({ min: decStr, max: decStr }),
+      }),
+      // The budget multiplier bounding the "stretch" bucket (D-08).
+      bucket: group({
+        stretchFactor: decStr,
+      }),
+    }),
+  })
+  .strict();
+
+/**
  * AssumptionSetSchema — the versioned discriminated union (D-05). Adding a version is a
  * one-line append: another object schema in the `z.discriminatedUnion` list.
  */
@@ -234,10 +352,11 @@ export const AssumptionSetSchema = z.discriminatedUnion('schemaVersion', [
   AssumptionsV1,
   AssumptionsV2,
   AssumptionsV3,
+  AssumptionsV4,
 ]);
 
 /** The current schema version (integer, monotonic). */
-export const CURRENT_VERSION = 3 as const;
+export const CURRENT_VERSION = 4 as const;
 
 /**
  * Any accepted (parseable) AssumptionSet — the union across all known versions.
@@ -251,7 +370,8 @@ export const CURRENT_VERSION = 3 as const;
 export type AnyAssumptionSet =
   | z.infer<typeof AssumptionsV1>
   | z.infer<typeof AssumptionsV2>
-  | z.infer<typeof AssumptionsV3>;
+  | z.infer<typeof AssumptionsV3>
+  | z.infer<typeof AssumptionsV4>;
 
 /** The current-version AssumptionSet (what calc code consumes). */
-export type CurrentAssumptionSet = z.infer<typeof AssumptionsV3>;
+export type CurrentAssumptionSet = z.infer<typeof AssumptionsV4>;

@@ -16,6 +16,7 @@ export {
   AssumptionsV1,
   AssumptionsV2,
   AssumptionsV3,
+  AssumptionsV4,
   decStr,
   CURRENT_VERSION,
   type AnyAssumptionSet,

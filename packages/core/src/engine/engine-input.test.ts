@@ -64,7 +64,7 @@ describe('engineInput factory — the immutable snapshot unit (D-11)', () => {
   test('assembles an object with asOf + assumptions + scenario', () => {
     const input = engineInput(baseParts());
     expect(input.asOf).toBe('2026-06-23');
-    expect(input.assumptions.schemaVersion).toBe(3);
+    expect(input.assumptions.schemaVersion).toBe(4);
     expect(input.scenario.label).toBe('boundary-valid: Newton $450k');
   });
 
