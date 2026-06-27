@@ -6,7 +6,13 @@
 // transform slots in as one `case`. An unrecognized version is rejected, not silently
 // passed through (defense against a corrupt/forged snapshot — T-03-01).
 import { parseAssumptionSet, type CurrentAssumptionSet } from './assumption-set.js';
-import { AssumptionsV1, AssumptionsV2, type AnyAssumptionSet, CURRENT_VERSION } from './schema.js';
+import {
+  AssumptionsV1,
+  AssumptionsV2,
+  AssumptionsV3,
+  type AnyAssumptionSet,
+  CURRENT_VERSION,
+} from './schema.js';
 import { DEFAULT_ASSUMPTIONS } from './defaults.js';
 import type { z } from 'zod';
 
@@ -14,6 +20,8 @@ import type { z } from 'zod';
 type V1Set = z.infer<typeof AssumptionsV1>;
 /** The parsed shape of a V2 set (input to the V2->V3 step-up). */
 type V2Set = z.infer<typeof AssumptionsV2>;
+/** The parsed shape of a V3 set (input to the V3->V4 step-up). */
+type V3Set = z.infer<typeof AssumptionsV3>;
 
 /**
  * Step a parsed AssumptionSet of any known version up to the current version.
@@ -29,15 +37,19 @@ export function migrate(input: AnyAssumptionSet): CurrentAssumptionSet {
 
   switch (set.schemaVersion) {
     case 1:
-      // V1 -> current: chain V1->V2->V3 so a V1 snapshot lands a COMPLETE V3 (the TCO slices
-      // from v1ToV2 AND the FI/sensitivity slices from v2ToV3). A REAL transform, not identity
-      // — proven by migrate.test.ts.
-      return v2ToV3(v1ToV2(set));
+      // V1 -> current: chain V1->V2->V3->V4 so a V1 snapshot lands a COMPLETE V4 (the TCO slices
+      // from v1ToV2, the FI/sensitivity slices from v2ToV3, AND the townScoring slice from v3ToV4).
+      // A REAL transform, not identity — proven by migrate.test.ts.
+      return v3ToV4(v2ToV3(v1ToV2(set)));
     case 2:
-      // V2 -> V3 step-up: fill the new FI/sensitivity slices from the V3 defaults (V2 is no
-      // longer current — a REAL transform, proven by migrate.test.ts).
-      return v2ToV3(set);
+      // V2 -> current: chain V2->V3->V4 so the FI/sensitivity AND townScoring slices are filled
+      // from the defaults (V2 is no longer current — a REAL transform, proven by migrate.test.ts).
+      return v3ToV4(v2ToV3(set));
     case 3:
+      // V3 -> V4 step-up: fill the new townScoring slice from the V4 defaults (V3 is no longer
+      // current — a REAL transform, proven by migrate.test.ts).
+      return v3ToV4(set);
+    case 4:
       // Already current.
       return set;
     default:
@@ -71,18 +83,34 @@ function v1ToV2(set: V1Set): V2Set {
 }
 
 /**
- * Lift a parsed V2 set to the current V3 shape (D-05). Copies every V2 slice verbatim, seeds the
- * new FI/sensitivity slices (`sensitivity` six bands + `projection.maxHorizonYears`) from the V3
- * defaults, and bumps `schemaVersion` to 3. The result satisfies the V3 schema by construction (a
- * shape drift here would be a compile error against `CurrentAssumptionSet`).
+ * Lift a parsed V2 set to the V3 shape (D-05). Copies every V2 slice verbatim, seeds the new
+ * FI/sensitivity slices (`sensitivity` six bands + `projection.maxHorizonYears`) from the defaults,
+ * and bumps `schemaVersion` to 3. V3 is no longer current, so this returns a `V3Set` (an
+ * intermediate); the caller chains it through `v3ToV4` to reach the current shape.
  */
-function v2ToV3(set: V2Set): CurrentAssumptionSet {
+function v2ToV3(set: V2Set): V3Set {
   return {
     ...set,
     schemaVersion: 3,
-    // New V3 slices, seeded from the defaults (the LOCKED band + horizon values).
+    // V3 slices, seeded from the defaults (the LOCKED band + horizon values).
     sensitivity: { ...DEFAULT_ASSUMPTIONS.sensitivity },
     projection: { ...DEFAULT_ASSUMPTIONS.projection },
+  };
+}
+
+/**
+ * Lift a parsed V3 set to the current V4 shape (D-05). Copies every V3 slice verbatim, seeds the
+ * new `townScoring` slice (weights + amenityWeights + ranges + bucket.stretchFactor) from the V4
+ * defaults, and bumps `schemaVersion` to 4. The result satisfies the V4 schema by construction (a
+ * shape drift here would be a compile error against `CurrentAssumptionSet`). STRICTLY ADDITIVE —
+ * every prior V3 leaf is preserved, so a round-tripped/migrated set computes identical results.
+ */
+function v3ToV4(set: V3Set): CurrentAssumptionSet {
+  return {
+    ...set,
+    schemaVersion: 4,
+    // New V4 slice, seeded from the defaults (the [ASSUMED] townScoring weights/ranges/stretch).
+    townScoring: { ...DEFAULT_ASSUMPTIONS.townScoring },
   };
 }
 

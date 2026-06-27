@@ -12,7 +12,7 @@
 import type { CurrentAssumptionSet } from './schema.js';
 
 export const DEFAULT_ASSUMPTIONS: CurrentAssumptionSet = {
-  schemaVersion: 3,
+  schemaVersion: 4,
   tax: {
     // Blended effective income tax rate (fed + MA 5% flat), placeholder.
     effectiveIncomeRate: '0.27',
@@ -87,5 +87,42 @@ export const DEFAULT_ASSUMPTIONS: CurrentAssumptionSet = {
     // loop bound (the downPaymentPct .refine Number-comparison precedent), never re-entering
     // as a bare number across the boundary.
     maxHorizonYears: '60',
+  },
+  townScoring: {
+    // [ASSUMED] Phase-5 town-scoring composite configuration (RESEARCH Discretion Proposals
+    // A1-A7 / D-06/D-07/D-08/D-09) — pending user confirmation. Every value a canonical decimal
+    // STRING (a float can never re-enter this boundary, T-05-06). STRICTLY ADDITIVE — no prior
+    // leaf changed, so the four existing result goldens stay byte-identical.
+    weights: {
+      // [ASSUMED] The five top-level metric weights (RESEARCH A1, D-06). Sum to 1.0; affordability
+      // (median price) leads, commute close behind, schools/mill-rate/amenities trail.
+      medianPrice: '0.30',
+      commute: '0.25',
+      school: '0.20',
+      millRate: '0.15',
+      amenities: '0.10',
+    },
+    amenityWeights: {
+      // [ASSUMED] The per-sub-metric weights inside the amenities composite (RESEARCH A2, D-07).
+      // Sum to 1.0; walkability leads, transit/dining tie, parks trail.
+      walkability: '0.30',
+      transit: '0.25',
+      dining: '0.25',
+      parks: '0.20',
+    },
+    ranges: {
+      // [ASSUMED] The FIXED normalization reference ranges per metric (RESEARCH A3-A6, D-09).
+      // A town's raw figure normalizes to [0,1] against THESE stored bands, not the live dataset.
+      medianPrice: { min: '400000', max: '2500000' }, // greater-Boston single-family band
+      commute: { min: '10', max: '75' }, // minutes to the configurable anchor
+      school: { min: '1', max: '10' }, // 1-10 rating scale
+      millRate: { min: '4', max: '16' }, // published residential $/$1,000 band
+      amenity: { min: '0', max: '100' }, // 0-100 sub-metric scale
+    },
+    bucket: {
+      // [ASSUMED] The budget multiplier bounding the "stretch" bucket (RESEARCH A7, D-08): a town
+      // priced at or below budget × 1.25 is a stretch (above is fantasy).
+      stretchFactor: '1.25',
+    },
   },
 };
