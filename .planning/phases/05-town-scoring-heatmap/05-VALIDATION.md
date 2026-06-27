@@ -1,9 +1,9 @@
 ---
 phase: 5
 slug: town-scoring-heatmap
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: approved
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-06-27
 ---
 
@@ -87,4 +87,4 @@ created: 2026-06-27
 - [ ] Feedback latency < 15s
 - [ ] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** approved 2026-06-27 (plan-checker: all tasks have automated verify, no 3-consecutive gap, inline TDD for new test files)
