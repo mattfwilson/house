@@ -176,7 +176,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 2** *(blocked on Wave 1)*
 
-  - [ ] 05-03-PLAN.md — Pure scoring math: normalize (fixed-range, direction-folded, clamped) + composite (explainable breakdown + missing renormalization) + bucket overlay (TOWN-01, TOWN-02, TOWN-03)
+  - [x] 05-03-PLAN.md — Pure scoring math: normalize (fixed-range, direction-folded, clamped) + composite (explainable breakdown + missing renormalization) + bucket overlay (TOWN-01, TOWN-02, TOWN-03)
 
 **Wave 3** *(blocked on Wave 2)*
 
@@ -222,6 +222,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 2. TCO Engine | 7/7 | Complete    | 2026-06-25 |
 | 3. Affordability Engine | 5/5 | Complete    | 2026-06-26 |
 | 4. FI-Impact Engine & Sensitivity | 6/6 | Complete    | 2026-06-26 |
-| 5. Town Scoring & Heatmap | 2/4 | In Progress|  |
+| 5. Town Scoring & Heatmap | 3/4 | In Progress|  |
 | 6. Persistence & Listings Adapter | 0/TBD | Not started | - |
 | 7. Web Shell | 0/TBD | Not started | - |
