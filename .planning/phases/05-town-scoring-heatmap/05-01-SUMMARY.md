@@ -103,6 +103,10 @@ None - no external service configuration required.
 - Missing-data handling is provably honest (absent, never zero) at the data layer — downstream scoring must continue to treat absent metrics as missing, not as 0.
 - `prop25` is intentionally not stored; the scoring/flag engine must inject Prop 2½ universally (D-05).
 
+## Self-Check: PASSED
+
+All modified files exist on disk; all task commits (`01e5b1a`, `1b5526c`, `381570f`) and the metadata commit (`bb9f41d`) are present in git history. `tsc -b` clean; full core suite 362/362 green.
+
 ---
 *Phase: 05-town-scoring-heatmap*
 *Completed: 2026-06-27*
