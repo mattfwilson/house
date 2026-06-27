@@ -194,7 +194,25 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. A `ListingsProvider` adapter interface is defined in the core, isolated from engine math, and depended on only through the interface (never the concrete type outside the DI container)
   4. A `MockListingsProvider` returning static fixtures exercises the full `ListingsProvider` interface end to end
 
-**Plans**: TBD
+**Plans**: 6 plans
+
+**Wave 1**
+
+  - [ ] 06-01-PLAN.md — Core ports (ProfileRepository, ScenarioRepository, ListingsProvider) + domain types (Profile, Listing, SavedScenario) + barrel (PROF-01, PROF-02, PROF-03, LIST-01)
+  - [ ] 06-02-PLAN.md — Scaffold packages/app workspace + SQLite stack install (legitimacy checkpoint for @types/better-sqlite3) (PROF-01, PROF-02, PROF-03)
+
+**Wave 2** *(blocked on Wave 1)*
+
+  - [ ] 06-03-PLAN.md — Drizzle schema + db/migrator wiring + [BLOCKING] migration materialization (live insert/select round-trip) (PROF-01, PROF-02, PROF-03)
+  - [ ] 06-04-PLAN.md — Listings adapter: MockListingsProvider + hand-seeded fixtures + contract test (LIST-01, LIST-02)
+
+**Wave 3** *(blocked on Wave 2)*
+
+  - [ ] 06-05-PLAN.md — SQLite repository adapters + InMemory fakes + shared repositoryContract factory + byte-identical reproducibility round-trip (PROF-01, PROF-02, PROF-03)
+
+**Wave 4** *(blocked on Wave 3)*
+
+  - [ ] 06-06-PLAN.md — Imperative-shell services (≤2 profile guard) + manual DI container + D-03 boundary enforcement (eslint app block + lint-as-test) (PROF-01, PROF-02, PROF-03)
 
 ### Phase 7: Web Shell
 
@@ -223,5 +241,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 3. Affordability Engine | 5/5 | Complete    | 2026-06-26 |
 | 4. FI-Impact Engine & Sensitivity | 6/6 | Complete    | 2026-06-26 |
 | 5. Town Scoring & Heatmap | 4/4 | Complete    | 2026-06-27 |
-| 6. Persistence & Listings Adapter | 0/TBD | Not started | - |
+| 6. Persistence & Listings Adapter | 0/6 | Not started | - |
 | 7. Web Shell | 0/TBD | Not started | - |
