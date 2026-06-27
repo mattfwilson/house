@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: TCO Engine** - Amortization, MA mill-rate tax, PMI, insurance, maintenance, HOA, closing costs, rent-vs-buy (completed 2026-06-25)
 - [x] **Phase 3: Affordability Engine** - Bank DTI affordability, true affordability, and the gap between them (completed 2026-06-26)
 - [x] **Phase 4: FI-Impact Engine & Sensitivity (flagship)** - Opportunity cost, FI-date delta, ranked comparison, oracle reconciliation, anti-funnel, sensitivity bands (completed 2026-06-26)
-- [ ] **Phase 5: Town Scoring & Heatmap** - Weighted normalized composite, budget bucketing, heatmap, MA-specific flags
+- [x] **Phase 5: Town Scoring & Heatmap** - Weighted normalized composite, budget bucketing, heatmap, MA-specific flags (completed 2026-06-27)
 - [ ] **Phase 6: Persistence & Listings Adapter** - Local SQLite repos, two profiles, named scenarios, ListingsProvider + MockListingsProvider
 - [ ] **Phase 7: Web Shell** - Thin Next.js UI over the proven core: editors, scenario builder, comparison, heatmap, sensitivity views
 
@@ -180,7 +180,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 3** *(blocked on Wave 2)*
 
-  - [ ] 05-04-PLAN.md — scoreTowns engine entry + UI-SPEC heatmap contract output + universal/curated flags + no-bare-number type-test + reproducibility golden + public barrel (TOWN-01..TOWN-04)
+  - [x] 05-04-PLAN.md — scoreTowns engine entry + UI-SPEC heatmap contract output + universal/curated flags + no-bare-number type-test + reproducibility golden + public barrel (TOWN-01..TOWN-04)
 
 ### Phase 6: Persistence & Listings Adapter
 
@@ -222,6 +222,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 2. TCO Engine | 7/7 | Complete    | 2026-06-25 |
 | 3. Affordability Engine | 5/5 | Complete    | 2026-06-26 |
 | 4. FI-Impact Engine & Sensitivity | 6/6 | Complete    | 2026-06-26 |
-| 5. Town Scoring & Heatmap | 3/4 | In Progress|  |
+| 5. Town Scoring & Heatmap | 4/4 | Complete   | 2026-06-27 |
 | 6. Persistence & Listings Adapter | 0/TBD | Not started | - |
 | 7. Web Shell | 0/TBD | Not started | - |
