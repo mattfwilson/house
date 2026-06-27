@@ -496,22 +496,25 @@ Both must pass identical assertions (save/load/list/delete/unique-name/round-tri
 | A4 | Global Vitest coverage thresholds will apply to `packages/app` once added | Pitfall 1 | Low — coverage is process-global in Vitest; confirmed by root config comment. Planner decides per-project scoping. |
 | A5 | `drizzle-kit` config uses `dialect: 'sqlite'` with `dbCredentials.url` (no separate `driver` field for better-sqlite3) | Drizzle config | Low — verified against current Drizzle get-started docs. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Repo method shape: sync or async?**
+1. **Repo method shape: sync or async?** — **RESOLVED: synchronous repositories.**
    - What we know: better-sqlite3 is synchronous; D-08 mandates sync listings; ARCHITECTURE sketched async repos for future-proofing.
    - What's unclear: whether to make repos async for a hypothetical future libSQL swap.
    - Recommendation: **synchronous repos** — honest to the driver, simpler tests; the port abstraction already absorbs a future async swap if it ever happens.
+   - **Resolution:** Synchronous. All port methods are sync per 06-01 Task 2 (`grep Promise<` returns 0 hits in the port files); the port interface absorbs a future async swap without changing call sites.
 
-2. **Where does the dev `.sqlite` file live, and who runs migrations at runtime?**
+2. **Where does the dev `.sqlite` file live, and who runs migrations at runtime?** — **RESOLVED: single configurable path, migrate at container construction, `:memory:` in tests.**
    - What we know: tests use `:memory:`; the file is app config.
    - What's unclear: exact dev path (`packages/app/house.sqlite` vs repo-root `data/`).
    - Recommendation: a single configurable path (default `./house.sqlite`, gitignored); `runMigrations()` called once at container construction; tests migrate a fresh `:memory:` db per suite.
+   - **Resolution:** `openDb(path)` defaults to `./house.sqlite` (gitignored, 06-02); `runMigrations()` runs at container construction (06-06) and per-suite against a fresh `:memory:` db (06-05 contract factory).
 
-3. **Profile vs Household type relationship.**
+3. **Profile vs Household type relationship.** — **RESOLVED: `Profile = { id, name } & Household`-derived.**
    - What we know: `Household` already exists in `engine-input.ts` with exactly the PROF-01 fields (income, savings rate, debt, rent, net worth) + FI fields, fully Zod-validated.
    - What's unclear: whether `Profile` IS a persisted `Household` + id/name, or a distinct narrower type.
    - Recommendation: model `Profile` as `{ id, name } & Household`-derived (reuse `HouseholdSchema`/`decStr` discipline) so the affordability engines consume a profile's household block directly — avoids a parallel money-validation schema.
+   - **Resolution:** `Profile` reuses the `Household` money leaves + `decStr` discipline plus `id`/`name`, with a single `parseProfile` boundary (06-01 Task 1) — no parallel money validator.
 
 ## Sources
 
