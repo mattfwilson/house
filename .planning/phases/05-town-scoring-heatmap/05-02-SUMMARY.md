@@ -132,3 +132,10 @@ None - no external service configuration required.
 ---
 *Phase: 05-town-scoring-heatmap*
 *Completed: 2026-06-27*
+
+## Self-Check: PASSED
+
+- SUMMARY.md present at `.planning/phases/05-town-scoring-heatmap/05-02-SUMMARY.md`
+- All commits verified in git log: `d511c02` (T1), `7bd2d9a` (T2), `0e31178` (T3), `7c26164` (SUMMARY)
+- Four result goldens byte-identical (no `*-golden-snapshot.json` modification; no UPDATE_GOLDEN)
+- Full core suite 360 green; `tsc -b` exit 0
