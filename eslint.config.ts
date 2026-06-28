@@ -17,6 +17,11 @@ export default tseslint.config(
       '**/node_modules/**',
       '**/coverage/**',
       '.planning/**',
+      // Next.js build output + the Next-generated type shim (its triple-slash `/// <reference
+      // types="next" />` directives are not editable and would otherwise trip
+      // @typescript-eslint/triple-slash-reference).
+      'apps/web/.next/**',
+      '**/next-env.d.ts',
       'packages/core/src/_lint-fixtures/**',
       // App D-03 negative fixture: an INTENTIONAL services->adapter violation, ignored from the
       // everyday `eslint .` so the lint gate stays green for real code — packages/app/src/
@@ -239,6 +244,68 @@ export default tseslint.config(
     files: ['packages/app/src/**/*.test.ts'],
     rules: {
       'boundaries/element-types': 'off',
+    },
+  },
+
+  // ── apps/web: client-bundle-leak guard (T-7-02) ─────────────────────────
+  // The client tiers (interactive components + Zustand stores ship to the browser) must NEVER
+  // import @house/app or the container — either drags the native better-sqlite3 module into the
+  // client graph (Pitfall 2). `import 'server-only'` is the build-time half of this mitigation;
+  // this lint rule is the defense-in-depth half. @house/core is PURE (Money, types) and stays
+  // importable client-side — only @house/app and the container.server composition root are
+  // forbidden. Server tiers (app/** RSCs, app/actions/**, lib/**) legitimately call the container
+  // and are NOT covered by this block.
+  {
+    files: ['apps/web/src/components/**', 'apps/web/src/store/**'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        paths: [
+          {
+            name: '@house/app',
+            message:
+              'Client-tier modules must not import @house/app — it drags the native ' +
+              'better-sqlite3 module into the client bundle (T-7-02). Receive plain DTOs from a ' +
+              'Server Action instead.',
+          },
+        ],
+        patterns: [
+          {
+            group: ['**/container.server', '**/lib/container.server', '@/lib/container.server'],
+            message:
+              'Client-tier modules must not import the server-only container (T-7-02). ' +
+              'Data crosses the boundary as a serializable DTO from a Server Action.',
+          },
+        ],
+      }],
+    },
+  },
+
+  // ── apps/web: confine money→float conversion to the display edge (Pitfall 5) ──
+  // `Number(...)` on a money value is the lossy step that turns a canonical decimal string into a
+  // float. It is permitted ONLY at the two sanctioned display-edge sites and forbidden everywhere
+  // else in the web layer, so no Server Action / DTO mapper / component silently floats money.
+  // The allow-list override directly below re-enables it for those two paths.
+  {
+    files: ['apps/web/src/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': ['error',
+        {
+          selector: "CallExpression[callee.name='Number']",
+          message:
+            'Money→float conversion is confined to the display edge: only ' +
+            'apps/web/src/components/charts/** (chart-data numbers) and apps/web/src/lib/format.ts ' +
+            '(the final Intl.NumberFormat step) may call Number() (Pitfall 5).',
+        },
+      ],
+    },
+  },
+  // The two sanctioned float-conversion edges. Written with BOTH paths from the start so 07-05's
+  // lib/format.ts does not trip the rule when it lands. charts/** build Recharts number[] data;
+  // format.ts does the final Number() into Intl.NumberFormat.
+  {
+    files: ['apps/web/src/components/charts/**', 'apps/web/src/lib/format.ts'],
+    rules: {
+      'no-restricted-syntax': 'off',
     },
   },
 );
