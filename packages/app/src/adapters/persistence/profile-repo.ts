@@ -6,16 +6,20 @@
 // DEFENSE IN DEPTH (T-06-13): `load`/`list` reassemble the row into a plain object and pass it
 // THROUGH `parseProfile` (the same `.strict()` + `decStr` boundary the affordability solvers trust),
 // so a corrupt DB value (a non-canonical string, a smuggled extra column) is REJECTED on read, not
-// blindly trusted. Timestamps are integer epoch-ms supplied by the caller/service — never
-// `Date.now()` here (core's determinism discipline; the imperative shell owns the clock).
+// blindly trusted. Timestamps (`created_at`/`updated_at`) are OWNED BY THIS adapter via an INJECTED
+// `now` clock — the locked nine-leaf `Profile` port carries NO timestamp fields, so the caller
+// cannot supply them. The container injects the real `Date.now()`; tests inject a fixed clock.
+// (Contrast `scenario-service`, where the CALLER owns the clock and passes `now` in.)
 import { eq, sql } from 'drizzle-orm';
 import { parseProfile, type Profile, type ProfileRepository } from '@house/core';
 import type { Db } from './db.js';
 import { profiles } from './schema.js';
 
 /**
- * SQLite-backed `ProfileRepository`. Drizzle parameterizes every write/read (T-06-14). The caller
- * supplies `createdAt`/`updatedAt` (epoch-ms) — they are NOT generated in this adapter.
+ * SQLite-backed `ProfileRepository`. Drizzle parameterizes every write/read (T-06-14). This adapter
+ * OWNS the wall clock via an injected `now` (real `Date.now()` in the container, a fixed clock in
+ * tests) and stamps `created_at`/`updated_at` itself — the locked `Profile` port carries no
+ * timestamp fields, so the caller cannot supply them.
  */
 export class SqliteProfileRepository implements ProfileRepository {
   constructor(
