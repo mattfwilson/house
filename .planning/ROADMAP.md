@@ -199,16 +199,16 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Wave 1**
 
   - [ ] 06-01-PLAN.md — Core ports (ProfileRepository, ScenarioRepository, ListingsProvider) + domain types (Profile, Listing, SavedScenario) + barrel (PROF-01, PROF-02, PROF-03, LIST-01)
-  - [ ] 06-02-PLAN.md — Scaffold packages/app workspace + SQLite stack install (legitimacy checkpoint for @types/better-sqlite3) (PROF-01, PROF-02, PROF-03)
+  - [ ] 06-02-PLAN.md — Scaffold packages/app workspace + SQLite stack install + native-binary smoke-test (all 4 packages slopcheck OK; autonomous) (PROF-01, PROF-02, PROF-03)
 
 **Wave 2** *(blocked on Wave 1)*
 
-  - [ ] 06-03-PLAN.md — Drizzle schema + db/migrator wiring + [BLOCKING] migration materialization (live insert/select round-trip) (PROF-01, PROF-02, PROF-03)
+  - [ ] 06-03-PLAN.md — Drizzle schema (nine-leaf profiles; PROF-01 net worth = available_net_worth) + db/migrator wiring + [BLOCKING] migration materialization (live insert/select round-trip) (PROF-01, PROF-02, PROF-03)
   - [ ] 06-04-PLAN.md — Listings adapter: MockListingsProvider + hand-seeded fixtures + contract test (LIST-01, LIST-02)
 
 **Wave 3** *(blocked on Wave 2)*
 
-  - [ ] 06-05-PLAN.md — SQLite repository adapters + InMemory fakes + shared repositoryContract factory + byte-identical reproducibility round-trip (PROF-01, PROF-02, PROF-03)
+  - [ ] 06-05-PLAN.md — SQLite repository adapters (nine-leaf profile round-trip) + InMemory fakes + shared repositoryContract factory + byte-identical reproducibility + frozen-household round-trip (PROF-01, PROF-02, PROF-03)
 
 **Wave 4** *(blocked on Wave 3)*
 
