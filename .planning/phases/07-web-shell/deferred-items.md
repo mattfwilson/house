@@ -11,3 +11,12 @@ outside its scope per the executor SCOPE BOUNDARY rule).
   - `apps/web/src/app/actions/scenarios.test.ts(80)` — `Object is possibly 'undefined'` on `dto.rows[0].isBaseline` (`noUncheckedIndexedAccess`).
   - `apps/web/src/lib/dto/scenario.test.ts(109)` — same `noUncheckedIndexedAccess` indexing pattern.
   - These are in plan 07-03's files, not caused by 07-04. Trivial fixes (a guard or non-null assertion on the indexed access). Left for a 07-03 follow-up or a phase-wide typecheck-gate decision.
+
+## From plan 07-06 (2026-06-28)
+
+- **Same two pre-existing 07-03 `tsc` errors re-confirmed.** 07-06's acceptance gate runs
+  `npx tsc -p apps/web/tsconfig.json --noEmit`, which still exits 1 solely because of the two
+  07-03 test-file errors above. The 07-06 store files (`working-set.ts`, `selection.ts`,
+  `recompute.ts`) contribute ZERO type errors (`grep "store/"` finds none in the tsc output) and
+  `npx eslint apps/web/src/store` exits 0. Still out of scope (07-06 is directed to touch
+  `apps/web/src/store/*` only; prior-plan files are locked).

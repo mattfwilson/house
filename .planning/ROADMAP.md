@@ -242,7 +242,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Wave 3** *(blocked on Wave 2)*
 
   - [ ] 07-05-PLAN.md — Client chrome: shadcn init (official registry), dark layout + persistent profile/scenario header (D-02), color-honest display-edge format helpers (SC-1, SC-4)
-  - [ ] 07-06-PLAN.md — Zustand stores: shared working set (no auto-persist, PROF-04), selection/expansion, debounced latest-wins recompute coordinator (SC-1, SC-2)
+  - [x] 07-06-PLAN.md — Zustand stores: shared working set (no auto-persist, PROF-04), selection/expansion, debounced latest-wins recompute coordinator (SC-1, SC-2)
 
 **Wave 4** *(blocked on Wave 3)*
 

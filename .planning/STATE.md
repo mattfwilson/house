@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 07-04-PLAN.md
-last_updated: "2026-06-28T19:30:00.000Z"
-last_activity: 2026-06-28 -- Completed Phase 07 Plan 04 (towns + sensitivity + trajectory Server Actions + DTOs)
+stopped_at: Completed 07-06-PLAN.md
+last_updated: "2026-06-28T19:45:00.000Z"
+last_activity: 2026-06-28 -- Completed Phase 07 Plan 06 (Zustand ephemeral state: working set + selection + debounced latest-wins recompute)
 progress:
   total_phases: 7
   completed_phases: 6
   total_plans: 43
-  completed_plans: 36
-  percent: 84
+  completed_plans: 37
+  percent: 86
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-06-22)
 ## Current Position
 
 Phase: 07 (web-shell) — EXECUTING
-Plan: 5 of 11 (07-01, 07-02, 07-03, 07-04 complete)
+Plan: 7 of 11 (07-01, 07-02, 07-03, 07-04, 07-06 complete)
 Status: Executing Phase 07
-Last activity: 2026-06-28 -- Completed Phase 07 Plan 04 (towns + sensitivity + trajectory Server-Action layer + DTOs)
+Last activity: 2026-06-28 -- Completed Phase 07 Plan 06 (Zustand ephemeral state: shared working set [no auto-persist, PROF-04] + selection/expansion + debounced latest-wins recompute coordinator)
 
 Progress: 5 of 7 phases complete (Phase 06: 6/6 plans — DONE)
 
@@ -89,6 +89,7 @@ Progress: 5 of 7 phases complete (Phase 06: 6/6 plans — DONE)
 | Phase 07 P02 | ~6min | 3 tasks | 6 files |
 | Phase 07 P03 | ~12min | 3 tasks | 13 files |
 | Phase 07 P04 | ~10min | 3 tasks | 7 files |
+| Phase 07 P06 | ~6min | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -158,6 +159,7 @@ Recent decisions affecting current work:
 - [Phase 07-01]: [Web Shell]: apps/web scaffolded as the FIRST apps/* workspace (Next 16.2.9 App Router + Tailwind v4, src-dir), buildable end-to-end (`npm run build -w apps/web` exit 0). Raw-TS workspace deps cross in via `transpilePackages: ['@house/core','@house/app']`; better-sqlite3 is NOT a direct apps/web dep and NOT in serverExternalPackages — it stays auto-externalized transitively through @house/app (listing it in both lists makes Next throw, Pitfall 3 / T-7-03). container.server.ts is a `server-only` process-singleton over makeContainer(HOUSE_DB_PATH ?? './house.sqlite'), stashed on globalThis for Next dev hot-reload, built once per process (never per-request — re-runs migrations / leaks SQLite handles, Pitfall 4). The 'web' Vitest project (jsdom, via mergeConfig+sharedTest) is wired into root `projects: ['packages/*','apps/*']`; coverage scoped to `packages/**` so React UI does not drop the 95/90 core gate. eslint guards (T-7-02): client tiers (components/**, store/**) are banned from importing @house/app or container.server (no-restricted-imports + server-only as the build-time half — boundaries plugin can't classify 'use client'), and `Number()` is confined to `components/charts/**` + `lib/format.ts` (no-restricted-syntax; both allow-paths written from the start so 07-05 format.ts won't trip it). create-next-app could not write in the exec environment → scaffolded manually to the identical end state. Full suite 475 green; better-sqlite3 confirmed absent from apps/web direct deps.
 - [Phase 07-02]: [Web Shell/FI]: fiTrajectory (SC-2 / D-07) surfaces the month-by-month net-worth SERIES projectFiDate computes but discards — for BOTH the buy path and the keep-renting baseline — so the hero chart's trajectory math stays in the core (CORE-01/02), never hand-rolled in the web layer. Correctness is AGREE-BY-CONSTRUCTION: buyPath/renterBaselinePath were extracted into a shared buildFiPaths (fi/fi-paths.ts) that BOTH fiImpact and fiTrajectory consume, so the two callers literally share the seed/premium/equity math; the series reuses the locked contribute-then-compound loop and the now-exported (module-level, NOT barrel) comparisonNw, so buyFiMonth/rentFiMonth equal projectFiDate exactly. Series is YEAR-SAMPLED (month 0 + every 12th month to the cap) for chart weight while crossover months are computed in the FULL monthly loop (exact regardless of stride). Buy plots COMPARISON NW (liquid + liquidated equity) so the line aligns with the owner-target crossing; rent plots liquid-only. fiThreshold = ownerTarget; FiTrajectoryResult closed (dollars as Money, markers number|null); buildFiPaths/PathBundle stay unexported (internal Dec). The fi-impact.ts refactor was a pure code move — four goldens byte-identical (no UPDATE_GOLDEN). Full suite 479 green (+4); tsc -b + eslint clean
 - [Phase 07-04]: [Web Shell]: The data-dense views (town heatmap, FI tornado, D-07 trajectory) get thin 'use server' endpoints — each validates input through the core Zod boundary (parseAssumptionSet+migrate / parseHousehold / parseScenarioInputs via buildEngineInput, or Money.of for the budget which THROWS on a bare number — T-7-01), calls exactly ONE core entry (scoreTowns / tornado / fiTrajectory) once, and maps to a plain DTO. toTornadoDTO reconstructs plain discriminated FiOutcomes and asserts swingMonths FINITE at the boundary (a tripwire that fails loud rather than letting an Infinity JSON.stringify to a silent null — FI-05/L3; never trips on valid core output since an unreached endpoint contributes cappedAtMonth). toTrajectoryDTO is the trajectory's single server-side Money.toDecimalString() site — net worth + fiThreshold cross as decimal strings, the lone float cast deferred to the chart edge (Pitfall 5, zero Number( tokens). toScoreboardDTO is a faithful pass-through (TownScoreboard carries no Money) preserving the locked 05-UI-SPEC encoding (Bucket/composite/MaFlag + the explainable MetricContribution breakdown) with EXPLICIT no-data markers intact (composite null / bucket null / missing:true — never a silent 0; D-12 two-channel separation, no bucketing/composite math in the web layer). The commute anchor is validated against a locked three-anchor allow-list. DEVIATION (test-perf, Rule 3): tornado(STRAINED) runs fiImpact ~13× to the horizon cap (~5s), so the boundary tests precompute each TornadoResult/FiTrajectoryResult ONCE at module load (module eval is not bound by the per-test timeout) and exercise only the mapper. Full suite 494 green (+7); eslint apps/web exit 0. DEFERRED (out of scope, logged to deferred-items.md): 2 pre-existing noUncheckedIndexedAccess tsc errors in 07-03 test files (apps/web tsc --noEmit is not a plan gate)
+- [Phase 07-06]: [Web Shell]: The ephemeral client-state layer is three Zustand stores holding ONLY transient UI state (server-truth stays in SQLite). working-set.ts is the shared working AssumptionSet (D-09) — loadFrozenSet replaces the set when a saved scenario opens (a one-way READ of the frozen snapshot), updateKnob immutably sets one nested decimal-string leaf; held as the plain decimal-string DTO (a TYPE-only @house/core import, never a Money instance). CRITICAL: it performs ZERO persistence (PROF-04/T-7-08) — freeze-on-save stays the sole job of computeAndSaveScenarioAction (07-03); a grep gate confirms no save call-expression and no @house/app/container.server import in store/* (the only textual match is the comment documenting the invariant). selection.ts is active profile/scenario (D-02) + single inline-expanded row (D-03 toggle) + the comparison set. recompute.ts is the race-safe debounced coordinator: a createRecomputeStore factory (own timer + pending thunk per instance, so tests get isolated coordinators) + the app-wide useRecompute; the monotonic request id is bumped at debounce-FLUSH time (~300ms, D-08) so a burst coalesces to ONE id, while settle(resultId,result) applies a result ONLY if resultId===the latest requestId — a stale out-of-order resolution is dropped (Pitfall 6/T-7-09). The recompute call is an INJECTED thunk (requestRecompute(fn)) → engine-agnostic, unit-testable without a server (07-07 wires recompareAction/trajectoryAction in). TDD: recompute.test.ts proves latest-wins (id-N resolves after id-N+1 → N discarded) + debounce coalescing (3 rapid calls → one id), green. eslint apps/web/src/store exit 0; store files contribute ZERO tsc errors. DEFERRED (re-confirmed, out of scope): the 2 pre-existing 07-03 test-file tsc errors that make the full `tsc -p apps/web --noEmit` exit 1 (locked prior-plan files; not a real project gate per 07-04).
 - [Phase 07-03]: [Web Shell]: The scenario + profile Server-Action layer is the thin shell contract — every action validates raw client input THROUGH the existing core Zod schemas (parseAssumptionSet+migrate / parseHousehold / parseScenarioInputs via buildEngineInput, or parseProfile) BEFORE any engine/persistence call (D-16, public-POST hardening), calls exactly ONE @house/core entry (compareScenarios/evaluateScenario/affordabilityGap) or @house/app service (computeAndSaveScenario/load/list/delete, saveProfile/list/delete), and maps every Money→string via a dedicated lib/dto/* mapper that is the SOLE server-side Money.toDecimalString() site (no money float-cast — eslint confines Number() to charts/** + lib/format.ts). toCompareDTO flattens the discriminated FiOutcome AND preserves the FI-06 ranking (baseline row 0, unreached last); the SC-4 gap framing (signed gap + verdict + Money ceilings) lives on AffordabilityGapResult → toGapDTO/gapAction, NOT EvaluateScenarioResult. PROF-04 reproducibility proven: computeAndSaveScenarioAction→loadScenarioAction replays the frozen snapshot byte-for-byte. DEVIATION: deleteProfileAction required a profile-delete capability the persistence stack lacked → added ProfileRepository.delete (port + SQLite + in-memory + type-test) + deleteProfile service, symmetric to scenarios (FK RESTRICT). Persistence-backed action tests pinned to node env (jsdom breaks @house/app's sqlite migrator file URL); actions take an optional injected Container (default = lazy server-only singleton) for :memory: testability. Full suite 487 green (+8); goldens byte-identical; tsc -b + eslint apps/web exit 0
 - [Phase ?]: [Phase 06-05]: [Persistence]: SqliteScenarioRepository is golden roundTrip promoted to production — SAVE canonicalJson-serializes the frozen EngineInput into the scenarios.snapshot TEXT blob; LOAD re-parses every leaf through parseAssumptionSet/parseScenarioInputs/parseHousehold+calendarDate (never an as cast; a forged blob throws, T-06-12) and rebuilds SOLELY from the self-contained blob, never re-joining the live owning-profile row (frozen household, PROF-04). SqliteProfileRepository round-trips all NINE Household money leaves as canonical decimal TEXT, parseProfile-revalidated on load (T-06-13); count() backs the <=2 service guard. ONE repositoryContract factory runs an identical 25-case suite against BOTH the SQLite adapters (shared migrated :memory: db) and InMemory fakes — byte-identity via plain toBe: save->reload byte-identical household present+absent, frozen-household-survives-a-profile-edit, PROF-03 fresh file-backed reload. Shared serializeSnapshot/deserializeSnapshot codec keeps the fake from drifting; profile timestamps via an injectable shell clock; FK enforcement live (scenarios seed their owning profile). Full suite 462 green (+34); goldens byte-identical
 
@@ -190,6 +192,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-28T19:30:00.000Z
-Stopped at: Completed 07-04-PLAN.md
+Last session: 2026-06-28T19:45:00.000Z
+Stopped at: Completed 07-06-PLAN.md
 Resume file: None
