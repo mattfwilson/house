@@ -34,6 +34,7 @@ import { openDb, runMigrations, type Db } from './db.js';
 import { SqliteScenarioRepository, serializeSnapshot } from './scenario-repo.js';
 import { SqliteProfileRepository } from './profile-repo.js';
 import { InMemoryScenarioRepository, InMemoryProfileRepository } from './in-memory-repos.js';
+import { scenarios, profiles } from './schema.js';
 
 // ---------------------------------------------------------------------------------------------
 // Fixtures — built fresh per test so a mutation in one case cannot leak into another.
@@ -378,6 +379,57 @@ describe('FK enforcement (SQLite)', () => {
     expect(() =>
       scenarioRepo.save(makeSavedScenario({ id: 'scn-orphan', profileId: 'ghost-profile' })),
     ).toThrow(/FOREIGN KEY/i);
+    db.$client.close();
+  });
+});
+
+// ---------------------------------------------------------------------------------------------
+// WR-04 — SQLite-only: the load-path Zod re-validation is PROVEN to reject forged/corrupt rows
+// written DIRECTLY to the DB (bypassing the adapters' save path, which would never produce them).
+// T-06-12 (a float smuggled into a snapshot) and T-06-13 (a non-canonical profile column) are
+// security-relevant trust-boundary defenses asserted by negative tests, not merely by prose. Not
+// part of the shared contract: these poke raw columns via Drizzle, which the InMemory fake lacks.
+// ---------------------------------------------------------------------------------------------
+
+describe('forged/corrupt row rejection (SQLite)', () => {
+  it('T-06-12: a snapshot blob carrying a bare-number price throws on load (float never computes)', () => {
+    const db = migratedMemoryDb();
+    new SqliteProfileRepository(db, () => FIXED_TS).save(makeProfile({ id: 'prof-1' }));
+
+    // Tamper a valid snapshot: replace the canonical decimal-STRING price with a bare JS number,
+    // exactly the float the decimal-string boundary exists to keep out.
+    const tampered = JSON.parse(serializeSnapshot(makeEngineInputWithHousehold())) as {
+      scenario: { price: unknown };
+    };
+    tampered.scenario.price = 850000;
+    db.insert(scenarios)
+      .values({
+        id: 'scn-forged',
+        profileId: 'prof-1',
+        name: 'forged',
+        snapshot: JSON.stringify(tampered),
+        createdAt: FIXED_TS,
+        updatedAt: FIXED_TS,
+      })
+      .run();
+
+    expect(() => new SqliteScenarioRepository(db).load('scn-forged')).toThrow();
+    db.$client.close();
+  });
+
+  it('T-06-13: a profiles row with a non-canonical decimal column throws on load', () => {
+    const db = migratedMemoryDb();
+    const valid = makeProfile({ id: 'prof-corrupt' });
+    db.insert(profiles)
+      .values({
+        ...valid,
+        grossAnnualIncome: 'not-a-number', // not a canonical decimal string — must be rejected
+        createdAt: FIXED_TS,
+        updatedAt: FIXED_TS,
+      })
+      .run();
+
+    expect(() => new SqliteProfileRepository(db, () => FIXED_TS).load('prof-corrupt')).toThrow();
     db.$client.close();
   });
 });
