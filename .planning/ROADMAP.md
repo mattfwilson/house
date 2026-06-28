@@ -247,7 +247,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Wave 4** *(blocked on Wave 3)*
 
   - [x] 07-07-PLAN.md — Persistent assumptions rail (D-10) + live debounced recompute wiring (D-08), mounted on every route (SC-1, SC-3)
-  - [ ] 07-08-PLAN.md — Cockpit = ranked comparison: pinned rent-baseline (D-05), bank-as-gap caution (D-06), trajectory hero chart (D-07), inline scenario editor (D-15) (SC-2, SC-4)
+  - [x] 07-08-PLAN.md — Cockpit = ranked comparison: pinned rent-baseline (D-05), bank-as-gap caution (D-06), trajectory hero chart (D-07), inline scenario editor (D-15) (SC-2, SC-4)
   - [ ] 07-09-PLAN.md — Town heatmap (CSS-grid, locked 05-UI-SPEC encoding, D-13) + sensitivity tornado route (FI-05) (SC-3, SC-4)
   - [ ] 07-11-PLAN.md — Profile editor: /profile route + ProfileEditor form (all nine Household leaves), create-first-profile empty state + edit/delete, field errors from core parseProfile (D-16), header entry (SC-1, PROF-01/02/03)
 
