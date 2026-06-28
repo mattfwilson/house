@@ -27,6 +27,21 @@ export default tseslint.config(
 
   ...tseslint.configs.recommended,
 
+  // Honor the leading-underscore convention for INTENTIONALLY-unused bindings repo-wide
+  // (function params, variables, caught errors). This does NOT weaken real coverage — only a
+  // binding the author EXPLICITLY marked with a leading `_` is ignored. It exists for the
+  // type-level port-signature probes in `*.type-test.ts`, whose `_q`/`_id`/`_p` params exist
+  // solely to PIN a synchronous signature shape at compile time and are never read at runtime.
+  {
+    rules: {
+      '@typescript-eslint/no-unused-vars': ['error', {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
+      }],
+    },
+  },
+
   // ── packages/core/src: zero framework, fully deterministic ──────────────
   // Scoped to src/** (production core code) — NOT the package's own tooling configs
   // (vitest.config.ts), which legitimately import the test runner. The override

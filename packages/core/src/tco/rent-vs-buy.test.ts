@@ -20,7 +20,6 @@
 //   - SELL HAIRCUT (D-05): sellCostPct of 0 yields a higher buy ending net worth than 0.065.
 import { describe, test, expect } from 'vitest';
 import { rentVsBuy, toReal, buyMonthlyOutflowAt, shouldChargePmi } from './rent-vs-buy.js';
-import { computeTco } from './tco.js';
 import { amortizationSchedule } from './amortization.js';
 import { computePmi } from './pmi.js';
 import { Money } from '../money/money.js';
