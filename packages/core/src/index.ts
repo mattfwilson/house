@@ -122,6 +122,13 @@ export {
 } from './fi/compare.js';
 export { fiTargets, type FiTargets } from './fi/fi-target.js';
 export { projectFiDate, type FiOutcome } from './fi/projection.js';
+// The net-worth-over-time SERIES (SC-2 / D-07 hero chart): the month-by-month trajectory for the
+// buy path AND the keep-renting baseline that `projectFiDate` computes but discards. Reuses the
+// shared `buildFiPaths` bundles + the locked projection loop, so the series reconciles with
+// `projectFiDate` by construction. Closed `FiTrajectoryResult`: dollars cross as `Money`, the
+// FI-month markers as `number | null`. The internal `buildFiPaths`/`PathBundle` (which consume/
+// return the internal `Dec`) stay UNEXPORTED — only the closed result type crosses the boundary.
+export { fiTrajectory, type FiTrajectoryResult } from './fi/fi-trajectory.js';
 // The sensitivity tornado (ASMP-02 / D-12/D-13/D-14): the per-driver one-way FI-date swing, ranked
 // with the top drivers flagged — the "no headline number without a range" instrument. Its closed
 // `TornadoResult`/`TornadoRow` carry the discriminated `FiOutcome`s + a finite `swingMonths` (no
