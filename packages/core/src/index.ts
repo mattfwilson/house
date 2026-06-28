@@ -50,9 +50,10 @@ export {
 export { runCanary, type CanaryResult } from './engine/canary.js';
 export { canonicalJson } from './serialize/canonical-json.js';
 
-// Town mill-rate table (TCO-02 data half): the resolver + its row/result types. The raw
-// data array stays internal; downstream code resolves by town name through this boundary.
-export { resolveMillRate, type ResolvedMillRate } from './towns/town-table.js';
+// Town mill-rate table (TCO-02 data half): the resolver + its row/result types + the curated
+// town NAMES (a UI selector source). The raw data array stays internal; downstream code resolves
+// by town name through this boundary (rate via resolveMillRate, never by reading the rows).
+export { resolveMillRate, TOWN_NAMES, type ResolvedMillRate } from './towns/town-table.js';
 export { type TownRateRow } from './towns/town-table.schema.js';
 
 // TCO engine (Phase 2): the top-level aggregator + the closed result types, plus the

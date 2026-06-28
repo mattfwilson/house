@@ -495,6 +495,14 @@ export const TOWN_RATE_TABLE: readonly TownRateRow[] = [
 ];
 
 /**
+ * The curated greater-Boston town NAMES (D-01) — the canonical order of {@link TOWN_RATE_TABLE}.
+ * Exposed (names ONLY, never the internal rate/metric rows) so a UI town selector can offer the
+ * same curated set the engine resolves against by name (the mill-rate data array stays internal —
+ * downstream code resolves a rate through {@link resolveMillRate}, never by reading the rows).
+ */
+export const TOWN_NAMES: readonly string[] = TOWN_RATE_TABLE.map((row) => row.town);
+
+/**
  * The snapshot-capturable resolved pair: the residential mill rate (as published) and the
  * fiscal year it was published for. Captured into the TCO result so a replay is
  * self-contained (D-08 / Pitfall 11).
