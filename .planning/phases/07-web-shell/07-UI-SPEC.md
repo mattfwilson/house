@@ -1,10 +1,11 @@
 ---
 phase: 7
 slug: web-shell
-status: draft
+status: approved
 shadcn_initialized: false
 preset: "shadcn official, New York style, dark/slate base — initialized during execution (no apps/web in repo yet)"
 created: 2026-06-28
+reviewed_at: 2026-06-28
 ---
 
 # Phase 7 — UI Design Contract
@@ -161,6 +162,7 @@ These are interaction (not just visual) contracts the executor must honor; they 
 | Inline editor | Add/Edit is an **inline expanding editor row** within the comparison table (not a modal, not a separate route); on save it re-flies and re-ranks immediately | D-15 |
 | Validation boundary | Form inputs (plain numerics → canonical decimal strings) are validated **only** through the existing core Zod schemas (`parseScenarioInputs`/`ScenarioInputsSchema`, `parseHousehold`, `parseAssumptionSet`) at the Server Action boundary; field errors surfaced from the parse result; **no duplicated validation, no bare-`number` money** in components | D-16 |
 | Heatmap render | CSS-grid towns×metrics table-heatmap; cells colored by the locked bucket palette + lightness intensity (normalized composite scalar), hatched no-data cells, per-metric breakdown in tooltips — honors the 05-UI-SPEC encoding contract exactly | D-13 |
+| Icon-only a11y | Every icon-only control (delete, expand/collapse row, toggle) carries an `aria-label` matching the action verb from the Copywriting Contract (e.g. `aria-label="Delete scenario"`); the 44px hit-target floor applies in tandem | Checker FLAG (Dim 2) |
 
 ---
 
@@ -177,11 +179,11 @@ No third-party registries are declared for Phase 7 (D-11 names only shadcn/ui of
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS (FLAG resolved — icon-only `aria-label` contract added)
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** APPROVED — 2026-06-28 (gsd-ui-checker)
