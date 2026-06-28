@@ -21,6 +21,13 @@ import * as schema from './schema.js';
 export function openDb(source: string) {
   const sqlite = new Database(source);
   sqlite.pragma('journal_mode = WAL');
+  // Enforce foreign keys EXPLICITLY per-connection (SQLite defaults FK checks OFF and resets
+  // them on every new connection). Do NOT rely on this build's better-sqlite3 happening to be
+  // compiled with SQLITE_DEFAULT_FOREIGN_KEYS=1: CLAUDE.md sanctions a future swap to
+  // `node:sqlite` (FK off by default), which would otherwise silently disable the
+  // scenarios->profiles FK with no compile or test failure. This pragma makes the constraint a
+  // property of the adapter, not of the driver's compile flags (proven by the negative FK test).
+  sqlite.pragma('foreign_keys = ON');
   return drizzle({ client: sqlite, schema });
 }
 

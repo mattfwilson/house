@@ -362,3 +362,22 @@ function migratedFileDb(file: string): Db {
   runMigrations(db);
   return db;
 }
+
+// ---------------------------------------------------------------------------------------------
+// WR-02 — SQLite-only: the scenarios->profiles FOREIGN KEY is ENFORCED, not merely declared.
+// This proves the `PRAGMA foreign_keys = ON` in `openDb` actually rejects an orphan scenario
+// (a profileId pointing at no profile row), rather than the constraint being asserted only in
+// prose. Not part of the shared contract: the InMemory fake intentionally models no FK.
+// ---------------------------------------------------------------------------------------------
+
+describe('FK enforcement (SQLite)', () => {
+  it('saving a scenario whose profileId references no profile row throws a FOREIGN KEY error', () => {
+    const db = migratedMemoryDb();
+    const scenarioRepo = new SqliteScenarioRepository(db);
+    // No profile is seeded — the owning profileId points at nothing.
+    expect(() =>
+      scenarioRepo.save(makeSavedScenario({ id: 'scn-orphan', profileId: 'ghost-profile' })),
+    ).toThrow(/FOREIGN KEY/i);
+    db.$client.close();
+  });
+});
