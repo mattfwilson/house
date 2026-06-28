@@ -8,6 +8,12 @@ dist/
 # Test / coverage
 coverage/
 
+# Local SQLite databases (committed drizzle/*.sql migrations are NOT ignored — D-11)
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.db
+
 # Editor / OS
 .DS_Store
 *.log
