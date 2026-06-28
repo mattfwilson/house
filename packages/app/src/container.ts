@@ -34,6 +34,14 @@ export interface Container {
   readonly scenarios: ScenarioRepository;
   readonly profiles: ProfileRepository;
   readonly listings: ListingsProvider;
+  /**
+   * Dispose the persistence stack: close the single shared SQLite connection, which checkpoints
+   * the WAL into the main DB file and releases the file (and WAL/SHM) handles. Without this the
+   * connection leaks for the process lifetime and, on Windows, an open handle blocks deletion of
+   * the DB file. Composition roots / shutdown hooks (and tests) MUST call this when done. Not a
+   * port method — it is a lifecycle hook on the bundle the composition root owns.
+   */
+  readonly close: () => void;
 }
 
 /**
@@ -48,5 +56,7 @@ export function makeContainer(dbPath: string): Container {
     scenarios: new SqliteScenarioRepository(db),
     profiles: new SqliteProfileRepository(db, () => Date.now()),
     listings: new MockListingsProvider(LISTING_FIXTURES),
+    // Deterministic disposal of the one shared connection (checkpoints WAL, frees handles).
+    close: () => db.$client.close(),
   };
 }

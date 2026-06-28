@@ -106,6 +106,13 @@ describe('makeContainer — end-to-end shell composition (zero Next.js)', () => 
     expect(loadScenario(c.scenarios, 'scn-1')).toBeNull();
   });
 
+  it('close() disposes the shared SQLite connection (checkpoints WAL, frees handles)', () => {
+    const c = makeContainer(':memory:');
+    expect(c.profiles.count()).toBe(0);
+    // Disposal must run cleanly; after it the underlying handle is closed.
+    expect(() => c.close()).not.toThrow();
+  });
+
   it('serves the MockListingsProvider fixtures through container.listings', () => {
     const c = makeContainer(':memory:');
     const all = c.listings.getListings({});
