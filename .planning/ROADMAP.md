@@ -231,7 +231,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 1**
 
-  - [ ] 07-01-PLAN.md — Scaffold apps/web (Next 16) + monorepo wiring (transpilePackages, server-only container singleton, apps/web Vitest project, eslint client-bundle/Number() boundary guards; Number() allowed in charts/** + lib/format.ts) (SC-1)
+  - [x] 07-01-PLAN.md — Scaffold apps/web (Next 16) + monorepo wiring (transpilePackages, server-only container singleton, apps/web Vitest project, eslint client-bundle/Number() boundary guards; Number() allowed in charts/** + lib/format.ts) (SC-1)
   - [ ] 07-02-PLAN.md — Pure `fiTrajectory` core entry (D-07 net-worth series, reuses projection loop, reconciles with projectFiDate) + barrel export (SC-2)
 
 **Wave 2** *(blocked on Wave 1)*
@@ -268,4 +268,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 4. FI-Impact Engine & Sensitivity | 6/6 | Complete    | 2026-06-26 |
 | 5. Town Scoring & Heatmap | 4/4 | Complete    | 2026-06-27 |
 | 6. Persistence & Listings Adapter | 6/6 | Complete    | 2026-06-28 |
-| 7. Web Shell | 0/11 | Planned | - |
+| 7. Web Shell | 1/11 | In Progress | - |
