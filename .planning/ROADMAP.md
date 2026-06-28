@@ -241,5 +241,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 3. Affordability Engine | 5/5 | Complete    | 2026-06-26 |
 | 4. FI-Impact Engine & Sensitivity | 6/6 | Complete    | 2026-06-26 |
 | 5. Town Scoring & Heatmap | 4/4 | Complete    | 2026-06-27 |
-| 6. Persistence & Listings Adapter | 5/6 | In Progress|  |
+| 6. Persistence & Listings Adapter | 6/6 | Complete    | 2026-06-28 |
 | 7. Web Shell | 0/TBD | Not started | - |
