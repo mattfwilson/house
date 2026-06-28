@@ -232,7 +232,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Wave 1**
 
   - [x] 07-01-PLAN.md — Scaffold apps/web (Next 16) + monorepo wiring (transpilePackages, server-only container singleton, apps/web Vitest project, eslint client-bundle/Number() boundary guards; Number() allowed in charts/** + lib/format.ts) (SC-1)
-  - [ ] 07-02-PLAN.md — Pure `fiTrajectory` core entry (D-07 net-worth series, reuses projection loop, reconciles with projectFiDate) + barrel export (SC-2)
+  - [x] 07-02-PLAN.md — Pure `fiTrajectory` core entry (D-07 net-worth series, reuses projection loop, reconciles with projectFiDate) + barrel export (SC-2)
 
 **Wave 2** *(blocked on Wave 1)*
 
