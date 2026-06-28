@@ -12,6 +12,7 @@
   "include": ["src"],
   "exclude": [
     "dist",
-    "src/**/*.test.ts"
+    "src/**/*.test.ts",
+    "src/**/_lint-fixtures/**"
   ]
 }

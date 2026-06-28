@@ -18,6 +18,10 @@ export default tseslint.config(
       '**/coverage/**',
       '.planning/**',
       'packages/core/src/_lint-fixtures/**',
+      // App D-03 negative fixture: an INTENTIONAL services->adapter violation, ignored from the
+      // everyday `eslint .` so the lint gate stays green for real code — packages/app/src/
+      // boundary.test.ts lints it directly with `--no-ignore` to prove the guard trips.
+      'packages/app/src/services/_lint-fixtures/**',
     ],
   },
 
@@ -167,6 +171,59 @@ export default tseslint.config(
     rules: {
       'no-restricted-globals': 'off',
       'no-restricted-properties': 'off',
+    },
+  },
+
+  // ── packages/app/src: D-03 dependency-inversion boundary ────────────────
+  // The imperative shell must depend only on the @house/core PORTS outside the single
+  // composition root. This block mechanizes D-03: `services/**` may NOT import a concrete
+  // adapter (`adapters/**`) — only `container.ts` may. The negative fixture under
+  // services/_lint-fixtures/** (ignored from `eslint .` above) proves the rule trips, asserted
+  // by packages/app/src/boundary.test.ts (mirroring core's lint-as-test). This is SEPARATE from
+  // the core override and does NOT touch the deprecated-but-pinned `boundaries/external` core rule.
+  {
+    files: ['packages/app/src/**/*.ts'],
+    plugins: { boundaries, import: importPlugin },
+    settings: {
+      // Element order is specificity order: `container` (a single file) is matched before the
+      // broad `services`/`adapters` folders. Files matching none (e.g. src/index.ts) are
+      // unclassified and unrestricted (default 'allow' below).
+      'boundaries/elements': [
+        { type: 'container', mode: 'full', pattern: 'packages/app/src/container.ts' },
+        { type: 'services', pattern: 'packages/app/src/services/**' },
+        { type: 'adapters', pattern: 'packages/app/src/adapters/**' },
+      ],
+      // Resolve NodeNext `.js` specifiers (and extensionless) back to their `.ts` source so
+      // boundaries can classify the import target's element.
+      'import/resolver': { node: { extensions: ['.ts', '.js'] } },
+    },
+    rules: {
+      // Default allow (container->adapters, adapters->adapters, etc. are legitimate); the ONLY
+      // forbidden edge is services -> a concrete adapter (D-03). Services depend on the core port.
+      'boundaries/element-types': ['error', {
+        default: 'allow',
+        rules: [
+          {
+            from: ['services'],
+            disallow: ['adapters'],
+            message:
+              'D-03: services/** must depend on the @house/core port, not a concrete adapter. ' +
+              'Only container.ts may import adapters/**.',
+          },
+        ],
+      }],
+    },
+  },
+
+  // App test files are verifiers, not production shell code: they legitimately construct the
+  // concrete adapters (the InMemory fakes, the SQLite repos) directly. Relax the D-03 boundary
+  // for *.test.ts so the guard applies to production shell code only. The negative fixture is a
+  // *.fixture.ts (NOT a test), so it stays under the strict rule and boundary.test.ts can prove
+  // it fails.
+  {
+    files: ['packages/app/src/**/*.test.ts'],
+    rules: {
+      'boundaries/element-types': 'off',
     },
   },
 );
