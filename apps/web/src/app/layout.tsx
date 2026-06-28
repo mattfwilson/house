@@ -1,26 +1,33 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { Geist } from "next/font/google";
-import { cn } from "@/lib/utils";
+import { Geist, Geist_Mono } from 'next/font/google';
+import { cn } from '@/lib/utils';
+import { Header } from '@/components/chrome/Header';
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+// Geist Sans drives UI/body; Geist Mono is reserved for numeric instrument readouts (dollars, ratios,
+// FI dates) via the `.num-readout` utility — UI-SPEC §Design System / §Typography.
+const geistSans = Geist({ subsets: ['latin'], variable: '--font-sans' });
+const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-mono' });
 
-
-// Root layout — the minimal App-Router shell. The persistent profile+scenario header (D-02),
-// Geist fonts, and dark-slate design system land in the layout/cockpit plans (07-02+). This is
-// the buildable scaffold root the rest of the phase mounts under.
 export const metadata: Metadata = {
   title: 'House — Affordability & FI-Impact',
   description:
     'What does buying this house do to our early-retirement timeline? A finances-first home-affordability decision tool.',
 };
 
+// Root layout — the dark instrument-panel base (D-12). `class="dark"` makes the locked slate
+// design contract (globals.css) the default and only theme. The persistent profile + scenario
+// switcher Header (D-02) is mounted ABOVE the route `children` slot so it is present on every route
+// (cockpit, heatmap, sensitivity) and they all inherit the active profile/scenario context.
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={cn("font-sans", geist.variable)}>
-      <body>{children}</body>
+    <html lang="en" className={cn('dark', geistSans.variable, geistMono.variable)}>
+      <body className="min-h-screen bg-background font-sans text-foreground antialiased">
+        <Header />
+        <main className="min-h-[calc(100vh-3.5rem)]">{children}</main>
+      </body>
     </html>
   );
 }

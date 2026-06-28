@@ -9,7 +9,6 @@ const Toaster = ({ ...props }: ToasterProps) => {
 
   return (
     <Sonner
-      theme={theme as ToasterProps["theme"]}
       className="toaster group"
       icons={{
         success: (
@@ -42,6 +41,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
         },
       }}
       {...props}
+      // `theme` LAST so the {...props} spread can never reintroduce `undefined`. Cast to the CONCRETE
+      // literal union (not `ToasterProps["theme"]`, whose optional-property indexed access itself
+      // includes `undefined`) so the assignment satisfies this repo's `exactOptionalPropertyTypes`.
+      theme={theme as "light" | "dark" | "system"}
     />
   )
 }
