@@ -1,3 +1,5 @@
+// @vitest-environment node
+//
 // scenarios.test.ts — the load-bearing Wave-0 boundary tests for the scenario Server Actions:
 //   - D-16: a malformed scenario is REJECTED at the core Zod parse, BEFORE any engine call (the
 //     action validates raw client input through the existing core schemas — RESEARCH Pitfall 7).
