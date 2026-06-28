@@ -226,12 +226,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. User can view the town affordability heatmap and the sensitivity (tornado) view, with assumptions visible and editable next to every result
   4. The UI leads with FI-impact / true affordability and presents bank affordability as the gap, never nudging toward a "buy" funnel
 
-**Plans**: 10 plans (5 waves)
+**Plans**: 11 plans (5 waves)
 **UI hint**: yes
 
 **Wave 1**
 
-  - [ ] 07-01-PLAN.md — Scaffold apps/web (Next 16) + monorepo wiring (transpilePackages, server-only container singleton, apps/web Vitest project, eslint client-bundle/Number() boundary guards) (SC-1)
+  - [ ] 07-01-PLAN.md — Scaffold apps/web (Next 16) + monorepo wiring (transpilePackages, server-only container singleton, apps/web Vitest project, eslint client-bundle/Number() boundary guards; Number() allowed in charts/** + lib/format.ts) (SC-1)
   - [ ] 07-02-PLAN.md — Pure `fiTrajectory` core entry (D-07 net-worth series, reuses projection loop, reconciles with projectFiDate) + barrel export (SC-2)
 
 **Wave 2** *(blocked on Wave 1)*
@@ -249,10 +249,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   - [ ] 07-07-PLAN.md — Persistent assumptions rail (D-10) + live debounced recompute wiring (D-08), mounted on every route (SC-1, SC-3)
   - [ ] 07-08-PLAN.md — Cockpit = ranked comparison: pinned rent-baseline (D-05), bank-as-gap caution (D-06), trajectory hero chart (D-07), inline scenario editor (D-15) (SC-2, SC-4)
   - [ ] 07-09-PLAN.md — Town heatmap (CSS-grid, locked 05-UI-SPEC encoding, D-13) + sensitivity tornado route (FI-05) (SC-3, SC-4)
+  - [ ] 07-11-PLAN.md — Profile editor: /profile route + ProfileEditor form (all nine Household leaves), create-first-profile empty state + edit/delete, field errors from core parseProfile (D-16), header entry (SC-1, PROF-01/02/03)
 
 **Wave 5** *(blocked on Wave 4)*
 
-  - [ ] 07-10-PLAN.md — Phase gate: clean `next build` (no client-bundle leak) + full suite green + human anti-funnel / flight-simulator verification (SC-1..SC-4)
+  - [ ] 07-10-PLAN.md — Phase gate: clean `next build` (no client-bundle leak) + full suite green + human anti-funnel / flight-simulator / first-profile-creation verification (SC-1..SC-4)
 
 ## Progress
 
@@ -267,4 +268,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 4. FI-Impact Engine & Sensitivity | 6/6 | Complete    | 2026-06-26 |
 | 5. Town Scoring & Heatmap | 4/4 | Complete    | 2026-06-27 |
 | 6. Persistence & Listings Adapter | 6/6 | Complete    | 2026-06-28 |
-| 7. Web Shell | 0/10 | Planned | - |
+| 7. Web Shell | 0/11 | Planned | - |
