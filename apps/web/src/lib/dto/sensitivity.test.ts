@@ -86,10 +86,18 @@ const inputFor = (scenario: ScenarioInputs, household: Household): EngineInput =
 const COMFORTABLE = inputFor(COMFORTABLE_SCENARIO, COMFORTABLE_HOUSEHOLD);
 const STRAINED = inputFor(STRAINED_SCENARIO, STRAINED_HOUSEHOLD);
 
+// The core entries (especially `tornado`, which runs `fiImpact` ~13× to the horizon cap on an
+// unreached path) are EXPENSIVE — compute each ONCE at module load so every test exercises only the
+// cheap DTO mapper under test, not the engine. Module evaluation is not bound by the per-test timeout.
+const COMFORTABLE_TORNADO = tornado(COMFORTABLE);
+const STRAINED_TORNADO = tornado(STRAINED);
+const COMFORTABLE_TRAJECTORY = fiTrajectory(COMFORTABLE);
+const STRAINED_TRAJECTORY = fiTrajectory(STRAINED);
+
 describe('toTornadoDTO — finite swings, no Infinity (FI-05)', () => {
   test('every swingMonths is a finite number for both reached and unreached endpoints', () => {
-    for (const input of [COMFORTABLE, STRAINED]) {
-      const dto = toTornadoDTO(tornado(input));
+    for (const result of [COMFORTABLE_TORNADO, STRAINED_TORNADO]) {
+      const dto = toTornadoDTO(result);
       expect(dto.rows.length).toBeGreaterThan(0);
       for (const row of dto.rows) {
         expect(typeof row.swingMonths).toBe('number');
@@ -99,7 +107,7 @@ describe('toTornadoDTO — finite swings, no Infinity (FI-05)', () => {
   });
 
   test('JSON.stringify does not throw and the serialized DTO contains no "Infinity"', () => {
-    const dto = toTornadoDTO(tornado(STRAINED));
+    const dto = toTornadoDTO(STRAINED_TORNADO);
     let json = '';
     expect(() => {
       json = JSON.stringify(dto);
@@ -112,7 +120,7 @@ describe('toTornadoDTO — finite swings, no Infinity (FI-05)', () => {
   });
 
   test('topDrivers carries at most three driver names', () => {
-    const dto = toTornadoDTO(tornado(COMFORTABLE));
+    const dto = toTornadoDTO(COMFORTABLE_TORNADO);
     expect(dto.topDrivers.length).toBeLessThanOrEqual(3);
     // Each flagged driver corresponds to an actual row.
     const drivers = new Set(dto.rows.map((r) => r.driver));
@@ -120,14 +128,14 @@ describe('toTornadoDTO — finite swings, no Infinity (FI-05)', () => {
   });
 
   test('the DTO round-trips through JSON with no class instance surviving', () => {
-    const dto = toTornadoDTO(tornado(COMFORTABLE));
+    const dto = toTornadoDTO(COMFORTABLE_TORNADO);
     expect(JSON.parse(JSON.stringify(dto))).toEqual(dto);
   });
 });
 
 describe('toTrajectoryDTO — dollars cross as decimal strings (Pitfall 5)', () => {
   test('every net-worth field and the threshold are decimal STRINGS, not numbers or Money', () => {
-    const dto = toTrajectoryDTO(fiTrajectory(COMFORTABLE));
+    const dto = toTrajectoryDTO(COMFORTABLE_TRAJECTORY);
     expect(dto.points.length).toBeGreaterThan(0);
     for (const point of dto.points) {
       expect(typeof point.buyNetWorth).toBe('string');
@@ -138,7 +146,7 @@ describe('toTrajectoryDTO — dollars cross as decimal strings (Pitfall 5)', () 
   });
 
   test('buyFiMonth/rentFiMonth pass through as number | null (null for the unreached buy path)', () => {
-    const dto = toTrajectoryDTO(fiTrajectory(STRAINED));
+    const dto = toTrajectoryDTO(STRAINED_TRAJECTORY);
     for (const marker of [dto.buyFiMonth, dto.rentFiMonth]) {
       expect(marker === null || typeof marker === 'number').toBe(true);
     }
@@ -147,7 +155,7 @@ describe('toTrajectoryDTO — dollars cross as decimal strings (Pitfall 5)', () 
   });
 
   test('the DTO round-trips through JSON with no class instance surviving', () => {
-    const dto = toTrajectoryDTO(fiTrajectory(COMFORTABLE));
+    const dto = toTrajectoryDTO(COMFORTABLE_TRAJECTORY);
     expect(JSON.parse(JSON.stringify(dto))).toEqual(dto);
   });
 });
