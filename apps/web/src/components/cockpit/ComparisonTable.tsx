@@ -7,7 +7,7 @@
 // slot; "Add scenario" opens the inline editor row (D-15) via `addingEditor`.
 //
 // Bank affordability appears ONLY as the amber "gap" caution beneath the table (D-06) — never as
-// headroom, never as a target, never success-green. There is no `Number()` here (formatting goes
+// headroom, never as a target, never success-green. There is no float cast here (formatting goes
 // through `lib/format.ts`).
 import { Fragment, type ReactNode } from 'react';
 import { Plus } from 'lucide-react';

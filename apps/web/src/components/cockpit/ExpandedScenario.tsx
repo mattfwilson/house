@@ -36,8 +36,8 @@ export interface ExpandedScenarioProps {
   /** The shared working-set assumptions (D-09). */
   readonly assumptions: AssumptionSet;
   readonly asOf: string;
-  readonly onEdit?: () => void;
-  readonly onDelete?: () => void;
+  readonly onEdit?: (() => void) | undefined;
+  readonly onDelete?: (() => void) | undefined;
 }
 
 /** A single labelled instrument readout (Geist Mono value, muted label). */
@@ -156,7 +156,7 @@ export function ExpandedScenario({
               value={`${evaluation.backEndRatio}${evaluation.backEndPass ? '' : ' (over)'}`}
             />
             <Instrument label="Savings-rate impact" value={evaluation.savingsRateImpact} />
-            <Instrument label="DTI headroom" value={evaluation.headroom} />
+            <Instrument label="DTI margin" value={evaluation.headroom} />
           </div>
           <TrajectoryChart data={trajectory} />
         </>
