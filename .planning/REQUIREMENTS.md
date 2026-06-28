@@ -59,7 +59,7 @@ Requirements for the core-engine build. Each maps to a roadmap phase.
 
 ### Listings Adapter (LIST)
 
-- [ ] **LIST-01**: Codebase defines a clean `ListingsProvider` adapter interface, isolated from the core
+- [x] **LIST-01**: Codebase defines a clean `ListingsProvider` adapter interface, isolated from the core
 - [ ] **LIST-02**: A `MockListingsProvider` returning static fixtures exercises the interface end to end
 
 ## v2 Requirements
@@ -122,10 +122,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TOWN-02 | Phase 5 | Complete |
 | TOWN-03 | Phase 5 | Complete |
 | TOWN-04 | Phase 5 | Complete |
-| PROF-01 | Phase 6 | Pending |
-| PROF-02 | Phase 6 | Pending |
-| PROF-03 | Phase 6 | Pending |
-| LIST-01 | Phase 6 | Pending |
+| PROF-01 | Phase 6 | In progress (contract: Profile nine-leaf type + parseProfile — 06-01; persistence pending 06-03/06-05) |
+| PROF-02 | Phase 6 | In progress (contract: SavedScenario frozen-snapshot type — 06-01; persistence pending 06-03/06-05) |
+| PROF-03 | Phase 6 | In progress (contract: ScenarioRepository load port — 06-01; reload pending 06-05) |
+| LIST-01 | Phase 6 | Complete (06-01 — ListingsProvider interface defined in core, isolated, barrel-exported) |
 | LIST-02 | Phase 6 | Pending |
 
 **Coverage:**

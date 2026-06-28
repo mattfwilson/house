@@ -120,3 +120,7 @@ None - no external service configuration required.
 ---
 *Phase: 06-persistence-listings-adapter*
 *Completed: 2026-06-28*
+
+## Self-Check: PASSED
+
+All 7 created files verified present on disk; all 7 commits (bbe032c, a1d7a7f, 7ade6b4, 2f90863, 356837a, 63d55fd, 7cadd1b) verified in git history.
