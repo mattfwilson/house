@@ -241,7 +241,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 3** *(blocked on Wave 2)*
 
-  - [ ] 07-05-PLAN.md — Client chrome: shadcn init (official registry), dark layout + persistent profile/scenario header (D-02), color-honest display-edge format helpers (SC-1, SC-4)
+  - [x] 07-05-PLAN.md — Client chrome: shadcn init (official registry, base-nova/Base UI accepted; slate forced), dark layout + persistent profile/scenario header (D-02), color-honest display-edge format helpers (SC-1, SC-4)
   - [x] 07-06-PLAN.md — Zustand stores: shared working set (no auto-persist, PROF-04), selection/expansion, debounced latest-wins recompute coordinator (SC-1, SC-2)
 
 **Wave 4** *(blocked on Wave 3)*
@@ -268,4 +268,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 4. FI-Impact Engine & Sensitivity | 6/6 | Complete    | 2026-06-26 |
 | 5. Town Scoring & Heatmap | 4/4 | Complete    | 2026-06-27 |
 | 6. Persistence & Listings Adapter | 6/6 | Complete    | 2026-06-28 |
-| 7. Web Shell | 4/11 | In Progress | - |
+| 7. Web Shell | 6/11 | In Progress | - |
