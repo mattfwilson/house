@@ -101,8 +101,14 @@ export function projectFiDate(opts: ProjectFiDateOptions): FiOutcome {
   return { kind: 'unreached', cappedAtMonth: maxHorizonMonths };
 }
 
-/** The NW used for the target comparison: liquid NW plus this month's liquidated equity (A5). */
-function comparisonNw(
+/**
+ * The NW used for the target comparison: liquid NW plus this month's liquidated equity (A5).
+ *
+ * Exported (module-level, NOT re-exported from the barrel — it consumes/returns the internal `Dec`)
+ * so `fiTrajectory` emits its series using the EXACT same comparison NW this loop crosses against,
+ * guaranteeing the emitted series and the FI-date crossing agree by construction (SC-2).
+ */
+export function comparisonNw(
   liquid: InstanceType<typeof Dec>,
   equityFor: ((month: number) => InstanceType<typeof Dec>) | undefined,
   month: number,
