@@ -249,7 +249,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   - [x] 07-07-PLAN.md — Persistent assumptions rail (D-10) + live debounced recompute wiring (D-08), mounted on every route (SC-1, SC-3)
   - [x] 07-08-PLAN.md — Cockpit = ranked comparison: pinned rent-baseline (D-05), bank-as-gap caution (D-06), trajectory hero chart (D-07), inline scenario editor (D-15) (SC-2, SC-4)
   - [x] 07-09-PLAN.md — Town heatmap (CSS-grid, locked 05-UI-SPEC encoding, D-13) + sensitivity tornado route (FI-05) (SC-3, SC-4)
-  - [ ] 07-11-PLAN.md — Profile editor: /profile route + ProfileEditor form (all nine Household leaves), create-first-profile empty state + edit/delete, field errors from core parseProfile (D-16), header entry (SC-1, PROF-01/02/03)
+  - [x] 07-11-PLAN.md — Profile editor: /profile route + ProfileEditor form (all nine Household leaves), create-first-profile empty state + edit/delete, field errors from core parseProfile (D-16), header entry (SC-1, PROF-01/02/03)
 
 **Wave 5** *(blocked on Wave 4)*
 
@@ -268,4 +268,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 4. FI-Impact Engine & Sensitivity | 6/6 | Complete    | 2026-06-26 |
 | 5. Town Scoring & Heatmap | 4/4 | Complete    | 2026-06-27 |
 | 6. Persistence & Listings Adapter | 6/6 | Complete    | 2026-06-28 |
-| 7. Web Shell | 6/11 | In Progress | - |
+| 7. Web Shell | 10/11 | In Progress | - |
