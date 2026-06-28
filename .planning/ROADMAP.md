@@ -237,7 +237,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Wave 2** *(blocked on Wave 1)*
 
   - [x] 07-03-PLAN.md — Scenario + profile Server Actions (validate-through-Zod → call → DTO) + DTO mappers + serializability/ranking/snapshot-replay tests (SC-1, SC-2, SC-4)
-  - [ ] 07-04-PLAN.md — Towns + sensitivity + trajectory Server Actions + DTOs (finite tornado, string-bounded trajectory, 05-UI-SPEC heatmap encoding) (SC-2, SC-3)
+  - [x] 07-04-PLAN.md — Towns + sensitivity + trajectory Server Actions + DTOs (finite tornado, string-bounded trajectory, 05-UI-SPEC heatmap encoding) (SC-2, SC-3)
 
 **Wave 3** *(blocked on Wave 2)*
 
@@ -268,4 +268,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 4. FI-Impact Engine & Sensitivity | 6/6 | Complete    | 2026-06-26 |
 | 5. Town Scoring & Heatmap | 4/4 | Complete    | 2026-06-27 |
 | 6. Persistence & Listings Adapter | 6/6 | Complete    | 2026-06-28 |
-| 7. Web Shell | 1/11 | In Progress | - |
+| 7. Web Shell | 4/11 | In Progress | - |
