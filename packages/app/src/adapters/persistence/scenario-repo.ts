@@ -17,10 +17,10 @@ import {
   canonicalJson,
   engineInput,
   calendarDate,
+  migrate,
   parseAssumptionSet,
   parseScenarioInputs,
   parseHousehold,
-  type CurrentAssumptionSet,
   type EngineInput,
   type SavedScenario,
   type SavedScenarioMeta,
@@ -56,12 +56,18 @@ export function serializeSnapshot(input: EngineInput): string {
  * Rebuild a trusted `EngineInput` from a stored snapshot blob (the LOAD half). Every leaf goes
  * back THROUGH its Zod boundary parser — a forged blob throws, never silently computes (T-06-12).
  * The household is omitted when the snapshot carried none (exactOptionalPropertyTypes).
+ *
+ * The assumptions leaf is parsed THEN `migrate`d to the current version — a legitimate narrowing
+ * (`migrate` returns `CurrentAssumptionSet` after re-validating through the V4 schema), never an
+ * `as` cast that asserts a version Zod did not prove. For a stored current-version (V4) snapshot
+ * `migrate` is the identity re-parse, so the reproducibility round-trip stays byte-identical; an
+ * older-version blob is lifted to the current shape (or rejected) instead of being mis-typed.
  */
 export function deserializeSnapshot(blob: string): EngineInput {
   const raw = JSON.parse(blob) as RawSnapshot;
   return engineInput({
     asOf: calendarDate(raw.asOf),
-    assumptions: parseAssumptionSet(raw.assumptions) as CurrentAssumptionSet,
+    assumptions: migrate(parseAssumptionSet(raw.assumptions)),
     scenario: parseScenarioInputs(raw.scenario),
     ...(raw.household !== undefined ? { household: parseHousehold(raw.household) } : {}),
   });
