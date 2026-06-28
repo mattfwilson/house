@@ -76,4 +76,14 @@ describe('MockListingsProvider — listings port contract', () => {
       expect(parseListing(listing)).toEqual(listing);
     }
   });
+
+  it('returned listings are FROZEN — a mutation cannot corrupt the shared fixture singleton', () => {
+    const [first] = provider.getListings({});
+    expect(Object.isFrozen(first)).toBe(true);
+    // A mutation must not silently take effect (frozen object); the singleton stays intact.
+    expect(() => {
+      (first as { town: string }).town = 'Mutated';
+    }).toThrow(TypeError);
+    expect(provider.getListings({})[0]!.town).toBe(first!.town);
+  });
 });

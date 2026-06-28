@@ -19,7 +19,7 @@ import type { Listing } from '@house/core';
  * `readonly Listing[]` so any shape drift from the `Listing` contract is a compile error, and
  * every entry survives `parseListing` (asserted in mock-provider.test.ts).
  */
-export const LISTING_FIXTURES: readonly Listing[] = [
+const RAW_LISTING_FIXTURES: readonly Listing[] = [
   {
     id: 'lst-boston-001',
     address: '120 Tremont St, Unit 4B',
@@ -121,3 +121,16 @@ export const LISTING_FIXTURES: readonly Listing[] = [
     propertyType: 'single-family',
   },
 ];
+
+/**
+ * The exported fixture set, each listing `Object.freeze`d at module load. `MockListingsProvider`
+ * returns these objects BY REFERENCE, so without freezing a consumer that mutates a returned
+ * listing (slipping past the `readonly` types via a cast or plain JS) would corrupt the shared
+ * singleton for every subsequent query in the process. Freezing matches the runtime-immutability
+ * discipline the calc core enforces on `EngineInput`, and keeps behavior consistent with a future
+ * `RealListingsProvider` that would return fresh per-call objects. Listings are flat (string/number
+ * leaves), so a shallow freeze fully seals each record.
+ */
+export const LISTING_FIXTURES: readonly Listing[] = RAW_LISTING_FIXTURES.map((listing) =>
+  Object.freeze(listing),
+);
