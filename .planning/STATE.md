@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-01-PLAN.md
-last_updated: "2026-06-28T02:44:06Z"
+stopped_at: Phase 6 context gathered
+last_updated: "2026-06-28T02:53:02.499Z"
 last_activity: 2026-06-28 -- Completed Phase 06 Plan 01 (core ports + domain types)
 progress:
   total_phases: 7
   completed_phases: 5
   total_plans: 32
-  completed_plans: 27
-  percent: 73
+  completed_plans: 28
+  percent: 71
 ---
 
 # Project State
@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-06-22)
 ## Current Position
 
 Phase: 06 (persistence-listings-adapter) — EXECUTING
-Plan: 2 of 6 (06-01 complete)
-Status: Executing Phase 06
+Plan: 3 of 6 (06-01 complete)
+Status: Ready to execute
 Last activity: 2026-06-28 -- Completed Phase 06 Plan 01 (core ports + domain types)
 
 Progress: 4 of 7 phases complete (Phase 4: 4/4 plans + 2/2 gap-closure — DONE)
@@ -79,6 +79,7 @@ Progress: 4 of 7 phases complete (Phase 4: 4/4 plans + 2/2 gap-closure — DONE)
 | Phase 04 P05 | ~12min | 3 tasks | 8 files |
 | Phase 04 P06 | ~3min | 1 task | 2 files |
 | Phase 06 P01 | 6min | 3 tasks | 9 files |
+| Phase 06 P02 | 4min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -142,6 +143,7 @@ Recent decisions affecting current work:
 
 - [Phase 06-01]: [Persistence/Listings]: Phase-6 contracts locked in packages/core as PURE interfaces (D-02 dependency inversion). Profile = { id, name } & Household via ProfileSchema = HouseholdSchema.extend({id,name}).strict() — reuses the nine-leaf validators verbatim, NO parallel money schema, and PROF-01 net worth IS availableNetWorth (no separate netWorth leaf). SavedScenario is TYPE-ONLY embedding a FROZEN EngineInput snapshot (re-validated on load by the same parseAssumptionSet/parseScenarioInputs/parseHousehold it was assembled with — reproducibility never re-joins the live profile, PROF-04); SavedScenarioMeta is the thin listByProfile projection (D-06). Listing mirrors the ScenarioInputs triad with listPrice/baths as decStr (D-09, never z.number()) and propertyType a closed enum. ALL ports SYNCHRONOUS (D-08, the SQLite driver is sync); zero framework/ORM import keeps core zero-dep. persistence.type-test.ts pins no-bare-number money + sync ports in the tsc -b graph. LIST-01 satisfied. Core suite 426 green (+25 new boundary tests), goldens byte-identical (no UPDATE_GOLDEN regen)
 - [Phase 04-06]: [FI gap-closure]: the buy-path liquidated-equity YEAR convention is now RECONCILED with rentVsBuy's year-boundary snapshot (WR-01/IN-04). `equityFor` was extracted to a pure, exported `buyEquityAt` (so the convention is unit-pinned — T-04-G4: a future blind re-sync fails CI) using `year = Math.max(0, Math.floor(month/12))`: month 12 → year 1 (AGREES with rentVsBuy's `month/12` at boundaries — the old `floor((month-1)/12)` valued month 12 at year 0, one year of appreciation too few), month 0 → year 0 (no NEGATIVE year — closes IN-02 since projection.ts:85 seeds the month-0 check with equityFor(0)), months 1-11 → year 0. Schedule-balance index `month-1` UNCHANGED (already agreed). The false "verbatim from rent-vs-buy.ts 246-253" comments corrected to the actual reconciled convention (IN-04; grep confirms 0 false equity claims). FI golden BYTE-IDENTICAL (buy month 175 / baseline 217 / delta -42 unchanged — the reconciliation did not straddle a year boundary for the fixed golden input, so NO UPDATE_GOLDEN regen). Suite 355 green (+3 convention pins). FLAGSHIP PHASE 04 fully COMPLETE — all 5 verification gaps + the code-review Critical + 4 Warnings closed.
+- [Phase 06-02]: [Persistence]: @house/app scaffolded as the first non-core workspace package; SQLite stack installed -w @house/app ONLY so packages/core stays decimal.js + zod (D-02). App tsconfig copies core except types [node, better-sqlite3] + references ../core; app vitest omits core determinism guard. Native binary smoke-tested. Used --legacy-peer-deps to match pre-existing eslint@10/eslint-plugin-import peer resolution. Suite 426 green.
 
 ### Pending Todos
 
@@ -172,6 +174,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-27T23:18:48.520Z
+Last session: 2026-06-28T02:52:16.269Z
 Stopped at: Phase 6 context gathered
 Resume file: .planning/phases/06-persistence-listings-adapter/06-CONTEXT.md

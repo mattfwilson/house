@@ -15,9 +15,9 @@ Requirements for the core-engine build. Each maps to a roadmap phase.
 
 ### Profiles & Scenarios (PROF)
 
-- [ ] **PROF-01**: User can create and save two financial profiles (household members) capturing net worth, income, savings rate, existing monthly debts, and current rent
-- [ ] **PROF-02**: User can create multiple named house scenarios under a profile (price, down-payment %, town, loan term, interest rate, HOA, etc.)
-- [ ] **PROF-03**: User can save scenarios and reload them in a later session
+- [x] **PROF-01**: User can create and save two financial profiles (household members) capturing net worth, income, savings rate, existing monthly debts, and current rent
+- [x] **PROF-02**: User can create multiple named house scenarios under a profile (price, down-payment %, town, loan term, interest rate, HOA, etc.)
+- [x] **PROF-03**: User can save scenarios and reload them in a later session
 - [x] **PROF-04**: A saved scenario snapshots every input and assumption so its result regenerates exactly (reproducibility), and replaying a snapshot reproduces the stored result
 
 ### Affordability (AFF)
