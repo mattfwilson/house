@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 6 context gathered
-last_updated: "2026-06-28T03:20:45.790Z"
-last_activity: 2026-06-28 -- Completed Phase 06 Plan 01 (core ports + domain types)
+stopped_at: Completed Phase 06 Plan 06 (imperative shell + DI container + D-03)
+last_updated: "2026-06-27T00:00:00.000Z"
+last_activity: 2026-06-27 -- Completed Phase 06 Plan 06 (services + container + D-03 lint-as-test)
 progress:
   total_phases: 7
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 32
-  completed_plans: 31
-  percent: 71
+  completed_plans: 32
+  percent: 86
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-06-22)
 
 ## Current Position
 
-Phase: 06 (persistence-listings-adapter) — EXECUTING
-Plan: 6 of 6 (06-01 complete)
-Status: Ready to execute
-Last activity: 2026-06-28 -- Completed Phase 06 Plan 01 (core ports + domain types)
+Phase: 06 (persistence-listings-adapter) — COMPLETE (6/6 plans)
+Plan: 6 of 6 (06-06 complete — imperative shell + DI container + D-03 mechanized)
+Status: Phase 06 complete — ready for Phase 07
+Last activity: 2026-06-27 -- Completed Phase 06 Plan 06 (services + container + D-03 lint-as-test)
 
-Progress: 4 of 7 phases complete (Phase 4: 4/4 plans + 2/2 gap-closure — DONE)
+Progress: 5 of 7 phases complete (Phase 06: 6/6 plans — DONE)
 
 ## Performance Metrics
 
@@ -83,6 +83,7 @@ Progress: 4 of 7 phases complete (Phase 4: 4/4 plans + 2/2 gap-closure — DONE)
 | Phase 06 P03 | 3min | 2 tasks | 6 files |
 | Phase 06 P04 | 3min | 2 tasks tasks | 3 files files |
 | Phase 06 P05 | 9min | 3 tasks | 4 files |
+| Phase 06 P06 | 12min | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -148,6 +149,7 @@ Recent decisions affecting current work:
 - [Phase 04-06]: [FI gap-closure]: the buy-path liquidated-equity YEAR convention is now RECONCILED with rentVsBuy's year-boundary snapshot (WR-01/IN-04). `equityFor` was extracted to a pure, exported `buyEquityAt` (so the convention is unit-pinned — T-04-G4: a future blind re-sync fails CI) using `year = Math.max(0, Math.floor(month/12))`: month 12 → year 1 (AGREES with rentVsBuy's `month/12` at boundaries — the old `floor((month-1)/12)` valued month 12 at year 0, one year of appreciation too few), month 0 → year 0 (no NEGATIVE year — closes IN-02 since projection.ts:85 seeds the month-0 check with equityFor(0)), months 1-11 → year 0. Schedule-balance index `month-1` UNCHANGED (already agreed). The false "verbatim from rent-vs-buy.ts 246-253" comments corrected to the actual reconciled convention (IN-04; grep confirms 0 false equity claims). FI golden BYTE-IDENTICAL (buy month 175 / baseline 217 / delta -42 unchanged — the reconciliation did not straddle a year boundary for the fixed golden input, so NO UPDATE_GOLDEN regen). Suite 355 green (+3 convention pins). FLAGSHIP PHASE 04 fully COMPLETE — all 5 verification gaps + the code-review Critical + 4 Warnings closed.
 - [Phase 06-02]: [Persistence]: @house/app scaffolded as the first non-core workspace package; SQLite stack installed -w @house/app ONLY so packages/core stays decimal.js + zod (D-02). App tsconfig copies core except types [node, better-sqlite3] + references ../core; app vitest omits core determinism guard. Native binary smoke-tested. Used --legacy-peer-deps to match pre-existing eslint@10/eslint-plugin-import peer resolution. Suite 426 green.
 - [Phase 06-04]: [Persistence/Listings]: MockListingsProvider is the only ListingsProvider impl (LIST-02) — an in-memory filter over 10 hand-seeded LISTING_FIXTURES (readonly Listing[], canonical decimal-string money, curated towns). Price-range filtering is decimal-safe via Money.toCents() bigints (never a float coercion), proven by a one-cent-below exclusion test; fixtures straddle exact [min,max] boundaries; every fixture survives parseListing. Consumers see only the port (D-03); 06-06 container is the one-line swap point. App suite 11 green — Proves the walled-off listings port is real and adapter-agnostic
+- [Phase 06-06]: [Imperative shell]: The shell composes end-to-end with ZERO Next.js (Phase-6 success criterion 3 closed). profile-service.saveProfile enforces the <=2 soft cap as a REAL service-layer invariant (count-and-throw on a 3rd DISTINCT id; an edit of an existing id never trips it — D-10/T-06-16, proven by a test); it has NO `now` param (the Profile port carries no timestamps and the adapter owns its injected clock — a `now` arg would be an unused-var lint error). scenario-service is the Pattern-1 shell: recompute ONCE via computeTco (universal — fiImpact would require a household and throw on TCO-only scenarios), then persist with caller-supplied timestamps (no wall-clock read in services, T-06-18). container.ts is the SINGLE composition root naming SqliteScenarioRepository/SqliteProfileRepository/MockListingsProvider — makeContainer(dbPath) runs migrations at construction, shares ONE Db across both repo adapters, injects () => Date.now() into the profile adapter, returns a port-typed Container. D-03 MECHANIZED: a new packages/app/src/** eslint boundaries/element-types override forbids services->adapters (only container may); a negative *.fixture.ts (imported EXTENSIONLESS + excluded from tsc, because the only installed resolver is `node` which can't map a NodeNext .js specifier to .ts — installing eslint-import-resolver-typescript was avoided as a Rule-3 package install) + boundary.test.ts shelling out to `eslint --no-ignore` prove the guard trips. Full suite 469 green (+7); coverage 98.74/91.13/98.25/98.84 above the 95/90/95/95 gate. DEFERRED (out of scope, logged to deferred-items.md): 7 pre-existing `eslint .` no-unused-vars errors in core test files (rent-vs-buy.test.ts + persistence.type-test.ts), reproduced under the prior committed config. PHASE 06 COMPLETE.
 - [Phase ?]: [Phase 06-05]: [Persistence]: SqliteScenarioRepository is golden roundTrip promoted to production — SAVE canonicalJson-serializes the frozen EngineInput into the scenarios.snapshot TEXT blob; LOAD re-parses every leaf through parseAssumptionSet/parseScenarioInputs/parseHousehold+calendarDate (never an as cast; a forged blob throws, T-06-12) and rebuilds SOLELY from the self-contained blob, never re-joining the live owning-profile row (frozen household, PROF-04). SqliteProfileRepository round-trips all NINE Household money leaves as canonical decimal TEXT, parseProfile-revalidated on load (T-06-13); count() backs the <=2 service guard. ONE repositoryContract factory runs an identical 25-case suite against BOTH the SQLite adapters (shared migrated :memory: db) and InMemory fakes — byte-identity via plain toBe: save->reload byte-identical household present+absent, frozen-household-survives-a-profile-edit, PROF-03 fresh file-backed reload. Shared serializeSnapshot/deserializeSnapshot codec keeps the fake from drifting; profile timestamps via an injectable shell clock; FK enforcement live (scenarios seed their owning profile). Full suite 462 green (+34); goldens byte-identical
 
 ### Pending Todos
@@ -179,6 +181,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-28T03:19:53.158Z
-Stopped at: Phase 6 context gathered
-Resume file: .planning/phases/06-persistence-listings-adapter/06-CONTEXT.md
+Last session: 2026-06-27T00:00:00.000Z
+Stopped at: Completed Phase 06 Plan 06 — Phase 06 COMPLETE (6/6 plans)
+Resume file: None — ready to plan/execute Phase 07

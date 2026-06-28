@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Affordability Engine** - Bank DTI affordability, true affordability, and the gap between them (completed 2026-06-26)
 - [x] **Phase 4: FI-Impact Engine & Sensitivity (flagship)** - Opportunity cost, FI-date delta, ranked comparison, oracle reconciliation, anti-funnel, sensitivity bands (completed 2026-06-26)
 - [x] **Phase 5: Town Scoring & Heatmap** - Weighted normalized composite, budget bucketing, heatmap, MA-specific flags (completed 2026-06-27)
-- [ ] **Phase 6: Persistence & Listings Adapter** - Local SQLite repos, two profiles, named scenarios, ListingsProvider + MockListingsProvider
+- [x] **Phase 6: Persistence & Listings Adapter** - Local SQLite repos, two profiles, named scenarios, ListingsProvider + MockListingsProvider (completed 2026-06-27)
 - [ ] **Phase 7: Web Shell** - Thin Next.js UI over the proven core: editors, scenario builder, comparison, heatmap, sensitivity views
 
 ## Phase Details
@@ -212,7 +212,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 4** *(blocked on Wave 3)*
 
-  - [ ] 06-06-PLAN.md — Imperative-shell services (≤2 profile guard) + manual DI container + D-03 boundary enforcement (eslint app block + lint-as-test) (PROF-01, PROF-02, PROF-03)
+  - [x] 06-06-PLAN.md — Imperative-shell services (≤2 profile guard) + manual DI container + D-03 boundary enforcement (eslint app block + lint-as-test) (PROF-01, PROF-02, PROF-03) (completed 2026-06-27)
 
 ### Phase 7: Web Shell
 
