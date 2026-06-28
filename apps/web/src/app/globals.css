@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+/* Tailwind v4 theme tokens live in CSS (no tailwind.config.js). The full dark-slate design
+   system (Geist, bucket palette) lands with the layout/UI plans (07-02+); this is the minimal
+   buildable base so the scaffold compiles. */
+:root {
+  --background: #0f172a; /* slate-900 — dark base (UI-SPEC §Design System) */
+  --foreground: #e2e8f0; /* slate-200 */
+}
+
+html,
+body {
+  background: var(--background);
+  color: var(--foreground);
+}

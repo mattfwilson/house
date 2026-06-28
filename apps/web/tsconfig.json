@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // Inherit repo-wide strictness from tsconfig.base.json, but override the module/emit
+    // surface for a Next App-Router app: the client/server graph is bundler-resolved (not
+    // NodeNext — React/shadcn relative imports carry no `.js` specifier), JSX is preserved
+    // for Next's compiler, and nothing is emitted (Next owns the build).
+    "lib": ["DOM", "DOM.Iterable", "ES2023"],
+    "jsx": "preserve",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "types": ["node"],
+    "allowJs": true,
+    "incremental": true,
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "plugins": [{ "name": "next" }],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  // This app consumes BOTH workspace packages; the references document the build graph
+  // (resolution itself goes through the node_modules workspace symlinks + transpilePackages).
+  "references": [
+    { "path": "../../packages/core" },
+    { "path": "../../packages/app" }
+  ],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules", ".next", "dist"]
+}

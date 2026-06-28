@@ -1,0 +1,13 @@
+# Next.js build output / caches
+/.next/
+/out/
+
+# Next-generated type shim (regenerated on every build)
+next-env.d.ts
+
+# local env
+.env*.local
+
+# vercel / typescript build info
+.vercel
+*.tsbuildinfo
