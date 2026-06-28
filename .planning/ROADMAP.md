@@ -236,7 +236,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 2** *(blocked on Wave 1)*
 
-  - [ ] 07-03-PLAN.md — Scenario + profile Server Actions (validate-through-Zod → call → DTO) + DTO mappers + serializability/ranking/snapshot-replay tests (SC-1, SC-2, SC-4)
+  - [x] 07-03-PLAN.md — Scenario + profile Server Actions (validate-through-Zod → call → DTO) + DTO mappers + serializability/ranking/snapshot-replay tests (SC-1, SC-2, SC-4)
   - [ ] 07-04-PLAN.md — Towns + sensitivity + trajectory Server Actions + DTOs (finite tornado, string-bounded trajectory, 05-UI-SPEC heatmap encoding) (SC-2, SC-3)
 
 **Wave 3** *(blocked on Wave 2)*

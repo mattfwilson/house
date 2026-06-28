@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 07-02-PLAN.md
-last_updated: "2026-06-28T14:53:00.000Z"
-last_activity: 2026-06-28 -- Completed Phase 07 Plan 02 (fiTrajectory net-worth series core entry)
+stopped_at: Completed 07-03-PLAN.md
+last_updated: "2026-06-28T15:13:00.000Z"
+last_activity: 2026-06-28 -- Completed Phase 07 Plan 03 (scenario + profile Server-Action layer + Money→string DTO boundary)
 progress:
   total_phases: 7
   completed_phases: 6
   total_plans: 43
-  completed_plans: 34
-  percent: 79
+  completed_plans: 35
+  percent: 81
 ---
 
 # Project State
@@ -26,9 +26,9 @@ See: .planning/PROJECT.md (updated 2026-06-22)
 ## Current Position
 
 Phase: 07 (web-shell) — EXECUTING
-Plan: 3 of 11 (07-01, 07-02 complete)
+Plan: 4 of 11 (07-01, 07-02, 07-03 complete)
 Status: Executing Phase 07
-Last activity: 2026-06-28 -- Completed Phase 07 Plan 02 (fiTrajectory net-worth series core entry)
+Last activity: 2026-06-28 -- Completed Phase 07 Plan 03 (scenario + profile Server-Action layer + Money→string DTO boundary)
 
 Progress: 5 of 7 phases complete (Phase 06: 6/6 plans — DONE)
 
@@ -87,6 +87,7 @@ Progress: 5 of 7 phases complete (Phase 06: 6/6 plans — DONE)
 | Phase 06 P06 | 12min | 3 tasks | 10 files |
 | Phase 07 P01 | ~12min | 2 tasks | 14 files |
 | Phase 07 P02 | ~6min | 3 tasks | 6 files |
+| Phase 07 P03 | ~12min | 3 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -155,6 +156,7 @@ Recent decisions affecting current work:
 - [Phase 06-06]: [Imperative shell]: The shell composes end-to-end with ZERO Next.js (Phase-6 success criterion 3 closed). profile-service.saveProfile enforces the <=2 soft cap as a REAL service-layer invariant (count-and-throw on a 3rd DISTINCT id; an edit of an existing id never trips it — D-10/T-06-16, proven by a test); it has NO `now` param (the Profile port carries no timestamps and the adapter owns its injected clock — a `now` arg would be an unused-var lint error). scenario-service is the Pattern-1 shell: recompute ONCE via computeTco (universal — fiImpact would require a household and throw on TCO-only scenarios), then persist with caller-supplied timestamps (no wall-clock read in services, T-06-18). container.ts is the SINGLE composition root naming SqliteScenarioRepository/SqliteProfileRepository/MockListingsProvider — makeContainer(dbPath) runs migrations at construction, shares ONE Db across both repo adapters, injects () => Date.now() into the profile adapter, returns a port-typed Container. D-03 MECHANIZED: a new packages/app/src/** eslint boundaries/element-types override forbids services->adapters (only container may); a negative *.fixture.ts (imported EXTENSIONLESS + excluded from tsc, because the only installed resolver is `node` which can't map a NodeNext .js specifier to .ts — installing eslint-import-resolver-typescript was avoided as a Rule-3 package install) + boundary.test.ts shelling out to `eslint --no-ignore` prove the guard trips. Full suite 469 green (+7); coverage 98.74/91.13/98.25/98.84 above the 95/90/95/95 gate. DEFERRED (out of scope, logged to deferred-items.md): 7 pre-existing `eslint .` no-unused-vars errors in core test files (rent-vs-buy.test.ts + persistence.type-test.ts), reproduced under the prior committed config. PHASE 06 COMPLETE.
 - [Phase 07-01]: [Web Shell]: apps/web scaffolded as the FIRST apps/* workspace (Next 16.2.9 App Router + Tailwind v4, src-dir), buildable end-to-end (`npm run build -w apps/web` exit 0). Raw-TS workspace deps cross in via `transpilePackages: ['@house/core','@house/app']`; better-sqlite3 is NOT a direct apps/web dep and NOT in serverExternalPackages — it stays auto-externalized transitively through @house/app (listing it in both lists makes Next throw, Pitfall 3 / T-7-03). container.server.ts is a `server-only` process-singleton over makeContainer(HOUSE_DB_PATH ?? './house.sqlite'), stashed on globalThis for Next dev hot-reload, built once per process (never per-request — re-runs migrations / leaks SQLite handles, Pitfall 4). The 'web' Vitest project (jsdom, via mergeConfig+sharedTest) is wired into root `projects: ['packages/*','apps/*']`; coverage scoped to `packages/**` so React UI does not drop the 95/90 core gate. eslint guards (T-7-02): client tiers (components/**, store/**) are banned from importing @house/app or container.server (no-restricted-imports + server-only as the build-time half — boundaries plugin can't classify 'use client'), and `Number()` is confined to `components/charts/**` + `lib/format.ts` (no-restricted-syntax; both allow-paths written from the start so 07-05 format.ts won't trip it). create-next-app could not write in the exec environment → scaffolded manually to the identical end state. Full suite 475 green; better-sqlite3 confirmed absent from apps/web direct deps.
 - [Phase 07-02]: [Web Shell/FI]: fiTrajectory (SC-2 / D-07) surfaces the month-by-month net-worth SERIES projectFiDate computes but discards — for BOTH the buy path and the keep-renting baseline — so the hero chart's trajectory math stays in the core (CORE-01/02), never hand-rolled in the web layer. Correctness is AGREE-BY-CONSTRUCTION: buyPath/renterBaselinePath were extracted into a shared buildFiPaths (fi/fi-paths.ts) that BOTH fiImpact and fiTrajectory consume, so the two callers literally share the seed/premium/equity math; the series reuses the locked contribute-then-compound loop and the now-exported (module-level, NOT barrel) comparisonNw, so buyFiMonth/rentFiMonth equal projectFiDate exactly. Series is YEAR-SAMPLED (month 0 + every 12th month to the cap) for chart weight while crossover months are computed in the FULL monthly loop (exact regardless of stride). Buy plots COMPARISON NW (liquid + liquidated equity) so the line aligns with the owner-target crossing; rent plots liquid-only. fiThreshold = ownerTarget; FiTrajectoryResult closed (dollars as Money, markers number|null); buildFiPaths/PathBundle stay unexported (internal Dec). The fi-impact.ts refactor was a pure code move — four goldens byte-identical (no UPDATE_GOLDEN). Full suite 479 green (+4); tsc -b + eslint clean
+- [Phase 07-03]: [Web Shell]: The scenario + profile Server-Action layer is the thin shell contract — every action validates raw client input THROUGH the existing core Zod schemas (parseAssumptionSet+migrate / parseHousehold / parseScenarioInputs via buildEngineInput, or parseProfile) BEFORE any engine/persistence call (D-16, public-POST hardening), calls exactly ONE @house/core entry (compareScenarios/evaluateScenario/affordabilityGap) or @house/app service (computeAndSaveScenario/load/list/delete, saveProfile/list/delete), and maps every Money→string via a dedicated lib/dto/* mapper that is the SOLE server-side Money.toDecimalString() site (no money float-cast — eslint confines Number() to charts/** + lib/format.ts). toCompareDTO flattens the discriminated FiOutcome AND preserves the FI-06 ranking (baseline row 0, unreached last); the SC-4 gap framing (signed gap + verdict + Money ceilings) lives on AffordabilityGapResult → toGapDTO/gapAction, NOT EvaluateScenarioResult. PROF-04 reproducibility proven: computeAndSaveScenarioAction→loadScenarioAction replays the frozen snapshot byte-for-byte. DEVIATION: deleteProfileAction required a profile-delete capability the persistence stack lacked → added ProfileRepository.delete (port + SQLite + in-memory + type-test) + deleteProfile service, symmetric to scenarios (FK RESTRICT). Persistence-backed action tests pinned to node env (jsdom breaks @house/app's sqlite migrator file URL); actions take an optional injected Container (default = lazy server-only singleton) for :memory: testability. Full suite 487 green (+8); goldens byte-identical; tsc -b + eslint apps/web exit 0
 - [Phase ?]: [Phase 06-05]: [Persistence]: SqliteScenarioRepository is golden roundTrip promoted to production — SAVE canonicalJson-serializes the frozen EngineInput into the scenarios.snapshot TEXT blob; LOAD re-parses every leaf through parseAssumptionSet/parseScenarioInputs/parseHousehold+calendarDate (never an as cast; a forged blob throws, T-06-12) and rebuilds SOLELY from the self-contained blob, never re-joining the live owning-profile row (frozen household, PROF-04). SqliteProfileRepository round-trips all NINE Household money leaves as canonical decimal TEXT, parseProfile-revalidated on load (T-06-13); count() backs the <=2 service guard. ONE repositoryContract factory runs an identical 25-case suite against BOTH the SQLite adapters (shared migrated :memory: db) and InMemory fakes — byte-identity via plain toBe: save->reload byte-identical household present+absent, frozen-household-survives-a-profile-edit, PROF-03 fresh file-backed reload. Shared serializeSnapshot/deserializeSnapshot codec keeps the fake from drifting; profile timestamps via an injectable shell clock; FK enforcement live (scenarios seed their owning profile). Full suite 462 green (+34); goldens byte-identical
 
 ### Pending Todos
@@ -186,6 +188,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-28T14:53:00.000Z
-Stopped at: Completed 07-02-PLAN.md
+Last session: 2026-06-28T15:13:00.000Z
+Stopped at: Completed 07-03-PLAN.md
 Resume file: None
