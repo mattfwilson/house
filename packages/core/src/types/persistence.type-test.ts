@@ -57,6 +57,7 @@ const _asyncRepo: ProfileRepository = {
   load: (_id: string): Promise<Profile | null> => Promise.resolve(null),
   list: (): Profile[] => [],
   count: (): number => 0,
+  delete: (_id: string): void => {},
 };
 void _asyncRepo;
 

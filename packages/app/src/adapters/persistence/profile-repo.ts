@@ -88,6 +88,15 @@ export class SqliteProfileRepository implements ProfileRepository {
     const row = this.db.select({ c: sql<number>`count(*)` }).from(profiles).get();
     return row?.c ?? 0;
   }
+
+  /**
+   * Remove a profile row (a subsequent `load` returns `null`) — mirrors the scenario adapter's
+   * `delete`. The scenarios→profiles foreign key is RESTRICT, so deleting a profile that still owns
+   * saved scenarios raises a constraint error (the caller removes the scenarios first).
+   */
+  delete(id: string): void {
+    this.db.delete(profiles).where(eq(profiles.id, id)).run();
+  }
 }
 
 /** A persisted profiles row (the nine TEXT money leaves + identity + timestamps). */

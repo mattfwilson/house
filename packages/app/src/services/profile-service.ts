@@ -40,3 +40,12 @@ export function saveProfile(repo: ProfileRepository, profile: Profile): void {
 export function listProfiles(repo: ProfileRepository): Profile[] {
   return repo.list();
 }
+
+/**
+ * Delete a profile by id (port pass-through) — mirrors `deleteScenario`. The ≤2 cap is a SAVE-side
+ * invariant; deletion is always allowed (it only ever frees a slot). The scenarios→profiles foreign
+ * key means a profile that still owns saved scenarios cannot be deleted until those are removed.
+ */
+export function deleteProfile(repo: ProfileRepository, id: string): void {
+  repo.delete(id);
+}

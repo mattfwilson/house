@@ -116,4 +116,8 @@ export class InMemoryProfileRepository implements ProfileRepository {
   count(): number {
     return this.rows.size;
   }
+
+  delete(id: string): void {
+    this.rows.delete(id);
+  }
 }

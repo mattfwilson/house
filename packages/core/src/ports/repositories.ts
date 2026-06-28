@@ -30,4 +30,6 @@ export interface ProfileRepository {
   load(id: string): Profile | null;
   list(): Profile[];
   count(): number;
+  /** Remove a profile by id (a subsequent `load` returns `null`) — mirrors `ScenarioRepository.delete`. */
+  delete(id: string): void;
 }

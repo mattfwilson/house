@@ -4,7 +4,7 @@
 // MockListingsProvider are named exclusively inside `container.ts`, never re-exported here.
 
 // Profile lifecycle services — the ≤2-profile guard (D-10) lives in saveProfile.
-export { saveProfile, listProfiles, MAX_PROFILES } from './services/profile-service.js';
+export { saveProfile, listProfiles, deleteProfile, MAX_PROFILES } from './services/profile-service.js';
 
 // Saved-scenario lifecycle services — the Pattern-1 shell (recompute once, persist with
 // service-stamped timestamps).
