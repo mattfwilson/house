@@ -7,7 +7,7 @@
 // visually distinct (a teal left-border + slate emphasis) but carries NO success styling — when it
 // out-ranks every buy that ranking IS the "don't buy" signal (D-05), surfaced as the locked copy.
 //
-// There is NO `Number()` here: dollars/dates are already finished values from the DTO, and the only
+// There is NO float cast here: dollars/dates are already finished values from the DTO, and the only
 // arithmetic is on the integer month COUNTS on the outcome (not money) to render an absolute FI date.
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { TableCell, TableRow } from '@/components/ui/table';
@@ -23,7 +23,7 @@ export const BASELINE_WINS_COPY =
 export const RENT_BASELINE_LABEL = 'Rent & invest the difference';
 
 /** Map the color-honest tone to its emphasis class — amber delay, neutral otherwise. NEVER green. */
-const TONE_CLASS: Record<FiDeltaTone, string> = {
+export const TONE_CLASS: Record<FiDeltaTone, string> = {
   delay: 'text-[#B45309]', // amber caution — buying pushes FI later (honest disclosure)
   earlier: 'text-foreground', // neutral — reaching FI earlier is NOT celebrated with success-green
   none: 'text-muted-foreground',
@@ -31,10 +31,10 @@ const TONE_CLASS: Record<FiDeltaTone, string> = {
 
 /**
  * An absolute FI-date label from the discriminated outcome (integer month COUNTS only — no money,
- * no `Number()`): a reached path → "FI in {Y} yr {M} mo"; an unreached path → the honest don't-buy
+ * no float cast): a reached path → "FI in {Y} yr {M} mo"; an unreached path → the honest don't-buy
  * disclosure "FI not reached within horizon" (never a fabricated date).
  */
-function absoluteFiLabel(row: CompareRowDTO): string {
+export function absoluteFiLabel(row: CompareRowDTO): string {
   if (row.outcomeKind === 'reached' && row.fiMonth !== null) {
     const years = Math.floor(row.fiMonth / 12);
     const months = row.fiMonth % 12;
