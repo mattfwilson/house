@@ -203,7 +203,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 2** *(blocked on Wave 1)*
 
-  - [ ] 06-03-PLAN.md — Drizzle schema (nine-leaf profiles; PROF-01 net worth = available_net_worth) + db/migrator wiring + [BLOCKING] migration materialization (live insert/select round-trip) (PROF-01, PROF-02, PROF-03)
+  - [x] 06-03-PLAN.md — Drizzle schema (nine-leaf profiles; PROF-01 net worth = available_net_worth) + db/migrator wiring + [BLOCKING] migration materialization (live insert/select round-trip) (PROF-01, PROF-02, PROF-03)
   - [ ] 06-04-PLAN.md — Listings adapter: MockListingsProvider + hand-seeded fixtures + contract test (LIST-01, LIST-02)
 
 **Wave 3** *(blocked on Wave 2)*
@@ -241,5 +241,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 3. Affordability Engine | 5/5 | Complete    | 2026-06-26 |
 | 4. FI-Impact Engine & Sensitivity | 6/6 | Complete    | 2026-06-26 |
 | 5. Town Scoring & Heatmap | 4/4 | Complete    | 2026-06-27 |
-| 6. Persistence & Listings Adapter | 2/6 | In Progress|  |
+| 6. Persistence & Listings Adapter | 3/6 | In Progress|  |
 | 7. Web Shell | 0/TBD | Not started | - |
