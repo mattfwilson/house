@@ -151,3 +151,33 @@ export {
   type CommuteAnchor,
   type MaFlag,
 } from './towns/score-towns.js';
+
+// Phase 6 persistence + listings CONTRACTS (D-02 dependency inversion): the inward-facing ports
+// every app adapter/service depends on, plus the persisted domain types. The core DEFINES these
+// pure interfaces; the app supplies the concrete SQLite adapters / MockListingsProvider (NOT this
+// boundary). Ports are SYNCHRONOUS (D-08, better-sqlite3 is sync) and framework-free (no
+// better-sqlite3/drizzle import — the boundaries/external guard would fail the build). Raw `Dec`
+// stays unexported: every dollar leaf crosses as a canonical decimal STRING (`decStr`), validated
+// only through `parseProfile` / `parseListing` (T-06-01/02), so no float can re-enter here.
+export {
+  type ListingsProvider,
+  type ListingsQuery,
+} from './ports/listings.js';
+export {
+  type ScenarioRepository,
+  type ProfileRepository,
+} from './ports/repositories.js';
+export {
+  ListingSchema,
+  parseListing,
+  type Listing,
+} from './types/listing.js';
+export {
+  ProfileSchema,
+  parseProfile,
+  type Profile,
+} from './types/profile.js';
+export {
+  type SavedScenario,
+  type SavedScenarioMeta,
+} from './types/saved-scenario.js';
