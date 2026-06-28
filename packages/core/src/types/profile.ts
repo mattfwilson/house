@@ -6,7 +6,7 @@
 // from Household) — a JS float can never re-enter here (CORE-02 / D-06).
 //
 // PROF-01 "net worth" maps to the engine field `availableNetWorth` — there is NO separate
-// `netWorth` leaf. A profile carrying only the PROF-01-visible fields could not drive the
+// separate net-worth leaf. A profile carrying only the PROF-01-visible fields could not drive the
 // affordability/FI engines; the full nine Household leaves are required.
 import { z } from 'zod';
 import { HouseholdSchema, type Household } from '../engine/engine-input.js';

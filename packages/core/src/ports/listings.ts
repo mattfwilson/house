@@ -1,12 +1,12 @@
 // ListingsProvider — the walled-off listings PORT (LIST-01 / D-02 dependency inversion). The
 // core DEFINES the contract; the app supplies the implementation (a `MockListingsProvider` over
 // static fixtures in this build — live MLS/IDX data is deliberately out of scope). This is a
-// PURE-interface module: no Zod, no class, no `better-sqlite3`/`drizzle` import — the
+// PURE-interface module: no Zod, no concrete impl, no persistence-driver/ORM import — the
 // `boundaries/external` deny-by-default guard would fail the build otherwise (D-02).
 //
-// The methods are SYNCHRONOUS (D-08), overriding ARCHITECTURE's `Promise<…>` sketch: the only
-// implementation is an in-memory fixture filter with no I/O, and the persistence driver
-// (better-sqlite3) is itself synchronous — async here would be cosmetic ceremony.
+// The methods are SYNCHRONOUS (D-08), overriding ARCHITECTURE's promise-returning sketch: the
+// only implementation is an in-memory fixture filter with no I/O, and the SQLite persistence
+// driver is itself synchronous — async here would be cosmetic ceremony.
 import type { Listing } from '../types/listing.js';
 
 /**

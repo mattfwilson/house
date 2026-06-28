@@ -1,10 +1,10 @@
 // Repository PORTS — the persistence contracts the core DEFINES and the app IMPLEMENTS (D-02
 // dependency inversion). The side that defines the NEED owns the interface: locking these here
 // lets the Wave-2/3 SQLite adapters be written against a known shape. This is a PURE-interface
-// module: no Zod, no class, NO `better-sqlite3`/`drizzle` import — the `boundaries/external`
+// module: no Zod, no concrete impl, NO persistence-driver/ORM import — the `boundaries/external`
 // deny-by-default guard would fail the build otherwise (D-02), keeping the core zero-framework.
 //
-// The methods are SYNCHRONOUS (D-08): better-sqlite3 is a synchronous driver, so async signatures
+// The methods are SYNCHRONOUS (D-08): the SQLite driver is synchronous, so async signatures
 // would be cosmetic. `ProfileRepository.count()` feeds the service-layer ≤2-profiles guard (D-10).
 import type { Profile } from '../types/profile.js';
 import type { SavedScenario, SavedScenarioMeta } from '../types/saved-scenario.js';
