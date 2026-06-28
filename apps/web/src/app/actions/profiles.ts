@@ -12,6 +12,7 @@
 import { parseProfile } from '@house/core';
 import { saveProfile, listProfiles, deleteProfile, MAX_PROFILES, type Container } from '@house/app';
 import { toProfileDTO, type ProfileDTO } from '@/lib/dto/profile';
+import { fieldErrorsFromZod } from '@/components/profile/profile-form';
 
 /**
  * Resolve the container: the injected one in tests (`:memory:`), else the real server-only singleton
@@ -54,4 +55,44 @@ export async function deleteProfileAction(id: string, injected?: Container): Pro
 /** The ≤2-profile soft cap, surfaced for DISPLAY COPY only (no enforcement — that lives in the service). */
 export async function maxProfilesAction(): Promise<number> {
   return MAX_PROFILES;
+}
+
+/**
+ * The serializable result of a profile-save attempt (D-16). `saveProfileAction` THROWS a `ZodError` on
+ * a forged/invalid profile, and a thrown error does NOT cross the Server Action boundary with its
+ * `.issues` intact — so the editor cannot read per-field messages from it directly. This wrapper
+ * mirrors `saveScenarioFormAction` (07-08): it translates the core's parse failure into a plain
+ * `{ fieldErrors }` map WITHOUT duplicating any validation (the schema still lives in core), and maps
+ * any non-validation failure (e.g. the ≤2-profile cap thrown by `saveProfile`) to a generic message.
+ */
+export interface SaveProfileResult {
+  readonly ok: boolean;
+  readonly saved?: ProfileDTO;
+  readonly fieldErrors?: Readonly<Record<string, string>>;
+  readonly formError?: string;
+}
+
+/** Generic copy for a non-validation save failure (e.g. the soft cap) — keeps cap enforcement server-side. */
+const SAVE_PROFILE_ERROR_COPY =
+  "Couldn't save the profile. It wasn't stored — you may already have the maximum number of profiles. " +
+  'Remove one and try again.';
+
+/**
+ * Validate + persist a profile and SURFACE the core's validation result (D-16). Wraps
+ * `saveProfileAction`; on a Zod parse failure it returns the per-field error map (translated from the
+ * core's `issues`), on any other failure the generic copy, and on success the saved DTO. The editor
+ * holds NO schema — it only renders what this returns.
+ */
+export async function saveProfileFormAction(
+  raw: unknown,
+  injected?: Container,
+): Promise<SaveProfileResult> {
+  try {
+    const saved = await saveProfileAction(raw, injected);
+    return { ok: true, saved };
+  } catch (error) {
+    const fieldErrors = fieldErrorsFromZod(error);
+    if (Object.keys(fieldErrors).length > 0) return { ok: false, fieldErrors };
+    return { ok: false, formError: SAVE_PROFILE_ERROR_COPY };
+  }
 }
