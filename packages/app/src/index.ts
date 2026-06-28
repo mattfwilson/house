@@ -16,6 +16,5 @@ export {
   type ComputeAndSaveParams,
 } from './services/scenario-service.js';
 
-// The single composition root (added in Task 2): builds the concrete adapters and returns a
-// port-typed Container.
-// export { makeContainer, type Container } from './container.js';
+// The single composition root: builds the concrete adapters and returns a port-typed Container.
+export { makeContainer, type Container } from './container.js';
