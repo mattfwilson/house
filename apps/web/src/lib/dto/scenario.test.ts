@@ -106,7 +106,7 @@ describe('toCompareDTO — RSC-serializable + ranking-preserving (Pitfall 1 / FI
     ]);
     const dto = toCompareDTO(result);
 
-    expect(dto.rows[0].isBaseline).toBe(true);
+    expect(dto.rows[0]!.isBaseline).toBe(true);
 
     const reachedIdx = dto.rows
       .map((row, i) => ({ row, i }))

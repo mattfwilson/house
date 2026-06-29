@@ -77,7 +77,7 @@ describe('recompareAction — validate-through-Zod before the engine (D-16)', ()
       baseline: SCENARIO,
       scenarios: [SCENARIO],
     });
-    expect(dto.rows[0].isBaseline).toBe(true);
+    expect(dto.rows[0]!.isBaseline).toBe(true);
     expect(JSON.parse(JSON.stringify(dto))).toEqual(dto);
   });
 });
