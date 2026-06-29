@@ -21,6 +21,19 @@ outside its scope per the executor SCOPE BOUNDARY rule).
   `npx eslint apps/web/src/store` exits 0. Still out of scope (07-06 is directed to touch
   `apps/web/src/store/*` only; prior-plan files are locked).
 
+## RESOLVED in 07-10 (2026-06-28)
+
+- **[RESOLVED] The `@house/app` drizzle-migrations build blocker (below) — fixed via Option C.**
+  `packages/app/src/adapters/persistence/db.ts` now resolves the migrations folder by a
+  workspace-anchored walk-up from `process.cwd()` (module-dir fallback), memoized — no
+  `new URL(<literal>, import.meta.url)`, so webpack stops asset-analyzing the migrations directory and
+  the runtime path resolves even when bundled. A second build failure surfaced and was fixed: `recharts`
+  declares `react-is` as a peer dependency that was unresolved → added `react-is@^19` to `apps/web`
+  (`better-sqlite3` stays auto-externalized + absent from `apps/web` deps). The two 07-03
+  `noUncheckedIndexedAccess` test errors below were also fixed. **Phase gate GREEN:**
+  `npm run build -w apps/web` exit 0 (no client-bundle leak), `npm test` 505 green, `npx eslint .` exit 0,
+  `npx tsc -p apps/web --noEmit` exit 0.
+
 ## From plan 07-05 (2026-06-28) — BLOCKER for the 07-10 build gate (ARCHITECTURAL / Rule 4)
 
 - **Production `next build` is blocked: bundling the raw-TS `@house/app` persistence package pulls

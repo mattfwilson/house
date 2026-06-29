@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 07-11-PLAN.md
-last_updated: "2026-06-28T23:10:00.000Z"
-last_activity: 2026-06-28 -- Completed Phase 07 Plan 11 (profile editor: the /profile route + ProfileEditor form rendering name + the nine Household leaves, create-the-FIRST-profile empty state + edit/delete, every numeric leaf forced to a canonical decimal string at the edge [no bare-number money], validation solely from the core parseProfile/HouseholdSchema boundary surfaced as per-field errors via a saveProfileFormAction ZodError->field-map wrapper [D-16], the <=2 soft cap shown as MAX_PROFILES display copy only [no client cap check], + a persistent header "Manage profiles" entry + empty-state "Create a profile" CTA without disturbing the D-02 switcher)
+stopped_at: 07-10 Task 1 phase-gate PASSED — AWAITING HUMAN flight-sim verification (07-10-02)
+last_updated: "2026-06-28T23:55:00.000Z"
+last_activity: 2026-06-28 -- 07-10 Task 1 (automated phase gate) COMPLETE: unblocked production next build via Option C (workspace-anchored, memoized drizzle-migrations resolution in packages/app/src/adapters/persistence/db.ts, replacing new URL(literal, import.meta.url) so webpack stops asset-analyzing the migrations dir and the path resolves at runtime even when bundled) + added recharts' declared react-is@^19 peer dep to apps/web (better-sqlite3 stays auto-externalized + absent from apps/web deps) + fixed the two deferred 07-03 noUncheckedIndexedAccess test errors. GATE GREEN: npm run build -w apps/web exit 0 (NO better-sqlite3/@house/app in .next/static), npm test 505 green across all three projects, npx eslint . exit 0, npx tsc -p apps/web --noEmit exit 0. 07-VALIDATION.md verified against the real run + human E2E checklist seeded. HALTED at the blocking human-verify checkpoint (07-10-02) — phase NOT closed; SC-1..SC-4 await the developer walking the running app.
 progress:
   total_phases: 7
   completed_phases: 6
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-06-22)
 
 ## Current Position
 
-Phase: 07 (web-shell) — EXECUTING
-Plan: 10 of 11 complete (07-01..07-09, 07-11) — only 07-10 (phase gate / next build) remains
-Status: Executing Phase 07
-Last activity: 2026-06-28 -- Completed Phase 07 Plan 11 (profile editor: the /profile route + ProfileEditor form rendering name + the nine Household leaves, create-the-FIRST-profile empty state + edit/delete; every numeric leaf forced to a canonical decimal string at the edge [no bare-number money], validation solely from the core parseProfile/HouseholdSchema boundary surfaced as per-field errors via a saveProfileFormAction ZodError->field-map wrapper [D-16, mirrors 07-08]; the <=2 soft cap stays a saveProfile service invariant shown as MAX_PROFILES display copy only [no client cap check]; persistent header "Manage profiles" entry + empty-state "Create a profile" CTA added without disturbing the D-02 switcher. tsc clean for plan files [only the 2 deferred 07-03 test errors], eslint apps/web exit 0, vitest apps/web 27 green)
+Phase: 07 (web-shell) — EXECUTING (07-10 phase gate: automated half DONE, human half PENDING)
+Plan: 10 of 11 — 07-10 Task 1 (next build + full suite + eslint) PASSED; Task 2 (human flight-sim + anti-funnel verify, 07-10-02) AWAITING the developer
+Status: Executing Phase 07 — halted at blocking human-verify checkpoint
+Last activity: 2026-06-28 -- 07-10 Task 1 automated phase gate GREEN. Option C unblocked production next build (workspace-anchored memoized drizzle-migrations walk in db.ts) + react-is@^19 added for recharts + 2 deferred 07-03 tsc errors fixed. npm run build -w apps/web exit 0 (no client-bundle leak), npm test 505 green (core+app+web), eslint . exit 0, tsc -p apps/web --noEmit exit 0. 07-VALIDATION.md verified + human checklist seeded. NEXT: developer runs `npm run dev -w apps/web` and walks the 5-check SC-1..SC-4 anti-funnel/flight-sim checklist; do NOT self-approve.
 
 Progress: 5 of 7 phases complete (Phase 06: 6/6 plans — DONE)
 
@@ -185,7 +185,8 @@ None yet.
 
 - Critical correctness pitfalls (float money, amortization final-balance, PMI 78/80 basis, DTI definitions, real-vs-nominal FI, opportunity-cost symmetry, SWR horizon) are existential — fence each into its mapped phase with gating verification (see research/PITFALLS.md).
 - Anti-funnel guarantee: a realistic input set must reach a "rent and invest" verdict (acceptance check in Phase 4).
-- [07-10 BUILD GATE, ARCHITECTURAL] Production `next build -w apps/web` is blocked: bundling the raw-TS `@house/app` persistence package statically pulls its drizzle migrations directory (`packages/app/src/adapters/persistence/db.ts:41` — `new URL('../../../drizzle', import.meta.url)`), which the bundler cannot resolve (and whose bundled `import.meta.url` would also break the runtime migrations path). The `.js`→`.ts` resolution half was fixed in 07-05 (webpack + extensionAlias). The remaining half is a persistence-package server-packaging decision (recommended: a JS build step for @house/app + `serverExternalPackages`; alternatives: outputFileTracingIncludes, or a workspace-anchored migrations path). Full analysis + 3 options in `.planning/phases/07-web-shell/deferred-items.md` (From plan 07-05). NOT hacked in db.ts (a locked Phase-06 file) — owned by 07-10.
+- [RESOLVED 07-10] Production `next build -w apps/web` build gate — the raw-TS `@house/app` drizzle-migrations blocker was fixed via **Option C** (workspace-anchored, memoized migrations resolution in `packages/app/src/adapters/persistence/db.ts`, replacing `new URL(<literal>, import.meta.url)`). A second build failure (recharts' unresolved `react-is` peer) was also fixed by adding `react-is@^19` to apps/web. Build is now GREEN (exit 0, no client-bundle leak); `better-sqlite3` stays auto-externalized + absent from apps/web deps. See `07-VALIDATION.md` §Phase-Gate Result + `deferred-items.md` §RESOLVED in 07-10.
+- [PENDING — blocking human gate] 07-10-02: the developer must walk the running app (`npm run dev -w apps/web`) against the 5-check SC-1..SC-4 flight-sim + anti-funnel checklist (07-VALIDATION.md §Human E2E Checklist) before the phase closes. Automated gate is green; the qualitative anti-funnel constraints cannot be unit-asserted.
 
 ### Quick Tasks Completed
 
@@ -203,6 +204,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-28T23:10:00.000Z
-Stopped at: Completed 07-11-PLAN.md
-Resume file: None
+Last session: 2026-06-28T23:55:00.000Z
+Stopped at: 07-10 Task 1 phase-gate PASSED — awaiting human flight-sim verification (07-10-02)
+Resume file: .planning/phases/07-web-shell/07-10-PLAN.md (Task 2 — blocking human-verify)

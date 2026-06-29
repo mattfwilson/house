@@ -253,7 +253,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Wave 5** *(blocked on Wave 4)*
 
-  - [ ] 07-10-PLAN.md — Phase gate: clean `next build` (no client-bundle leak) + full suite green + human anti-funnel / flight-simulator / first-profile-creation verification (SC-1..SC-4)
+  - [~] 07-10-PLAN.md — Phase gate: clean `next build` (no client-bundle leak) + full suite green + human anti-funnel / flight-simulator / first-profile-creation verification (SC-1..SC-4) — **automated gate GREEN** (build exit 0, 505 tests, eslint 0); **AWAITING human verify (07-10-02)**
 
 ## Progress
 
@@ -268,4 +268,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 4. FI-Impact Engine & Sensitivity | 6/6 | Complete    | 2026-06-26 |
 | 5. Town Scoring & Heatmap | 4/4 | Complete    | 2026-06-27 |
 | 6. Persistence & Listings Adapter | 6/6 | Complete    | 2026-06-28 |
-| 7. Web Shell | 10/11 | In Progress | - |
+| 7. Web Shell | 10/11 | In Progress (07-10 automated gate GREEN; awaiting human verify) | - |
