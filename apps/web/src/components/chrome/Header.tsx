@@ -67,11 +67,17 @@ export function Header() {
 
   return (
     <header className="flex h-14 items-center gap-3 border-b border-border bg-card px-4 text-card-foreground">
-      <div className="flex items-center gap-2 text-sm font-semibold">
-        {/* Teal mark — the one reserved-accent affordance in the chrome (UI-SPEC accent list). */}
+      {/* Brand mark doubles as the persistent home/cockpit nav — the only always-present way back to
+          `/` from every route (07-10 gap fix). Teal stays reserved for the Building2 mark + primary CTA;
+          the "House" text stays slate. Affordance: cursor-pointer + a slate hover. */}
+      <Link
+        href="/"
+        aria-label="House — go to cockpit"
+        className="flex items-center gap-2 text-sm font-semibold text-card-foreground hover:text-foreground"
+      >
         <Building2 className="size-4 text-primary" aria-hidden="true" />
         <span>House</span>
-      </div>
+      </Link>
 
       <div className="ml-auto flex items-center gap-2">
         {profiles.length === 0 ? (

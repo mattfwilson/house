@@ -162,3 +162,22 @@ verification) remains ⏸ awaiting human.
 - [x] `nyquist_compliant: true` set in frontmatter
 
 **Approval:** populated by planner 2026-06-28 — 07-10 Task 1 verifies the map (Status column) against the real run.
+
+---
+
+## 07-10 Human-Verify Gap Log
+
+- **Gap (found 2026-06-28, 07-10 human verification):** Navigation dead-end. The header "House"
+  brand mark was a plain `<div>` (no link), so the only chrome nav was "Manage profiles" → `/profile`.
+  After a brand-new user created their FIRST profile from the empty state, `afterMutation` only
+  reloaded the "Manage profiles" list and never navigated to the cockpit (`/`). With no persistent
+  home link, the user was stranded on `/profile` and could not reach the cockpit to add a scenario —
+  the core flight-simulator loop was unreachable.
+- **Resolution:** (1) `Header.tsx` — wrapped the Building2 mark + "House" text in a Next
+  `<Link href="/">` with `aria-label="House — go to cockpit"`, giving a persistent way back to the
+  cockpit from every route (teal stays reserved for the mark; brand text stays slate per the accent
+  rules). (2) `app/profile/page.tsx` — the first-profile empty-state create path now navigates to `/`
+  on save via `useRouter().push('/')` (scoped to that path only; edits and 2nd-profile adds stay on
+  `/profile`). The disabled scenario-switcher logic was left unchanged.
+- **Gates after fix:** `eslint apps/web` 0, `tsc apps/web` clean, `vitest apps/web` 27 passed,
+  `npm run build -w apps/web` exit 0.

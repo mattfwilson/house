@@ -12,6 +12,7 @@
 // Boundary note: this is an `app/**` route (server tier by location) but marked `'use client'` for the
 // interactive list — it reads server truth only through the 'use server' profile actions.
 import { useCallback, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   listProfilesAction,
   maxProfilesAction,
@@ -22,6 +23,7 @@ import { formatUSD } from '@/lib/format';
 import { Button } from '@/components/ui/button';
 
 export default function ProfilePage() {
+  const router = useRouter();
   const [profiles, setProfiles] = useState<readonly ProfileDTO[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [maxProfiles, setMaxProfiles] = useState(2);
@@ -46,6 +48,13 @@ export default function ProfilePage() {
     reload();
   };
 
+  // First-profile create path (empty state): a brand-new user has just seeded the engine, so land them
+  // on the cockpit (`/`) where they add their first scenario — closing the 07-10 navigation dead-end.
+  // Scoped to this path only: edits and 2nd-profile adds from the list stay on /profile via afterMutation.
+  const afterFirstProfileCreated = (): void => {
+    router.push('/');
+  };
+
   // ── Empty state: the FIRST-profile create path (locked UI-SPEC copy) ──────
   if (loaded && profiles.length === 0) {
     return (
@@ -57,7 +66,7 @@ export default function ProfilePage() {
             spend. You can save up to two profiles.
           </p>
         </div>
-        <ProfileEditor maxProfiles={maxProfiles} onSaved={afterMutation} />
+        <ProfileEditor maxProfiles={maxProfiles} onSaved={afterFirstProfileCreated} />
       </main>
     );
   }
